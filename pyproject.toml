@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jev-trader"
+version = "0.1.0"
+description = "Self-rewriting Solana trade-test bot (von/System One decision loop + Jupiter + public experiment log)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "solders>=0.21.0",
+  "httpx>=0.27.0",
+  "von-sdk>=1.2.1; python_version >= '3.12'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+jev-trader = "jev_trader.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

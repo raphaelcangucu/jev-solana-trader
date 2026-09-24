@@ -1,0 +1,88 @@
+{
+  "questions_article": {
+    "action": {
+      "type": "choice",
+      "instructions": "buy on strength only when the book can absorb it",
+      "criteria": {
+        "buy": "the move is strong and depth is not thin",
+        "sell": "the move is fading or fees are climbing",
+        "hold": "anything else"
+      }
+    },
+    "skip_this_cycle": {
+      "type": "noul",
+      "instructions": "conditions are too hostile to trade at all"
+    }
+  },
+  "article_example_response": {
+    "action": "hold",
+    "probabilities": {"buy": 0.11, "sell": 0.08, "hold": 0.81},
+    "confidence": 0.81,
+    "skip_noul": 0.22
+  },
+  "behavioral_assumptions": {
+    "note": "Assumptions for sanity scoring (not labelled ground truth from article). Article only shows one example state→hold.",
+    "bullish_lean_buy": "deep + quiet fees + pumping + calm + early + green → expect buy mass or at least buy>sell",
+    "bearish_lean_sell": "thin + bot_war + fading/dumping + violent + late + red → expect sell mass or sell>buy",
+    "hostile_lean_skip_or_hold": "thin + bot_war + violent (hostile book) → higher skip noul and/or hold",
+    "quiet_lean_hold": "deep + quiet + flat + calm → hold",
+    "article_state": "match article example: hold peaked (~0.81), skip modest (~0.22)"
+  },
+  "cases": [
+    {
+      "id": "article_sample",
+      "regime": "article_example",
+      "expect": "hold_peak_skip_modest",
+      "state": "thin bot_war pumping violent flat green wide calm early mid quiet held"
+    },
+    {
+      "id": "bullish_deep_pump",
+      "regime": "bullish",
+      "expect": "lean_buy",
+      "state": "deep quiet pumping calm early green wide soft early mid quiet flat"
+    },
+    {
+      "id": "bullish_early_strength",
+      "regime": "bullish",
+      "expect": "lean_buy",
+      "state": "deep quiet pumping calm early green wide calm early early quiet held"
+    },
+    {
+      "id": "bearish_fade_botwar",
+      "regime": "bearish",
+      "expect": "lean_sell",
+      "state": "thin bot_war fading violent late red thin harsh late mid loud sold"
+    },
+    {
+      "id": "bearish_late_dump",
+      "regime": "bearish",
+      "expect": "lean_sell",
+      "state": "thin bot_war dumping violent late red tight harsh late late loud bare"
+    },
+    {
+      "id": "choppy_hostile",
+      "regime": "choppy_hostile",
+      "expect": "hold_or_skip",
+      "state": "thin bot_war whipping violent late yellow tight violent late mid loud held"
+    },
+    {
+      "id": "quiet_chop",
+      "regime": "quiet",
+      "expect": "hold",
+      "state": "deep quiet flat calm mid gray wide calm mid mid quiet held"
+    },
+    {
+      "id": "high_vol_pump_thin",
+      "regime": "high_vol",
+      "expect": "hold_or_skip",
+      "state": "thin quiet pumping violent early green wide violent early mid loud held"
+    },
+    {
+      "id": "deep_calm_flat",
+      "regime": "quiet",
+      "expect": "hold",
+      "state": "deep quiet flat calm early green wide calm early early quiet flat"
+    }
+  ],
+  "repeats": 3
+}
