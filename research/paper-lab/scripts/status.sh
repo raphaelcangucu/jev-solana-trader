@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-ROOT=/home/box/solana-trader/paper
+LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # código do lab (research/paper-lab)
+ROOT="${PAPER_LAB_ROOT:-$LAB}"                           # dados/estado (logs, data, run, status.json)
+JEV_ALTS="${JEV_ALTS_ROOT:-/workspace/jev-alts}"         # venvs + hf-cache dos modelos
+export PAPER_LAB_ROOT="$ROOT" JEV_ALTS_ROOT="$JEV_ALTS"
 echo "=== paper Solana bot status ==="
 echo "time BRT: $(TZ=America/Sao_Paulo date -Iseconds)"
 for f in supervisor von laya poorjev sol meme rules lab nightly dashboard tunnel; do
@@ -14,9 +17,9 @@ if [[ -f $ROOT/dashboard/url.txt ]]; then
   echo "dashboard_url: $(cat $ROOT/dashboard/url.txt)"
 fi
 python3 - <<'PY'
-import json, time
+import json, os, time
 from pathlib import Path
-root=Path('/home/box/solana-trader/paper')
+root=Path(os.environ['PAPER_LAB_ROOT'])
 sp=root/'status.json'
 if sp.exists():
   d=json.loads(sp.read_text())
@@ -73,9 +76,9 @@ tail -n 8 "$ROOT/logs/sol_bot.log" 2>/dev/null || true
 rp=$ROOT/data/rules/status.json
 if [[ -f $rp ]]; then
   python3 - <<'PY2'
-import json,time
+import json,os,time
 from pathlib import Path
-d=json.loads(Path("/home/box/solana-trader/paper/data/rules/status.json").read_text())
+d=json.loads((Path(os.environ["PAPER_LAB_ROOT"]) / "data" / "rules" / "status.json").read_text())
 age=time.time()-float(d.get("ts") or 0)
 print("--- RULES status.json ---")
 print(f"heartbeat_age_s: {age:.1f} cycles={d.get('cycles')} errors={d.get('errors')} ok={d.get('ok')}")
@@ -88,8 +91,8 @@ fi
 echo '--- recent MEME log ---'
 tail -n 6 "$ROOT/logs/meme_bot.log" 2>/dev/null || true
 echo '--- FUNDING (Hyperliquid funding-carry paper, funding/status.sh) ---'
-if [[ -x $ROOT/funding/status.sh ]]; then
-  bash "$ROOT/funding/status.sh"; FST=$?
+if [[ -x $LAB/funding/status.sh ]]; then
+  bash "$LAB/funding/status.sh"; FST=$?
   case $FST in 0) echo "funding: healthy (exit 0)";; 1) echo "funding: STOPPED (exit 1)";; 2) echo "funding: HEARTBEAT STALE (exit 2)";; *) echo "funding: status exit $FST";; esac
 else
   echo "funding: status.sh not found"

@@ -15,7 +15,7 @@ import gzip, json, os, shutil, time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT
 ARCH = ROOT / "archive"
 BRT = timezone(timedelta(hours=-3))
 SEED_LINES = 3000
@@ -23,14 +23,20 @@ MIN_BYTES = 5 * 1024 * 1024
 EXCLUDE = {"logs/trades.jsonl", "logs/meme_trades.jsonl", "logs/param_changes.jsonl", "logs/lab_orders.jsonl"}
 
 
-def _arch_dir(path: Path) -> Path:
-    rel = path.resolve().relative_to(ROOT)
-    return ARCH / rel.parent
+def _arch_dir(path: Path, root: Path | None = None) -> Path:
+    r = Path(root).resolve() if root else ROOT
+    rel = path.resolve().relative_to(r)
+    return r / "archive" / rel.parent
 
 
-def archives(path: Path):
-    """Archive files for a live path, oldest first."""
-    path = Path(path); d = _arch_dir(path)
+def archives(path: Path, root: Path | None = None):
+    """Archive files for a live path, oldest first (none if the path lives outside the root).
+    `root` = raiz alternativa (ex.: uma pasta archive/run_*); padrão ROOT."""
+    path = Path(path)
+    try:
+        d = _arch_dir(path, root)
+    except ValueError:
+        return []
     if not d.exists():
         return []
     stem = path.stem
@@ -55,10 +61,10 @@ def _lines(f: Path):
                 except Exception: pass
 
 
-def iter_rows(path, since_ts: float | None = None, contains: str | None = None):
+def iter_rows(path, since_ts: float | None = None, contains: str | None = None, root: Path | None = None):
     """All rows of a JSONL log across archives + live (deduped), optionally only archives rotated after since_ts."""
     path = Path(path); max_ts = None
-    for f in archives(path):
+    for f in archives(path, root):
         if since_ts is not None and _stamp_of(f) and _stamp_of(f) < since_ts:
             continue  # archive rotated before the window: all its rows are older
         op = gzip.open if f.name.endswith(".gz") else open

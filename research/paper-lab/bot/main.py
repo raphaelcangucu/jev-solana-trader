@@ -16,8 +16,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 # Ensure package import when run as script
-ROOT = Path("/home/box/solana-trader/paper")
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # código do lab (não PAPER_LAB_ROOT)
+from bot.paths import ROOT, LAB_DIR  # noqa: E402
 
 from bot.paths import load_config, assert_no_keypair_touch  # noqa: E402
 from bot.market import MarketFeed  # noqa: E402

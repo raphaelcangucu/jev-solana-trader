@@ -2,6 +2,67 @@
 
 **Simulation only.** Never signs, never sends, never reads `keypair.json` / `secret.b58`.
 
+## Execuções (histórico)
+
+| # | Nome / arquivo | Início (BRT) | Fim (BRT) | Capital por portfólio |
+| --- | --- | --- | --- | --- |
+| 1 | `archive/run_52usd_2026-09-24/` | 2026-09-24 00:10 | 2026-09-24 21:07 | ~US$52 (espelho da carteira real); memes 50 USDT |
+| 2 | `archive/run_1000usd_2026-09-24/` | 2026-09-24 21:07:46 | 2026-09-26 03:54 (último dado exportado) | US$1.000 (0,334150878 SOL + 960,812456 USDT); memes 1.000 USDT |
+| 3 | `run_1000usd_2026-09-30` (atual) | 2026-09-30 (recomeço do zero) | — | US$1.000, paper, como a 2 |
+
+- **2026-09-30 — execução 3.** O utilizador decidiu recomeçar do zero, tudo em paper, com US$1.000 por portfólio. O estado da execução 2
+  (portfólios, `status.json`, `data/{lab,meme,rules,nightly}`, `reports/`, `reviews/`, relatórios do funding) foi movido para
+  `archive/run_1000usd_2026-09-24/` com `scripts/maintenance/restart_run.py` (no repositório com `--keep-balances`, sem preço ao vivo).
+  `config.json:experiment` marca a execução 3 (`run_name`, `day1_start_brt`, `previous_runs`). No host, repetir o recomeço com o
+  procedimento abaixo, que grava a hora real e reescala o capital ao preço do momento.
+- Revisão da regra noturna sobre os logs reais: `archive/run_1000usd_2026-09-24/reviews/percentile_vs_fixed_0.8.md`.
+
+## Operação: caminhos (`PAPER_LAB_ROOT`)
+
+Nenhum módulo tem caminho fixo. `bot/paths.py` resolve:
+
+- `ROOT` (dados/estado: `config.json`, `data/`, `logs/`, `run/`, `reports/`, `reviews/`) = env **`PAPER_LAB_ROOT`**, senão a pasta do lab
+  (derivada de `bot/paths.py`). `paths.root` no `config.json`, se existir, é sobreposto por `PAPER_LAB_ROOT`; caminhos relativos resolvem contra a raiz.
+- `LAB_DIR` (código: `bot/`, `scripts/`, `dashboard/`, `dashboard-v2/dist`) = a pasta do lab. Scripts `.sh` usam
+  `LAB=$(dirname $0)/..` e `ROOT=${PAPER_LAB_ROOT:-$LAB}` e exportam `PAPER_LAB_ROOT` para os filhos.
+- `JEV_ALTS_ROOT` (venvs `venvs/{von,laya,poorjev}` e `hf-cache`) padrão `/workspace/jev-alts`; `STRATEGY_RESEARCH_ROOT` padrão `/workspace/strategy-research`.
+
+No host antigo basta correr a partir de `/home/box/solana-trader/paper` (código e dados na mesma pasta). Para ler uma exportação sem copiar logs
+para o git: `PAPER_LAB_ROOT=/caminho/para/jev-paper-export/paper python scripts/compare_review_cutoffs.py`.
+
+## Recomeçar uma execução (`scripts/maintenance/restart_run.py`)
+
+```bash
+scripts/stop.sh && funding/stop.sh                     # o script recusa se houver pid vivo ou heartbeat < 120 s
+python scripts/maintenance/restart_run.py --archive-name run_1000usd_2026-09-24 --capital 1000 --dry-run   # só o plano
+python scripts/maintenance/restart_run.py --archive-name run_1000usd_2026-09-24 --capital 1000
+scripts/start.sh
+```
+
+- Move (nunca apaga) para `archive/<nome>/`: `status.json`, `data/portfolio_*`, `data/equity_*`, `data/{meme,rules,lab}` (estado), `data/nightly`,
+  `logs/*.jsonl`, logs dos bots, `archive/{logs,data}` (rotações), `reports/*`, `reviews/*` e, salvo `--skip-funding`, o estado/relatórios do funding.
+- Copia e mantém vivos: configs, critérios, `data/params_overlay.json` (overlay do dashboard, é configuração), `data/prices.jsonl` e `data/meme/prices/`.
+- `criteria_v2.json` fica vivo; o `sol_bot` considera a revisão de arranque feita se ele existir (ou o `.md` do dia de `night_review_at_brt`), por isso
+  arquivar `reviews/` não relança a revisão nem sobrescreve os critérios do v2.
+- Capital SOL: mesma fração SOL/USDT, escalada a `--capital` ao último preço de `data/prices.jsonl` (≤10 min) ou `--ref-price`; `--keep-balances` não reescala.
+- Recusa destino com conteúdo (outro `--archive-name`), atualiza `experiment` (`run_name`, `day1_start_brt`, `previous_runs`) e `memecoins.json`.
+
+## Revisão noturna por percentil (`bot/confidence_audit.py`)
+
+A regra antiga (conf > 0,8 e `approx_pnl` negativo em vendas) nunca disparava com o von e ignorava compras. Agora (`config.json:review`):
+
+- corte = **P90** (`confidence_percentile`) das confianças respondidas (sem fail-closed) do dia revisado; com muitos empates no corte usa-se `>`;
+- candidatas = chamadas buy/sell do modelo (`candidates: chosen`; `acted` = só as que viraram ordem); baseline e relaxed contam como uma chamada;
+- erro = retorno a `horizon_s` (900 s) contra a chamada além de `band` (0,10%), com o preço de `data/prices.jsonl`; sem preço até +5 min → não resolvida;
+- a proposta só acrescenta frases quando há erros confiantes; a barra fixa (`fixed_bar` 0,8) é calculada só para comparação; o título usa o dia revisado.
+- Continua **só proposta** (`reviews/criteria_v2_proposed_<data>.json` + `data/nightly/v2_review_tmp.md`); nada altera os critérios em uso.
+- `bot/review.py` (variante antiga) está deprecado e delega em `sol_bot.night_review`.
+
+## Testes
+
+`pytest -q` na raiz do repositório corre também `research/paper-lab/tests/` (gates, estado, analytics, auditoria de confiança, caminhos e
+recomeço), offline e com `PAPER_LAB_ROOT` numa pasta temporária. `analytics` precisa de `numpy` (`pip install -e .[lab]`); sem ele esses testes fazem skip.
+
 ## 2026-09-24 meme clean restart (BRT 2026-09-24T00:33:02.275231-03:00)
 
 - Removed `data/meme/seed_prices.json` and all seed/last_or_seed fallbacks.
@@ -52,7 +113,7 @@ Pluggable System One backends in `models.json` (enable/disable flags). Interface
 
 ## Rule strategies + hybrids — start 2026-09-24T15:09:13.282682-03:00
 
-Paper-only rule portfolios from `/workspace/strategy-research/REPORT.md`:
+Paper-only rule portfolios from `$STRATEGY_RESEARCH_ROOT/REPORT.md` (padrão `/workspace/strategy-research`):
 
 | Portfolio | Type | Params |
 | --- | --- | --- |
@@ -92,12 +153,12 @@ Modern UI (Vite + React + TypeScript + Tailwind + shadcn/ui + Lightweight Charts
 
 ```bash
 # install (once) + build
-cd /home/box/solana-trader/paper/dashboard-v2
+cd dashboard-v2            # a partir da pasta do lab
 npm install
 npm run build
 
 # restart the Python server so it picks up dist/ (supervisor will also keep it up)
-bash /home/box/solana-trader/paper/scripts/start_dashboard.sh
+bash scripts/start_dashboard.sh
 # if already running: kill the pid in run/dashboard.pid then re-run start_dashboard.sh
 
 # force legacy temporarily
@@ -112,10 +173,10 @@ Inspiration (patterns only, no code copied): FreqUI (bot overview, trade markers
 
 ## Start / stop / status
 ```bash
-/home/box/solana-trader/paper/scripts/start.sh      # supervisor (von + sol + meme, auto-restart)
-/home/box/solana-trader/paper/scripts/status.sh
-/home/box/solana-trader/paper/scripts/stop.sh
-/workspace/jev-alts/venvs/von/bin/python /home/box/solana-trader/paper/scripts/report.py
+scripts/start.sh      # supervisor (von + sol + meme, auto-restart); raiz = PAPER_LAB_ROOT ou a pasta do lab
+scripts/status.sh
+scripts/stop.sh
+$JEV_ALTS_ROOT/venvs/von/bin/python scripts/report.py   # JEV_ALTS_ROOT padrão /workspace/jev-alts
 # → reports/day1.md
 ```
 

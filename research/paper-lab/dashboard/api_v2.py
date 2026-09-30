@@ -14,7 +14,11 @@ from typing import Any, Callable
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-ROOT = Path("/home/box/solana-trader/paper")
+import sys as _sys_paths
+_LAB = str(Path(__file__).resolve().parents[1])  # código do lab (research/paper-lab)
+if _LAB not in _sys_paths.path:
+    _sys_paths.path.insert(0, _LAB)
+from bot.paths import ROOT, LAB_DIR  # noqa: E402  (ROOT = PAPER_LAB_ROOT ou a pasta do lab)
 FUND = ROOT / "funding"
 BRT = timezone(timedelta(hours=-3))
 FUNDING_SHOWN = ("p1000", "p1000_pons")  # user: show only the $1000 funding portfolios
@@ -174,8 +178,8 @@ def eq_stats(p: Path) -> EqStats | None:
         s = EqStats()
         try:
             import sys
-            if str(ROOT) not in sys.path:
-                sys.path.insert(0, str(ROOT))
+            if str(LAB_DIR) not in sys.path:
+                sys.path.insert(0, str(LAB_DIR))
             from bot import logio  # type: ignore
             for r in logio.iter_rows(p):
                 s.feed(r)

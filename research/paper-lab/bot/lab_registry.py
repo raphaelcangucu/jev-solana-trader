@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from bot.lib import BRT, brt_iso, write_json, append_jsonl
 
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT
 LAB = ROOT / "data" / "lab"
 REG = LAB / "registry.json"
 LOCK = LAB / "registry.lock"

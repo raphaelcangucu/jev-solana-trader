@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT=/home/box/solana-trader/paper
+LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # código do lab (research/paper-lab)
+ROOT="${PAPER_LAB_ROOT:-$LAB}"                           # dados/estado (logs, data, run, status.json)
+JEV_ALTS="${JEV_ALTS_ROOT:-/workspace/jev-alts}"         # venvs + hf-cache dos modelos
+export PAPER_LAB_ROOT="$ROOT" JEV_ALTS_ROOT="$JEV_ALTS"
 RUN=$ROOT/run
 mkdir -p "$RUN" "$ROOT/logs" "$ROOT/dashboard"
 export DASHBOARD_PORT="${DASHBOARD_PORT:-8787}"
-export PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="$LAB${PYTHONPATH:+:$PYTHONPATH}"
 # default to v2 UI when dist/ exists (override with DASHBOARD_UI=legacy)
 export DASHBOARD_UI="${DASHBOARD_UI:-v2}"
 PIDFILE=$RUN/dashboard.pid
 LOG=$ROOT/logs/dashboard.log
-PY=/workspace/jev-alts/venvs/von/bin/python
-[[ -x $PY ]] || PY=/workspace/jev-alts/venvs/von/bin/python
+PY=$JEV_ALTS/venvs/von/bin/python
 [[ -x $PY ]] || PY=python3
 
 alive() { [[ -f $1 ]] && kill -0 "$(cat "$1")" 2>/dev/null; }
@@ -24,11 +26,11 @@ fi
 # clear stale listener on our port (only our app.py)
 if ss -tlnp 2>/dev/null | grep -q ":${DASHBOARD_PORT}"; then
   old=$(ss -tlnp 2>/dev/null | awk -v p=":${DASHBOARD_PORT}" '$0 ~ p { if (match($0,/pid=([0-9]+)/,a)) print a[1]; }' | head -1)
-  if [[ -n "${old:-}" ]] && ps -p "$old" -o cmd= | grep -q "solana-trader/paper/dashboard/app.py"; then
+  if [[ -n "${old:-}" ]] && ps -p "$old" -o cmd= | grep -qF "$LAB/dashboard/app.py"; then
     echo "stopping stale dashboard pid=$old"; kill "$old" 2>/dev/null || true; sleep 1; kill -9 "$old" 2>/dev/null || true
   fi
 fi
-nohup "$PY" "$ROOT/dashboard/app.py" >>"$LOG" 2>&1 &
+nohup "$PY" "$LAB/dashboard/app.py" >>"$LOG" 2>&1 &
 echo $! >"$PIDFILE"
 # wait until THIS pid owns the port (or at least HTTP answers)
 echo "started dashboard pid=$(cat $PIDFILE) on 127.0.0.1:${DASHBOARD_PORT} UI=${DASHBOARD_UI}"

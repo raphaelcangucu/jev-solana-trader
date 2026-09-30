@@ -1,9 +1,10 @@
-"""One-off: archive the $52 paper run (never delete) and switch starting capital to $1,000 per portfolio.
+"""One-off (histórico; para novos recomeços use scripts/maintenance/restart_run.py): archive the $52 paper run (never delete) and switch starting capital to $1,000 per portfolio.
 Run ONLY with sol/meme/rules/lab/nightly + supervisor stopped. Paper only; touches no wallet/keys."""
 import json, os, shutil, sys, time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-ROOT = Path("/home/box/solana-trader/paper")
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # código do lab
+from bot.paths import ROOT  # noqa: E402
 BRT = timezone(timedelta(hours=-3))
 DEST = ROOT / "archive" / "run_52usd_2026-09-24"
 moved, copied = [], []

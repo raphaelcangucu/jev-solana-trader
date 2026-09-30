@@ -16,8 +16,8 @@ import argparse, json, os, signal, sys, time, traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 
-ROOT = Path("/home/box/solana-trader/paper")
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # código do lab (não PAPER_LAB_ROOT)
+from bot.paths import ROOT, LAB_DIR  # noqa: E402
 from bot.lib import BRT, brt_iso, load_cfg, write_json, append_jsonl
 from bot import analytics as A, lab_registry as R, tuner as T
 
@@ -193,12 +193,21 @@ def run(day=None, dry=False):
         tmp = ROOT / "data" / "nightly" / "v2_review_tmp.md"
         if dry:
             prop = ROOT / "data" / "nightly" / f"criteria_v2_proposed_dryrun_{run_date}.json"
-        p = SB.night_review(ROOT / "logs" / "decisions.jsonl", ROOT / "logs" / "trades.jsonl", ROOT / "criteria_baseline.json", tmp, prop)
+        p = SB.night_review(ROOT / "logs" / "decisions.jsonl", ROOT / "logs" / "trades.jsonl", ROOT / "criteria_baseline.json",
+                            tmp, prop, day=day, cfg=cfg, prices_log=ROOT / "data" / "prices.jsonl")
         cur = json.loads((ROOT / "criteria_v2.json").read_text())
         same = cur.get("action") == p.get("action") and cur.get("skip_this_cycle") == p.get("skip_this_cycle")
-        L.append(f"- Auditoria: {json.dumps(p['audit'])}")
+        au = p["audit"]; fx = au.get("fixed_bar_compare") or {}
+        hr = lambda x: "–" if x is None else f"{x:.0%}"
+        L.append(f"- Auditoria por percentil ({au['rule']}, corte {A.fmt(au['cutoff'], 3)}; grupo {au.get('group')}; dia {day}): "
+                 f"{au['n_answered']} respondidas, {au['n_confident']} chamadas buy/sell confiantes ({au['n_confident_acted']} viraram ordem), "
+                 f"{au['n_resolved']} resolvidas a {int(au['horizon_s'])} s, **{au['n_mistakes']} erros** ({au.get('mistake_episodes')} episódios), hit rate {hr(au['hit_rate'])}; "
+                 f"palavras dos erros {au['lose_words'] or '–'}.")
+        L.append(f"- Comparação com a barra fixa ({fx.get('rule')}): {fx.get('n_confident')} confiantes, {fx.get('n_mistakes')} erros.")
+        L.append(f"- {'Frases novas: ' + json.dumps(p.get('phrases_added'), ensure_ascii=False) if p.get('changed') else 'Sem erros confiantes: nenhuma frase nova (proposta = critérios base).'}")
         L.append(f"- Proposta salva em `{prop.relative_to(ROOT)}`; {'idêntica aos critérios atuais' if same else 'DIFERENTE dos critérios atuais'}. "
-                 "O portfólio v2 original NÃO é alterado; um fork com critério de texto novo exigiria uma chamada extra ao von por ciclo (decisão do usuário).")
+                 "O portfólio v2 original NÃO é alterado; um fork com critério de texto novo exigiria uma chamada extra ao von por ciclo (decisão do usuário). "
+                 f"Resumo em `{tmp.relative_to(ROOT)}`.")
     except Exception as ex:
         L.append(f"- erro na auditoria v2: {ex}")
     # 7) fill quality
@@ -214,8 +223,8 @@ def run(day=None, dry=False):
     if not dry:
         try:
             import subprocess
-            subprocess.run([sys.executable, str(ROOT / "scripts" / "report.py"), "--day", day], timeout=600)
-            subprocess.run([sys.executable, str(ROOT / "scripts" / "report.py"), "--cumulative"], timeout=600)
+            subprocess.run([sys.executable, str(LAB_DIR / "scripts" / "report.py"), "--day", day], timeout=600)
+            subprocess.run([sys.executable, str(LAB_DIR / "scripts" / "report.py"), "--cumulative"], timeout=600)
         except Exception as ex:
             print(f"report generation failed: {ex}", flush=True)
     return out

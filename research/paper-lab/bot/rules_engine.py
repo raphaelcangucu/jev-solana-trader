@@ -7,8 +7,8 @@ from typing import Any
 
 BRT = timezone(timedelta(hours=-3))
 UA = {"User-Agent": "paper-solana-bot/rules (sim-only)"}
-RESEARCH = Path("/workspace/strategy-research/data")
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT, STRATEGY_RESEARCH_ROOT
+RESEARCH = STRATEGY_RESEARCH_ROOT / "data"
 
 MEME_GATE_PAIRS = {
     "BONK": "BONK_USDT", "WIF": "WIF_USDT", "POPCAT": "POPCAT_USDT",

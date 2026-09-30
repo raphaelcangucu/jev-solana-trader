@@ -12,7 +12,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT
 DIR = ROOT / "data" / "jup"
 STATE = DIR / "limiter.json"
 LOCK = DIR / "limiter.lock"

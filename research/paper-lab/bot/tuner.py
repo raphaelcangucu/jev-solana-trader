@@ -10,7 +10,7 @@ from bot import analytics as A
 from bot import lab_registry as R
 from bot import logio
 
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT
 TUNE_DEFAULTS = {"train_frac": 0.7, "steps": [0.8, 0.9, 1.1, 1.2], "max_rel_change": 0.2,
                  "min_improvement_pct": 0.25, "trade_penalty_bps": 2.0, "net_fee_usd": 0.0006}
 

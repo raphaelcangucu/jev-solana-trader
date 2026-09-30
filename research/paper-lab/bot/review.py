@@ -1,5 +1,9 @@
-"""Night review: audit confident mistakes; propose criteria v2 via rules-based summarizer.
-Does NOT mutate baseline criteria. Starts shadow v2 portfolio separately (caller).
+"""DEPRECADO — variante antiga da revisão noturna (usada só pelo ponto de entrada legado bot/main.py).
+
+`run_night_review` agora delega em `bot.sol_bot.night_review`, que usa a auditoria por percentil partilhada
+(`bot/confidence_audit.py`). `_propose_criteria`/`_render_markdown` ficam só como referência histórica do
+critério antigo (conf > 0,8 e approx_pnl negativo), que nunca disparava com o von.
+Não altera os critérios baseline (portão humano).
 """
 from __future__ import annotations
 
@@ -13,83 +17,24 @@ from typing import Any
 BRT = timezone(timedelta(hours=-3))
 
 
-def run_night_review(cfg: dict) -> dict[str, Any]:
+def run_night_review(cfg: dict, day: str | None = None) -> dict[str, Any]:
+    """Compatível com o chamador antigo (cfg de bot.paths.load_config, com `_paths`)."""
+    from bot.sol_bot import night_review
     paths = cfg["_paths"]
-    decisions_path: Path = paths["decisions_log"]
-    trades_path: Path = paths["trades_log"]
-    review_md: Path = paths["review_md"]
-    criteria_v2_path: Path = paths["criteria_v2"]
-    baseline_path: Path = paths["criteria_baseline"]
-
-    decisions = _read_jsonl(decisions_path)
-    trades = _read_jsonl(trades_path)
-    # Audit baseline AND relaxed (relaxed is where trades actually occur under von conf~0.40).
-    audit_ports = ("baseline", "relaxed")
-    decisions_b = [d for d in decisions if d.get("portfolio", "baseline") in audit_ports]
-    trades_b = [t for t in trades if t.get("portfolio", "baseline") in audit_ports]
-    n_dec_baseline = sum(1 for d in decisions_b if d.get("portfolio") == "baseline")
-    n_dec_relaxed = sum(1 for d in decisions_b if d.get("portfolio") == "relaxed")
-    n_tr_baseline = sum(1 for t in trades_b if t.get("portfolio") == "baseline")
-    n_tr_relaxed = sum(1 for t in trades_b if t.get("portfolio") == "relaxed")
-
-    # Index trades by decision_id
-    trade_by_dec = {t.get("decision_id"): t for t in trades_b if t.get("decision_id")}
-
-    confident_mistakes = []
-    confident_wins = []
-    blocked = 0
-    action_dist = Counter()
-    final_dist = Counter()
-    gate_reasons = Counter()
-
-    for d in decisions_b:
-        action_dist[d.get("chosen_action", "?")] += 1
-        final_dist[d.get("final_action", "?")] += 1
-        for r in d.get("gate_reasons") or []:
-            gate_reasons[r] += 1
-        if d.get("blocked_trade"):
-            blocked += 1
-        conf = float(d.get("confidence") or 0)
-        final = d.get("final_action")
-        if conf > 0.8 and final in ("buy", "sell"):
-            tr = trade_by_dec.get(d.get("decision_id"))
-            pnl = None
-            if tr:
-                fill = tr.get("fill") or {}
-                pnl = fill.get("approx_pnl_usdt")
-                # For buys, look ahead is hard; mark as open
-            if pnl is not None and pnl < -0.01:
-                confident_mistakes.append({"decision": d, "trade": tr, "pnl": pnl})
-            elif pnl is not None and pnl > 0.01:
-                confident_wins.append({"decision": d, "trade": tr, "pnl": pnl})
-            elif final == "buy":
-                # Check subsequent equity move roughly via features in later decisions — skip
-                pass
-
-    # Rules-based criteria rewrite from audit stats
-    proposed = _propose_criteria(baseline_path, decisions_b, trades_b, confident_mistakes, gate_reasons)
-
-    with open(criteria_v2_path, "w") as f:
-        json.dump(proposed, f, indent=2)
-
-    md = _render_markdown(
-        decisions_b, trades_b, confident_mistakes, confident_wins,
-        action_dist, final_dist, gate_reasons, blocked, proposed,
-    )
-    review_md.parent.mkdir(parents=True, exist_ok=True)
-    review_md.write_text(md)
-
+    proposed = night_review(paths["decisions_log"], paths["trades_log"], paths["criteria_baseline"],
+                            paths["review_md"], paths["criteria_v2"], day=day, cfg=cfg,
+                            prices_log=paths.get("prices_log"))
+    au = proposed["audit"]
     return {
-        "review_path": str(review_md),
-        "criteria_v2_path": str(criteria_v2_path),
-        "n_decisions": len(decisions_b),
-        "n_trades": len(trades_b),
-        "n_decisions_baseline": n_dec_baseline,
-        "n_decisions_relaxed": n_dec_relaxed,
-        "n_trades_baseline": n_tr_baseline,
-        "n_trades_relaxed": n_tr_relaxed,
-        "confident_mistakes": len(confident_mistakes),
+        "review_path": str(paths["review_md"]),
+        "criteria_v2_path": str(paths["criteria_v2"]),
+        "n_decisions": au["n_rows"],
+        "n_answered": au["n_answered"],
+        "n_confident": au["n_confident"],
+        "confident_mistakes": au["n_mistakes"],
+        "cutoff": au["cutoff"],
         "proposed_version": proposed.get("version"),
+        "changed": proposed.get("changed"),
     }
 
 

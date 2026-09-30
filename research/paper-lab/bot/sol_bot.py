@@ -10,8 +10,8 @@ import json, os, signal, sys, time, traceback, uuid
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path("/home/box/solana-trader/paper")
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # código do lab (não PAPER_LAB_ROOT)
+from bot.paths import ROOT, LAB_DIR  # noqa: E402
 
 from bot.lib import (
     brt_now, brt_iso, load_cfg, assert_no_keys, build_state, von_system_one,
@@ -146,70 +146,92 @@ def sim_trade(side, data, gcfg, fees, market, price, decision_id, trades_log: Pa
     append_jsonl(trades_log, row)
     return row
 
-def night_review(decisions_log, trades_log, criteria_path, review_path, criteria_v2_path):
-    # Audit baseline AND relaxed (relaxed is where real trades happen under von conf~0.40).
-    # Baseline criteria file stays untouched (human gate); v2 rewrite still parented on baseline text.
-    all_dec = read_jsonl(decisions_log)
-    all_tr = read_jsonl(trades_log)
-    audit_ports = ("baseline", "relaxed")
-    decisions = [d for d in all_dec if d.get("portfolio") in audit_ports]
-    trades = [t for t in all_tr if t.get("portfolio") in audit_ports]
-    n_dec_b = sum(1 for d in decisions if d.get("portfolio") == "baseline")
-    n_dec_r = sum(1 for d in decisions if d.get("portfolio") == "relaxed")
-    n_tr_b = sum(1 for t in trades if t.get("portfolio") == "baseline")
-    n_tr_r = sum(1 for t in trades if t.get("portfolio") == "relaxed")
-    base = load_criteria(criteria_path)
-    lose = {}
-    by_id = {d.get("decision_id"): d for d in decisions}
-    for t in trades:
-        pnl = (t.get("fill") or {}).get("approx_pnl")
-        if pnl is not None and pnl < -0.01:
-            d = by_id.get(t.get("decision_id"))
-            if d and float(d.get("confidence") or 0) > 0.8:
-                for w in (d.get("state") or "").split():
-                    lose[w] = lose.get(w, 0) + 1
-    buy = base["action"]["criteria"]["buy"] + "; prefer deep quiet pumping with calm tape"
-    sell = base["action"]["criteria"]["sell"] + "; prefer fading or dumping with harsh or loud tape"
-    hold = base["action"]["criteria"]["hold"] + "; prefer flat gray chop or unclear mixed signals"
-    skip = base["skip_this_cycle"]["instructions"] + "; prefer thin bot_war violent conditions"
-    if lose.get("thin", 0) + lose.get("bot_war", 0) >= 1:
-        buy += "; and the book is deep not thin"
-        skip += "; especially when thin or fees hostile"
-    if lose.get("violent", 0) or lose.get("whipping", 0):
-        hold += "; when the tape is violent or whipping"
-        skip += "; when volatility is violent"
-    proposed = {
-        "version": "v2",
-        "source": "night_review_rules_based",
-        "parent": "baseline",
-        "generated_at_brt": brt_iso(),
-        "method": "Deterministic rules-based rewrite from audit stats (baseline+relaxed). Baseline untouched (human gate).",
-        "action": {
-            "instructions": base["action"]["instructions"] + "; be stricter after overnight audit",
-            "criteria": {"buy": buy, "sell": sell, "hold": hold},
-        },
-        "skip_this_cycle": {"instructions": skip},
-        "audit": {
-            "n_decisions": len(decisions), "n_trades": len(trades),
-            "n_decisions_baseline": n_dec_b, "n_decisions_relaxed": n_dec_r,
-            "n_trades_baseline": n_tr_b, "n_trades_relaxed": n_tr_r,
-            "lose_words": sorted(lose.items(), key=lambda x: -x[1])[:8],
-        },
-    }
-    write_json(criteria_v2_path, proposed)
+AUDIT_GROUPS = {
+    # baseline e relaxed partilham UMA chamada von por ciclo (critérios baseline): fundidas por dedupe_calls.
+    "von · critérios baseline (baseline+relaxed)": ("baseline", "relaxed"),
+    "von · critérios v2 (v2)": ("v2",),
+}
+PROPOSAL_GROUP = "von · critérios baseline (baseline+relaxed)"
+
+
+def _day_window(day):
+    if not day:
+        return None
+    a = datetime.fromisoformat(f"{day}T00:00:00-03:00").timestamp()
+    return a, a + 86400
+
+
+def night_review(decisions_log, trades_log, criteria_path, review_path, criteria_v2_path,
+                 day=None, cfg=None, prices_log=None):
+    """Revisão noturna (proposta apenas; portão humano). Auditoria por PERCENTIL da confiança
+    (bot/confidence_audit.py): corte = P`review.confidence_percentile` das confianças respondidas do von
+    no dia revisado, candidatas = chamadas buy/sell, erro = retorno a `review.horizon_s` contra a chamada
+    além de `review.band`. A barra fixa antiga (`review.fixed_bar`, 0,8) é calculada só para comparação.
+    Escreve a proposta em `criteria_v2_path` e o resumo em `review_path`; nunca altera criteria_baseline.json.
+    `day` (YYYY-MM-DD, BRT) limita a janela ao dia revisado; sem `day` audita tudo (arranque do v2)."""
+    from bot import confidence_audit as CA
+    from bot import logio
+    cfg = cfg if cfg is not None else load_cfg()
+    rc = CA.review_cfg(cfg)
+    win = _day_window(day)
+    since = (win[0] - 1) if win else None
+    wanted = {p for ps in AUDIT_GROUPS.values() for p in ps}
+    rows = [d for d in logio.iter_rows(Path(decisions_log), since_ts=since) if d.get("portfolio") in wanted]
+    trades = [t for t in read_jsonl(Path(trades_log)) if t.get("portfolio") in wanted]
+    traded_ids = {t.get("decision_id") for t in trades}
+    prices_log = Path(prices_log) if prices_log else ROOT / "data" / "prices.jsonl"
+    prices = CA.build_series(logio.iter_rows(prices_log, since_ts=since), asset="SOL") if prices_log.exists() else {}
+    kw = dict(prices=prices, trades=trades, horizon_s=rc["horizon_s"], band=rc["band"],
+              tolerance_s=rc["tolerance_s"], candidates=rc["candidates"], window=win, top_words=rc["top_words"],
+              tie_rule=rc["tie_rule"])
+    audits = {}
+    for gname, ports in AUDIT_GROUPS.items():
+        g = CA.dedupe_calls([d for d in rows if d.get("portfolio") in ports], traded_ids=traded_ids)
+        audits[gname] = {
+            "pct": CA.audit(g, percentile_p=rc["confidence_percentile"], **kw),
+            "fixed": CA.audit(g, fixed_bar=rc["fixed_bar"], **kw),
+        }
+    base = load_criteria(Path(criteria_path))
+    main = audits[PROPOSAL_GROUP]["pct"]
+    proposed = CA.propose_criteria(base, main, min_mistakes=int(rc["min_mistakes"]), generated_at=brt_iso())
+    proposed["audit"].update({
+        "day": day, "group": PROPOSAL_GROUP,
+        "fixed_bar_compare": CA.summary(audits[PROPOSAL_GROUP]["fixed"]),
+        "groups": {g: {"percentile": CA.summary(v["pct"]), "fixed_bar": CA.summary(v["fixed"])} for g, v in audits.items()},
+    })
+    write_json(Path(criteria_v2_path), proposed)
+    title_day = day or brt_now().strftime("%Y-%m-%d")
+    f = lambda x, n=3: "–" if x is None else f"{x:.{n}f}"
+    L = [f"# Revisão noturna (critérios v2) — {title_day}", "",
+         f"**Gerado (BRT):** {brt_iso()} · **Dia revisado:** {day or 'todo o log disponível'} · paper only", "",
+         "## Portão humano", "",
+         "- `criteria_baseline.json` NÃO foi alterado; o portfólio v2 em curso mantém os seus critérios.",
+         f"- Proposta escrita em `{Path(criteria_v2_path).name}` (só proposta).", "",
+         "## Auditoria por percentil da confiança", "",
+         f"Corte = P{rc['confidence_percentile']:g} das confianças respondidas (sem fail-closed) de cada grupo; candidatas = "
+         f"`{rc['candidates']}`; erro = retorno a {int(rc['horizon_s'])} s contra a chamada além de ±{rc['band']*100:.2f}%. "
+         f"A barra fixa {rc['fixed_bar']} aparece só para comparação. Com muitos empates no corte usa-se `>` (coluna Regra).", "",
+         "| Grupo | Regra | Corte | Respondidas | Confiantes | Resolvidas | Erros (episódios) | Acertos | Hit rate | Palavras dos erros |",
+         "|---|---|---:|---:|---:|---:|---:|---:|---:|---|"]
+    for g, v in audits.items():
+        for a in (v["pct"], v["fixed"]):
+            L.append(f"| {g} | {a['rule']} | {f(a['cutoff'])} | {a['n_answered']} | {a['n_confident']} | {a['n_resolved']} | "
+                     f"{a['n_mistakes']} ({a['mistake_episodes']}) | {a['n_correct']} | {f(a['hit_rate'], 2)} | "
+                     f"{', '.join(f'{w}:{n}' for w, n in a['lose_words']) or '–'} |")
+    L += ["", "## Proposta", "",
+          ("- Há erros confiantes: frases acrescentadas " + json.dumps(proposed["phrases_added"], ensure_ascii=False))
+          if proposed["changed"] else "- Sem erros confiantes no grupo principal: nenhuma frase nova (proposta = texto base).",
+          "", "```json",
+          json.dumps({"action": proposed["action"], "skip_this_cycle": proposed["skip_this_cycle"]}, indent=2),
+          "```", ""]
+    if main["mistakes"]:
+        L += ["## Erros confiantes (grupo principal, até 20)", ""]
+        for i, m in enumerate(main["mistakes"][:20], 1):
+            L.append(f"{i}. `{m['ts_brt']}` {m['side']} conf={m['confidence']:.3f} ret={m['ret']*100:+.3f}% estado=`{m['state']}`")
+        L.append("")
+    review_path = Path(review_path)
     review_path.parent.mkdir(parents=True, exist_ok=True)
-    review_path.write_text(
-        f"# Night review — 2026-09-24\n\n**Generated (BRT):** {brt_iso()}\n\n"
-        f"**Method:** {proposed['method']}\n\n## Human gate\n\n"
-        f"- Baseline criteria NOT modified.\n- Proposed rewrite written to criteria_v2.json.\n"
-        f"- Shadow v2 portfolio starts with same balances.\n"
-        f"- Audit includes baseline AND relaxed portfolios.\n\n"
-        f"## Snapshot\n\n"
-        f"- decisions total={len(decisions)} (baseline={n_dec_b}, relaxed={n_dec_r})\n"
-        f"- trades total={len(trades)} (baseline={n_tr_b}, relaxed={n_tr_r})\n\n"
-        f"## Proposed criteria\n\n```json\n"
-        f"{json.dumps({'action': proposed['action'], 'skip_this_cycle': proposed['skip_this_cycle']}, indent=2)}\n```\n"
-    )
+    review_path.write_text("\n".join(L))
     return proposed
 
 def apply_and_maybe_trade(name, pdata, path, eqp, gcfg, profile, dec, st, price, price_row,
@@ -281,7 +303,11 @@ def main() -> int:
     eq_v2_path = ROOT / "data" / "equity_v2.jsonl"
     crit_path = ROOT / "criteria_baseline.json"
     crit_v2_path = ROOT / "criteria_v2.json"
-    review_path = ROOT / "reviews" / "2026-09-24.md"
+    # Arranque do v2: revisão única no dia de night_review_at_brt. O flag "revisão feita" é criteria_v2.json
+    # (critérios em uso pelo v2) OU o .md desse dia, para que arquivar reviews/ num recomeço não relance a
+    # revisão nem sobrescreva criteria_v2.json.
+    review_day = datetime.fromisoformat(cfg["night_review_at_brt"]).strftime("%Y-%m-%d")
+    review_path = ROOT / "reviews" / f"{review_day}.md"
 
     for d in (ROOT / "data", ROOT / "logs", ROOT / "reviews", ROOT / "run"):
         d.mkdir(parents=True, exist_ok=True)
@@ -304,7 +330,7 @@ def main() -> int:
 
     cycles = errors = skipped_no_price = 0
     started = time.time()
-    review_done = review_path.exists() and crit_v2_path.exists()
+    review_done = crit_v2_path.exists() or review_path.exists()
     finished = False
     v2_gate_note = (
         f"v2_gate=relaxed conf>={gates_relaxed['min_confidence']} "
@@ -423,7 +449,8 @@ def main() -> int:
 
             if (not review_done) and now >= review_at:
                 print("night review...", flush=True)
-                criteria_v2 = night_review(decisions_log, trades_log, crit_path, review_path, crit_v2_path)
+                criteria_v2 = night_review(decisions_log, trades_log, crit_path, review_path, crit_v2_path,
+                                           cfg=cfg, prices_log=prices_log)
                 v2 = new_portfolio(port_v2_path, bal["sol"], bal["usdt"], float(base.get("start_price") or price), "v2")
                 review_done = True
 

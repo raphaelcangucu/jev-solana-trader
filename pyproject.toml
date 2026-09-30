@@ -16,6 +16,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+# laboratório paper (research/paper-lab): analytics/tuner usam numpy; os testes de analytics fazem skip sem ele
+lab = ["numpy>=1.24"]
 
 [project.scripts]
 jev-trader = "jev_trader.__main__:main"
@@ -25,4 +27,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-testpaths = ["tests"]
+testpaths = ["tests", "research/paper-lab/tests"]

@@ -1,20 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT=/home/box/solana-trader/paper
+LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # código do lab (research/paper-lab)
+ROOT="${PAPER_LAB_ROOT:-$LAB}"                           # dados/estado (logs, data, run, status.json)
+JEV_ALTS="${JEV_ALTS_ROOT:-/workspace/jev-alts}"         # venvs + hf-cache dos modelos
+export PAPER_LAB_ROOT="$ROOT" JEV_ALTS_ROOT="$JEV_ALTS"
 RUN=$ROOT/run
 mkdir -p "$RUN" "$ROOT/logs"
 export POORJEV_PORT=8767
-export HF_HOME=/workspace/jev-alts/hf-cache
-export TRANSFORMERS_CACHE=/workspace/jev-alts/hf-cache
-export HF_HUB_CACHE=/workspace/jev-alts/hf-cache/hub
+export HF_HOME=$JEV_ALTS/hf-cache
+export TRANSFORMERS_CACHE=$JEV_ALTS/hf-cache
+export HF_HUB_CACHE=$JEV_ALTS/hf-cache/hub
 export TOKENIZERS_PARALLELISM=false
 PIDFILE=$RUN/poorjev.pid
 LOG=$ROOT/logs/poorjev_serve.log
-PY=/workspace/jev-alts/venvs/poorjev/bin/python
+PY=$JEV_ALTS/venvs/poorjev/bin/python
 if [[ -f $PIDFILE ]] && kill -0 "$(cat $PIDFILE)" 2>/dev/null; then
   echo "poorjev already running pid=$(cat $PIDFILE)"; exit 0
 fi
-nohup "$PY" "$ROOT/bot/serve_poorjev.py" >>"$LOG" 2>&1 &
+nohup "$PY" "$LAB/bot/serve_poorjev.py" >>"$LOG" 2>&1 &
 echo $! >"$PIDFILE"
 echo "started poorjev pid=$(cat $PIDFILE)"
 for i in $(seq 1 240); do

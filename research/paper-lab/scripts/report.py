@@ -6,7 +6,8 @@ from collections import Counter
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-ROOT = Path("/home/box/solana-trader/paper")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # código do lab
+from bot.paths import ROOT  # noqa: E402  (PAPER_LAB_ROOT ou a pasta do lab)
 BRT = timezone(timedelta(hours=-3))
 
 def read_jsonl(p: Path):
@@ -430,7 +431,6 @@ def main():
     print(f"wrote {out}")
 
 def _analytics():
-    sys.path.insert(0, str(ROOT))
     from bot import analytics as A
     return A
 
@@ -460,7 +460,9 @@ def day_report(day):
     a, b = A.day_bounds(day); import time as _t; b = min(b, _t.time())
     tbl, _ = A.stats_table(cat, tb, a, b)
     fq = A.fill_quality(a, b)
-    day1 = datetime.fromisoformat("2026-09-24T00:00:00-03:00").date()
+    d1 = ((json.loads((ROOT / "config.json").read_text()).get("experiment") or {}).get("day1_start_brt")
+          or "2026-09-24T00:00:00-03:00")
+    day1 = datetime.fromisoformat(d1).astimezone(BRT).date()
     n = (datetime.fromisoformat(day + "T00:00:00-03:00").date() - day1).days + 1
     txt = "\n".join([f"# Relatório do dia {day} (dia {n} do experimento)", "",
         f"Janela 00:00–24:00 BRT (portfólios que começaram no meio do dia usam o próprio início). Gerado {datetime.now(BRT).isoformat()}. Paper only.", "",

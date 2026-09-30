@@ -13,8 +13,8 @@ from collections import deque
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path("/home/box/solana-trader/paper")
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # código do lab (não PAPER_LAB_ROOT)
+from bot.paths import ROOT, LAB_DIR  # noqa: E402
 from bot.lib import brt_iso, brt_now, load_cfg, apply_gates, append_jsonl, write_json, BRT
 from bot import lab_registry as R
 import bot.sol_bot as SB

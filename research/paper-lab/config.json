@@ -7,6 +7,18 @@
   "cycle_seconds": 15,
   "end_at_brt": "2099-12-31T00:00:00-03:00",
   "night_review_at_brt": "2026-09-24T04:00:00-03:00",
+  "review": {
+    "confidence_percentile": 90,
+    "fixed_bar": 0.8,
+    "horizon_s": 900,
+    "band": 0.001,
+    "tolerance_s": 300,
+    "candidates": "chosen",
+    "tie_rule": "auto",
+    "min_mistakes": 1,
+    "top_words": 8,
+    "note": "Revis\u00e3o noturna do v2 por percentil da confian\u00e7a (bot/confidence_audit.py): corte = P90 das confian\u00e7as respondidas do dia; candidatas = chamadas buy/sell do modelo (chosen) ou s\u00f3 ordens (acted); erro = retorno a horizon_s contra a chamada al\u00e9m de band. fixed_bar s\u00f3 para compara\u00e7\u00e3o. Proposta apenas (port\u00e3o humano)."
+  },
   "starting_balances": {
     "sol": 0.334150878,
     "usdt": 960.812456,
@@ -124,18 +136,30 @@
     }
   },
   "experiment": {
-    "day1_start_brt": "2026-09-24T21:07:46-03:00",
+    "run_name": "run_1000usd_2026-09-30",
+    "run_number": 3,
+    "mode": "paper",
+    "day1_start_brt": "2026-09-30T00:00:00-03:00",
+    "start_marker_note": "Marcador do recome\u00e7o do zero (restart_run.py). Cada portf\u00f3lio grava o pr\u00f3prio in\u00edcio (created_ts/started_brt) no primeiro ciclo; analytics usa esse valor.",
     "end": "none (runs indefinitely; end_at_brt is a far-future sentinel)",
-    "note": "Continuation past day 1: no day-1 cutoff, no end date. Nothing is ever deactivated/retired (originals, hypotheses, forks).",
+    "note": "Execu\u00e7\u00e3o 3 (paper, US$1.000 por portf\u00f3lio, como a 2): recome\u00e7o do zero em 2026-09-30; sem data de fim. Nada \u00e9 desativado/aposentado (originais, hip\u00f3teses, forks). No host, restart_run.py grava em day1_start_brt a hora real do rein\u00edcio.",
+    "capital_usd_each": 1000.0,
     "previous_runs": [
       {
         "name": "run_52usd_2026-09-24",
         "start_brt": "2026-09-24T00:10:27-03:00",
         "end_brt": "2026-09-24T21:07:46-03:00",
         "archive": "archive/run_52usd_2026-09-24"
+      },
+      {
+        "name": "run_1000usd_2026-09-24",
+        "start_brt": "2026-09-24T21:07:46-03:00",
+        "end_brt": "2026-09-26T03:54:44-03:00",
+        "capital_usd_each": 1000.0,
+        "archive": "archive/run_1000usd_2026-09-24",
+        "end_note": "\u00faltimo dado da exporta\u00e7\u00e3o jev-paper-export (2026-09-26 03:54 BRT); o host pode ter continuado depois"
       }
-    ],
-    "capital_usd_each": 1000.0
+    ]
   },
   "tuning": {
     "run_at_brt": "00:30",

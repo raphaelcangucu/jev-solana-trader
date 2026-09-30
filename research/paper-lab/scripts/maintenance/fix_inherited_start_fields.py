@@ -6,7 +6,9 @@ Balances/trades/benchmark_buy_hold (same mix) are untouched. Run only while sol_
 import json, time, sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-ROOT = Path("/home/box/solana-trader/paper"); BRT = timezone(timedelta(hours=-3))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # código do lab
+from bot.paths import ROOT  # noqa: E402
+BRT = timezone(timedelta(hours=-3))
 dry = "--dry-run" in sys.argv
 def first_mark(eqf, t0):
     with open(eqf) as f:

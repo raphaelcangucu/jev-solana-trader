@@ -12,18 +12,23 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
-ROOT = Path("/home/box/solana-trader/paper")
-DASH = ROOT / "dashboard"
+import sys as _sys_paths
+_LAB = str(Path(__file__).resolve().parents[1])  # código do lab (research/paper-lab)
+if _LAB not in _sys_paths.path:
+    _sys_paths.path.insert(0, _LAB)
+from bot.paths import ROOT, LAB_DIR  # noqa: E402  (ROOT = PAPER_LAB_ROOT ou a pasta do lab)
+DASH = ROOT / "dashboard"          # dados locais: .auth, url.txt (fora do git)
+DASH_CODE = LAB_DIR / "dashboard"  # código: static/, defaults.py, api_v2.py
 BRT = timezone(timedelta(hours=-3))
 security = HTTPBasic()
 
 # Hard deny — never serve these
 FORBIDDEN_NAMES = {"keypair.json", "secret.b58", ".auth"}
-FORBIDDEN_PREFIXES = (str(Path("/home/box/solana-trader/keypair.json")),
-                      str(Path("/home/box/solana-trader/secret.b58")))
+FORBIDDEN_PREFIXES = (str(ROOT.parent / "keypair.json"),
+                      str(ROOT.parent / "secret.b58"))
 
 app = FastAPI(title="Paper Solana Simulator", docs_url=None, redoc_url=None)
-app.mount("/static", StaticFiles(directory=str(DASH / "static")), name="static")
+app.mount("/static", StaticFiles(directory=str(DASH_CODE / "static")), name="static")
 
 
 def brt_iso(ts=None):
@@ -160,7 +165,7 @@ def portfolio_names() -> list[str]:
     return names
 
 
-V2_DIST = ROOT / "dashboard-v2" / "dist"
+V2_DIST = LAB_DIR / "dashboard-v2" / "dist"
 NO_CACHE = {"Cache-Control": "no-cache"}
 
 
@@ -173,13 +178,13 @@ def index(_: str = Depends(require_auth)):
     """New UI (dashboard-v2 build) by default; legacy stays at /legacy."""
     if _v2_ready():
         return HTMLResponse((V2_DIST / "index.html").read_text(), headers=NO_CACHE)
-    return (DASH / "static" / "index.html").read_text()
+    return (DASH_CODE / "static" / "index.html").read_text()
 
 
 @app.get("/legacy", response_class=HTMLResponse)
 @app.get("/legacy/", response_class=HTMLResponse)
 def legacy_index(_: str = Depends(require_auth)):
-    return (DASH / "static" / "index.html").read_text()
+    return (DASH_CODE / "static" / "index.html").read_text()
 
 
 @app.get("/assets/{fname:path}")
@@ -438,7 +443,7 @@ def api_file(path: str, _: str = Depends(require_auth)):
 @app.get("/api/params")
 def api_params(_: str = Depends(require_auth)):
     import importlib.util
-    spec = importlib.util.spec_from_file_location("defaults", DASH / "defaults.py")
+    spec = importlib.util.spec_from_file_location("defaults", DASH_CODE / "defaults.py")
     mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     df, ED = mod.default_for, mod.EDITABLE
     overlay = load_overlay()
@@ -469,7 +474,7 @@ def api_params(_: str = Depends(require_auth)):
 @app.post("/api/params/{portfolio}")
 async def api_set_params(portfolio: str, request: Request, _: str = Depends(require_auth)):
     import importlib.util
-    spec = importlib.util.spec_from_file_location("defaults", DASH / "defaults.py")
+    spec = importlib.util.spec_from_file_location("defaults", DASH_CODE / "defaults.py")
     mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     default_for, validate_patch, EDITABLE = mod.default_for, mod.validate_patch, mod.EDITABLE
     if portfolio not in portfolio_names():
@@ -503,7 +508,7 @@ async def api_set_params(portfolio: str, request: Request, _: str = Depends(requ
 @app.post("/api/params/{portfolio}/restore")
 def api_restore(portfolio: str, _: str = Depends(require_auth)):
     import importlib.util
-    spec = importlib.util.spec_from_file_location("defaults", DASH / "defaults.py")
+    spec = importlib.util.spec_from_file_location("defaults", DASH_CODE / "defaults.py")
     mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
     default_for, EDITABLE = mod.default_for, mod.EDITABLE
     if portfolio not in portfolio_names():
@@ -601,8 +606,8 @@ def _port_summary(name: str, file: Path, asset: str):
 @app.get("/api/lab")
 def api_lab(_: str = Depends(require_auth)):
     import sys as _s
-    if str(ROOT) not in _s.path:
-        _s.path.insert(0, str(ROOT))
+    if str(LAB_DIR) not in _s.path:
+        _s.path.insert(0, str(LAB_DIR))
     from bot import lab_registry as R
     reg = read_json(ROOT / "data" / "lab" / "registry.json", {}) or {}
     st = read_json(ROOT / "data" / "lab" / "status.json", {}) or {}
@@ -652,8 +657,8 @@ def api_param_changes(limit: int = 100, _: str = Depends(require_auth)):
 # ---- dashboard v2 API (/api/v2/*, SSE at /api/v2/stream) ----
 try:
     import sys as _sys
-    if str(DASH) not in _sys.path:
-        _sys.path.insert(0, str(DASH))
+    if str(DASH_CODE) not in _sys.path:
+        _sys.path.insert(0, str(DASH_CODE))
     from api_v2 import make_router as _make_v2_router
     app.include_router(_make_v2_router(require_auth, {
         "portfolio_names": portfolio_names,

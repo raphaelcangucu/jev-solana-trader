@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT=/home/box/solana-trader/paper
+LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # código do lab (research/paper-lab)
+ROOT="${PAPER_LAB_ROOT:-$LAB}"                           # dados/estado (logs, data, run, status.json)
+JEV_ALTS="${JEV_ALTS_ROOT:-/workspace/jev-alts}"         # venvs + hf-cache dos modelos
+export PAPER_LAB_ROOT="$ROOT" JEV_ALTS_ROOT="$JEV_ALTS"
 RUN=$ROOT/run
 mkdir -p "$RUN" "$ROOT/logs" "$ROOT/dashboard"
 PIDFILE=$RUN/tunnel.pid
@@ -18,7 +21,7 @@ fi
 if [[ -f $PIDFILE ]] && kill -0 "$(cat $PIDFILE)" 2>/dev/null; then
   echo "tunnel already running pid=$(cat $PIDFILE) url=$(cat $URLFILE 2>/dev/null || true)"; exit 0
 fi
-bash "$ROOT/scripts/start_dashboard.sh" >/dev/null 2>&1 || true
+bash "$LAB/scripts/start_dashboard.sh" >/dev/null 2>&1 || true
 # Keep previous URL until new one arrives (avoid empty url.txt on brief restart)
 nohup "$CF" tunnel --url http://127.0.0.1:8787 --no-autoupdate >"$LOG" 2>&1 &
 echo $! >"$PIDFILE"

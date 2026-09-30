@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 set -uo pipefail
-ROOT=/home/box/solana-trader/paper
+LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # código do lab (research/paper-lab)
+ROOT="${PAPER_LAB_ROOT:-$LAB}"                           # dados/estado (logs, data, run, status.json)
+JEV_ALTS="${JEV_ALTS_ROOT:-/workspace/jev-alts}"         # venvs + hf-cache dos modelos
+export PAPER_LAB_ROOT="$ROOT" JEV_ALTS_ROOT="$JEV_ALTS"
 RUN=$ROOT/run
 LOG=$ROOT/logs/supervisor.log
-PY=/workspace/jev-alts/venvs/von/bin/python
+PY=$JEV_ALTS/venvs/von/bin/python
 mkdir -p "$RUN" "$ROOT/logs"
 export PYTHONUNBUFFERED=1
 export VON_DEVICE=cpu
-export HF_HOME=/workspace/jev-alts/hf-cache
-export TRANSFORMERS_CACHE=/workspace/jev-alts/hf-cache
-export HF_HUB_CACHE=/workspace/jev-alts/hf-cache/hub
+export HF_HOME=$JEV_ALTS/hf-cache
+export TRANSFORMERS_CACHE=$JEV_ALTS/hf-cache
+export HF_HUB_CACHE=$JEV_ALTS/hf-cache/hub
 export TOKENIZERS_PARALLELISM=false
 # JEV_API_KEY inherited from parent if set (never write to disk)
 echo $$ >"$RUN/supervisor.pid"
@@ -20,7 +23,7 @@ END_EPOCH=$(python3 -c "import json;from datetime import datetime;print(int(date
 ensure_von() {
   if [[ -f $RUN/von.pid ]] && kill -0 "$(cat $RUN/von.pid)" 2>/dev/null; then return 0; fi
   echo "$(date -Iseconds) starting von" >>"$LOG"
-  bash "$ROOT/scripts/start_von.sh" >>"$LOG" 2>&1 || true
+  bash "$LAB/scripts/start_von.sh" >>"$LOG" 2>&1 || true
 }
 ensure_laya() {
   # only if enabled in models.json
@@ -29,7 +32,7 @@ ensure_laya() {
   fi
   if [[ -f $RUN/laya.pid ]] && kill -0 "$(cat $RUN/laya.pid)" 2>/dev/null; then return 0; fi
   echo "$(date -Iseconds) starting laya" >>"$LOG"
-  bash "$ROOT/scripts/start_laya.sh" >>"$LOG" 2>&1 || true
+  bash "$LAB/scripts/start_laya.sh" >>"$LOG" 2>&1 || true
 }
 ensure_poorjev() {
   if ! python3 -c "import json;d=json.load(open('$ROOT/models.json'));raise SystemExit(0 if d.get('backends',{}).get('poorjev',{}).get('enabled') else 1)"; then
@@ -37,7 +40,7 @@ ensure_poorjev() {
   fi
   if [[ -f $RUN/poorjev.pid ]] && kill -0 "$(cat $RUN/poorjev.pid)" 2>/dev/null; then return 0; fi
   echo "$(date -Iseconds) starting poorjev" >>"$LOG"
-  bash "$ROOT/scripts/start_poorjev.sh" >>"$LOG" 2>&1 || true
+  bash "$LAB/scripts/start_poorjev.sh" >>"$LOG" 2>&1 || true
 }
 ensure() {
   local name=$1 script=$2 pidfile=$3 logfile=$4 statusfile=$5
@@ -52,16 +55,16 @@ ensure() {
 }
 ensure_dashboard() {
   if [[ -f $RUN/dashboard.pid ]] && kill -0 "$(cat $RUN/dashboard.pid)" 2>/dev/null; then return 0; fi
-  if [[ -x $ROOT/scripts/start_dashboard.sh ]]; then
+  if [[ -x $LAB/scripts/start_dashboard.sh ]]; then
     echo "$(date -Iseconds) starting dashboard" >>"$LOG"
-    bash "$ROOT/scripts/start_dashboard.sh" >>"$LOG" 2>&1 || true
+    bash "$LAB/scripts/start_dashboard.sh" >>"$LOG" 2>&1 || true
   fi
 }
 ensure_tunnel() {
   if [[ -f $RUN/tunnel.pid ]] && kill -0 "$(cat $RUN/tunnel.pid)" 2>/dev/null; then return 0; fi
-  if [[ -x $ROOT/scripts/start_tunnel.sh ]]; then
+  if [[ -x $LAB/scripts/start_tunnel.sh ]]; then
     echo "$(date -Iseconds) starting tunnel" >>"$LOG"
-    bash "$ROOT/scripts/start_tunnel.sh" >>"$LOG" 2>&1 || true
+    bash "$LAB/scripts/start_tunnel.sh" >>"$LOG" 2>&1 || true
   fi
 }
 # Hyperliquid funding-carry paper service (standalone in funding/; we never edit that folder).
@@ -71,8 +74,8 @@ ensure_funding() {
   local now; now=$(date +%s)
   (( now - LAST_FUNDING < 300 )) && return 0
   LAST_FUNDING=$now
-  if [[ -x $ROOT/funding/watchdog.sh ]]; then
-    bash "$ROOT/funding/watchdog.sh" >>"$LOG" 2>&1 || echo "$(date -Iseconds) funding watchdog exit=$?" >>"$LOG"
+  if [[ -x $LAB/funding/watchdog.sh ]]; then
+    bash "$LAB/funding/watchdog.sh" >>"$LOG" 2>&1 || echo "$(date -Iseconds) funding watchdog exit=$?" >>"$LOG"
   fi
 }
 
@@ -84,11 +87,11 @@ while true; do
   ensure_von
   ensure_laya
   ensure_poorjev
-  ensure sol "$ROOT/bot/sol_bot.py" "$RUN/sol.pid" "$ROOT/logs/sol_bot.log" "$ROOT/status.json"
-  ensure meme "$ROOT/bot/meme_bot.py" "$RUN/meme.pid" "$ROOT/logs/meme_bot.log" "$ROOT/data/meme/status.json"
-  ensure rules "$ROOT/bot/rules_bot.py" "$RUN/rules.pid" "$ROOT/logs/rules_bot.log" "$ROOT/data/rules/status.json"
-  [[ -f $ROOT/bot/lab_bot.py ]] && ensure lab "$ROOT/bot/lab_bot.py" "$RUN/lab.pid" "$ROOT/logs/lab_bot.log" "$ROOT/data/lab/status.json"
-  [[ -f $ROOT/bot/nightly.py ]] && ensure nightly "$ROOT/bot/nightly.py" "$RUN/nightly.pid" "$ROOT/logs/nightly.log" "$ROOT/data/nightly/status.json"
+  ensure sol "$LAB/bot/sol_bot.py" "$RUN/sol.pid" "$ROOT/logs/sol_bot.log" "$ROOT/status.json"
+  ensure meme "$LAB/bot/meme_bot.py" "$RUN/meme.pid" "$ROOT/logs/meme_bot.log" "$ROOT/data/meme/status.json"
+  ensure rules "$LAB/bot/rules_bot.py" "$RUN/rules.pid" "$ROOT/logs/rules_bot.log" "$ROOT/data/rules/status.json"
+  [[ -f $LAB/bot/lab_bot.py ]] && ensure lab "$LAB/bot/lab_bot.py" "$RUN/lab.pid" "$ROOT/logs/lab_bot.log" "$ROOT/data/lab/status.json"
+  [[ -f $LAB/bot/nightly.py ]] && ensure nightly "$LAB/bot/nightly.py" "$RUN/nightly.pid" "$ROOT/logs/nightly.log" "$ROOT/data/nightly/status.json"
   ensure_dashboard
   ensure_tunnel
   ensure_funding

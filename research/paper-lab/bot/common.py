@@ -11,7 +11,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT
 BRT = timezone(timedelta(hours=-3))
 USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
 SOL = "So11111111111111111111111111111111111111112"

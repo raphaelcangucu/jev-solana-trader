@@ -8,7 +8,7 @@ from bot.lib import BRT
 from bot import lab_registry as R
 from bot import logio
 
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT
 DOWN = []  # known downtime windows (ts pairs) excluded from return series
 for a, b in (("2026-09-24T00:11:00", "2026-09-24T00:21:00"), ("2026-09-24T08:56:00", "2026-09-24T09:14:00")):
     DOWN.append((datetime.fromisoformat(a + "-03:00").timestamp(), datetime.fromisoformat(b + "-03:00").timestamp()))

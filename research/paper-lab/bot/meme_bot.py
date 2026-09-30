@@ -7,8 +7,8 @@ import json, os, signal, sys, time, traceback, uuid
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path("/home/box/solana-trader/paper")
-sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # código do lab (não PAPER_LAB_ROOT)
+from bot.paths import ROOT, LAB_DIR  # noqa: E402
 
 from bot.lib import (
     brt_now, brt_iso, load_cfg, assert_no_keys, build_state, von_system_one,

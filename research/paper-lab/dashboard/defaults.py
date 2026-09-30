@@ -3,7 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-ROOT = Path("/home/box/solana-trader/paper")
+import sys as _sys_paths
+_LAB = str(Path(__file__).resolve().parents[1])  # código do lab (research/paper-lab)
+if _LAB not in _sys_paths.path:
+    _sys_paths.path.insert(0, _LAB)
+from bot.paths import ROOT, LAB_DIR  # noqa: E402  (ROOT = PAPER_LAB_ROOT ou a pasta do lab)
 
 EDITABLE = (
     "min_confidence", "min_prob_margin", "max_skip_noul",

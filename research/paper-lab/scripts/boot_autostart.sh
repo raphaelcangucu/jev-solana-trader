@@ -2,7 +2,10 @@
 # Bring the paper stack up after a host reboot (idempotent).
 # Called from @reboot cron (best-effort) and from the health-check routine.
 set -uo pipefail
-ROOT=/home/box/solana-trader/paper
+LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"   # código do lab (research/paper-lab)
+ROOT="${PAPER_LAB_ROOT:-$LAB}"                           # dados/estado (logs, data, run, status.json)
+JEV_ALTS="${JEV_ALTS_ROOT:-/workspace/jev-alts}"         # venvs + hf-cache dos modelos
+export PAPER_LAB_ROOT="$ROOT" JEV_ALTS_ROOT="$JEV_ALTS"
 LOG=$ROOT/logs/boot_autostart.log
 RUN=$ROOT/run
 mkdir -p "$RUN" "$ROOT/logs"
@@ -43,16 +46,16 @@ if command -v cron >/dev/null 2>&1 || [[ -x /usr/sbin/cron ]]; then
 fi
 
 # Main paper stack (supervisor brings models, bots, dashboard, tunnel, funding watchdog)
-if [[ -x $ROOT/scripts/start.sh ]]; then
-  out=$(bash "$ROOT/scripts/start.sh" 2>&1) || true
+if [[ -x $LAB/scripts/start.sh ]]; then
+  out=$(bash "$LAB/scripts/start.sh" 2>&1) || true
   log "start.sh: $out"
 else
-  log "ERROR: missing $ROOT/scripts/start.sh"
+  log "ERROR: missing $LAB/scripts/start.sh"
 fi
 
 # Funding has its own watchdog; nudge once at boot
-if [[ -x $ROOT/funding/watchdog.sh ]]; then
-  out=$(bash "$ROOT/funding/watchdog.sh" 2>&1) || true
+if [[ -x $LAB/funding/watchdog.sh ]]; then
+  out=$(bash "$LAB/funding/watchdog.sh" 2>&1) || true
   log "funding watchdog: $out"
 fi
 

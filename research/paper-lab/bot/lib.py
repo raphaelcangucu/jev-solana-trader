@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT, resolve_root
 BRT = timezone(timedelta(hours=-3))
 USDT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
 SOL = "So11111111111111111111111111111111111111112"
@@ -20,7 +20,18 @@ def brt_iso(ts=None):
     return datetime.fromtimestamp(ts or time.time(), tz=BRT).isoformat()
 
 def load_cfg():
-    return json.loads((ROOT / "config.json").read_text())
+    """config.json da raiz resolvida (PAPER_LAB_ROOT ou pasta do lab). Se houver bloco `paths`,
+    `paths.root` passa a ser a raiz resolvida (PAPER_LAB_ROOT tem prioridade) e caminhos relativos
+    viram absolutos contra ela (strings, para o cfg continuar serializável)."""
+    cfg = json.loads((ROOT / "config.json").read_text())
+    if isinstance(cfg.get("paths"), dict):
+        root = resolve_root(cfg["paths"].get("root"))
+        out = {"root": str(root)}
+        for k, v in cfg["paths"].items():
+            if k != "root":
+                out[k] = v if Path(v).is_absolute() else str(root / v)
+        cfg["paths"] = out
+    return cfg
 
 def assert_no_keys(cfg):
     for p in cfg.get("forbid_keypair_paths", []):

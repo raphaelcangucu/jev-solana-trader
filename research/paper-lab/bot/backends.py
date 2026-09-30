@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
-ROOT = Path("/home/box/solana-trader/paper")
+from bot.paths import ROOT
 
 def load_models_cfg() -> dict:
     return json.loads((ROOT / "models.json").read_text())

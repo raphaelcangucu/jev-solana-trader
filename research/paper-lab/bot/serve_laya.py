@@ -4,9 +4,10 @@ from __future__ import annotations
 import json, os, sys, traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-os.environ.setdefault("HF_HOME", "/workspace/jev-alts/hf-cache")
-os.environ.setdefault("TRANSFORMERS_CACHE", "/workspace/jev-alts/hf-cache")
-os.environ.setdefault("HF_HUB_CACHE", "/workspace/jev-alts/hf-cache/hub")
+_JEV_ALTS = os.environ.get("JEV_ALTS_ROOT") or "/workspace/jev-alts"
+os.environ.setdefault("HF_HOME", f"{_JEV_ALTS}/hf-cache")
+os.environ.setdefault("TRANSFORMERS_CACHE", f"{_JEV_ALTS}/hf-cache")
+os.environ.setdefault("HF_HUB_CACHE", f"{_JEV_ALTS}/hf-cache/hub")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
 PORT = int(os.environ.get("LAYA_PORT", "8766"))
