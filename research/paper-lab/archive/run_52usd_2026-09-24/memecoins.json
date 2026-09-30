@@ -1,0 +1,89 @@
+{
+  "note": "Paper-only. Mints from Solana Explorer / Coinbase / DexPaprika. Jupiter token API was 429 at setup.",
+  "start_usdt_each": 50.0,
+  "cadence": {
+    "rotate_seconds": 60,
+    "description": "1 token/60s rotate; shared von; live marks Gate.io\u2192Coinpaprika\u2192DexScreener\u2192Jupiter; Jupiter/mark fills; no seed"
+  },
+  "night_review": "skipped_for_memecoins",
+  "tokens": [
+    {
+      "symbol": "BONK",
+      "mint": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+      "decimals": 5,
+      "coingecko_id": "bonk",
+      "why": "Largest Solana meme; Jupiter verified",
+      "gate_pair": "BONK_USDT",
+      "coinpaprika_id": "bonk-bonk"
+    },
+    {
+      "symbol": "WIF",
+      "mint": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+      "decimals": 6,
+      "coingecko_id": "dogwifcoin",
+      "why": "Top meme liquidity; Jupiter verified",
+      "gate_pair": "WIF_USDT",
+      "coinpaprika_id": "wif-dogwifcoin"
+    },
+    {
+      "symbol": "POPCAT",
+      "mint": "7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr",
+      "decimals": 9,
+      "coingecko_id": "popcat",
+      "why": "High organic volume; Jupiter verified",
+      "gate_pair": "POPCAT_USDT",
+      "coinpaprika_id": "popcat-popcat"
+    },
+    {
+      "symbol": "FARTCOIN",
+      "mint": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+      "decimals": 6,
+      "coingecko_id": "fartcoin",
+      "why": "High recent volume; Jupiter-routed",
+      "gate_pair": "FARTCOIN_USDT",
+      "coinpaprika_id": "fartcoin-fartcoin"
+    },
+    {
+      "symbol": "PNUT",
+      "mint": "2qEHjDLDLbuBgRYvsxhc5D6uDWAivNFZGan56P1tpump",
+      "decimals": 6,
+      "coingecko_id": "peanut-the-squirrel",
+      "why": "High-volume meme; Jupiter-routable",
+      "gate_pair": "PNUT_USDT",
+      "coinpaprika_id": "pnut-peanut-the-squirrel"
+    },
+    {
+      "symbol": "MEW",
+      "mint": "MEW1gQWJ3nEXg2qgERiKu7FAFj79PHvQVREQUzScPP5",
+      "decimals": 5,
+      "coingecko_id": "cat-in-a-dogs-world",
+      "why": "Established cat meme; Jupiter verified",
+      "gate_pair": "MEW_USDT",
+      "coinpaprika_id": "mew-cat-in-a-dogs-world",
+      "mint_wrong_before_2026-09-24": "MEW1gQWJ3nEXg2qgERiPu7FHDdCJhZt5BaY56KqEyvg",
+      "mint_verified": "2026-09-24 21:06 BRT: CoinGecko platforms.solana, Coinpaprika contracts sol-solana, Jupiter tokens v2 (verified, dec 5)"
+    },
+    {
+      "symbol": "GOAT",
+      "mint": "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump",
+      "decimals": 6,
+      "coingecko_id": "goatseus-maximus",
+      "why": "AI-narrative meme; sustained volume",
+      "gate_pair": "GOAT_USDT",
+      "coinpaprika_id": "goat-goatseus-maximus"
+    }
+  ],
+  "price_policy": {
+    "sources": [
+      "gate.io",
+      "coinpaprika",
+      "dexscreener",
+      "jupiter_quote"
+    ],
+    "max_age_seconds": 120,
+    "no_seed": true,
+    "on_missing": "skip_decision_skipped_no_price",
+    "restart_note": "2026-09-24T00:30 BRT wiped fake-seed meme state and restarted on live Gate.io + Coinpaprika marks"
+  },
+  "mints_verified_brt": "2026-09-24T21:06-03:00 (all 7 vs CoinGecko/Coinpaprika/Jupiter tokens v2; only MEW was wrong)"
+}

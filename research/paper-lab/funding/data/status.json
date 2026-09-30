@@ -1,0 +1,147 @@
+{
+ "service": "funding-carry-paper",
+ "paper_only": true,
+ "pid": 42504,
+ "heartbeat": "2026-09-26T03:54:34-03:00",
+ "heartbeat_ms": 1790405674507,
+ "started_at": "2026-09-24T20:50:01-03:00",
+ "end_at": null,
+ "run_mode": "indefinite",
+ "counters": {
+  "http_429_hl": 1083,
+  "http_429_jupiter": 24
+ },
+ "last_error": {
+  "at": "2026-09-26T03:09:43-03:00",
+  "err": "RuntimeError: request failed after 8 tries: https://api.hyperliquid.xyz/info (HTTP Error 429: Too Many Requests)"
+ },
+ "benchmarks": {
+  "kamino_usdc": {
+   "apy": 0.05927957504635029,
+   "apy_spot_now": 0.2163623481799104,
+   "method": "mean of last 24 hourly supplyInterestAPY (metrics/history)",
+   "polled_at": "2026-09-25T20:49:38-03:00",
+   "stale": false,
+   "hourly_min": 0.04642789940700642,
+   "hourly_max": 0.3044365811417651,
+   "source": "api.kamino.finance reserves/metrics + metrics/history",
+   "tvl_usd": 117008882.31550755
+  },
+  "jitosol": {
+   "apy": 0.04769620373714556,
+   "apy_date": "2026-09-25T23:08:12Z",
+   "polled_at": "2026-09-25T20:49:38-03:00",
+   "stale": false,
+   "source": "kobe.mainnet.jito.network stake_pool_stats apy[-1]"
+  }
+ },
+ "portfolios": {
+  "p1000": {
+   "capital": 1000.0,
+   "nav": 994.9138066662114,
+   "cash": 31.679454417123647,
+   "ret_pct": -0.508619333378868,
+   "apr_simple_pct": -143.37586860082877,
+   "funding": 0.7004940833556155,
+   "fees": 1.1749820346157462,
+   "max_dd_pct": 0.1596630402826519,
+   "positions": {
+    "GRASS": {
+     "size": 205.2,
+     "funding_accrued": 0.3716630550024048,
+     "current_funding_ann": 1.2583722480000001
+    },
+    "TAO": {
+     "size": 0.304,
+     "funding_accrued": 0.0916931962977808,
+     "current_funding_ann": 0.1095
+    },
+    "ONDO": {
+     "size": 171.0,
+     "funding_accrued": 0.0880561030978575,
+     "current_funding_ann": 0.1095
+    },
+    "UNI": {
+     "size": 9.8,
+     "funding_accrued": 0.06091345201355401,
+     "current_funding_ann": 0.1095
+    },
+    "ZEC": {
+     "size": 0.05,
+     "funding_accrued": 0.03317884424350001,
+     "current_funding_ann": 0.1095
+    },
+    "ETH": {
+     "size": 0.0334,
+     "funding_accrued": 0.034818197399999994,
+     "current_funding_ann": 0.1095
+    },
+    "BTC": {
+     "size": 0.00106,
+     "funding_accrued": 0.020171235300518404,
+     "current_funding_ann": 0.089064672
+    }
+   },
+   "bench": {
+    "kamino_usdc": 1000.0457054520845,
+    "jitosol_yield": 999.9993402735832
+   }
+  },
+  "p1000_pons": {
+   "capital": 1000.0,
+   "nav": 994.9739222046849,
+   "cash": 41.952136177861085,
+   "ret_pct": -0.5026077795315165,
+   "apr_simple_pct": -141.6812579206196,
+   "funding": 0.7268353950869173,
+   "fees": 1.1948587461945765,
+   "max_dd_pct": 0.1483978563418669,
+   "positions": {
+    "GRASS": {
+     "size": 179.5,
+     "funding_accrued": 0.325114611953858,
+     "current_funding_ann": 1.2583722480000001
+    },
+    "PONS": {
+     "size": 102.0,
+     "funding_accrued": 0.10937202260193297,
+     "current_funding_ann": 0.1095
+    },
+    "TAO": {
+     "size": 0.266,
+     "funding_accrued": 0.08023154676055819,
+     "current_funding_ann": 0.1095
+    },
+    "ONDO": {
+     "size": 150.0,
+     "funding_accrued": 0.077242195699875,
+     "current_funding_ann": 0.1095
+    },
+    "UNI": {
+     "size": 8.6,
+     "funding_accrued": 0.053454661971077996,
+     "current_funding_ann": 0.1095
+    },
+    "ZEC": {
+     "size": 0.05,
+     "funding_accrued": 0.03317884424350001,
+     "current_funding_ann": 0.1095
+    },
+    "ETH": {
+     "size": 0.0293,
+     "funding_accrued": 0.030544107299999998,
+     "current_funding_ann": 0.1095
+    },
+    "BTC": {
+     "size": 0.00093,
+     "funding_accrued": 0.017697404556115202,
+     "current_funding_ann": 0.089064672
+    }
+   },
+   "bench": {
+    "kamino_usdc": 1000.0457054520845,
+    "jitosol_yield": 999.9993402735832
+   }
+  }
+ }
+}

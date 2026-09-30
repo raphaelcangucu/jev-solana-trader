@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Simulador Paper Solana</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0f1419;--card:#1a2332;--fg:#e7ecf3;--mut:#9aa7b8;--acc:#3b82f6;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;--bd:#2a3548}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--fg);line-height:1.4}
+header{padding:12px 16px;background:#0b1017;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+h1{font-size:1.05rem;margin:0}
+.badge{font-size:.7rem;padding:2px 8px;border-radius:999px;background:#14532d;color:#bbf7d0}
+.grid{display:grid;gap:12px;padding:12px;grid-template-columns:1fr}
+@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}.full{grid-column:1/-1}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.card h2{margin:0 0 8px;font-size:.95rem}
+.mut{color:var(--mut);font-size:.8rem}
+table{width:100%;border-collapse:collapse;font-size:.75rem}
+th,td{border-bottom:1px solid var(--bd);padding:6px 4px;text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.pill{background:#111827;border:1px solid var(--bd);border-radius:8px;padding:8px;min-width:140px;flex:1}
+.pill b{display:block;font-size:1.05rem}
+button,input{font:inherit}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:6px 10px;cursor:pointer}
+button.secondary{background:#334155}
+button.danger{background:var(--bad)}
+button.warn{background:var(--warn);color:#111}
+label{font-size:.75rem;color:var(--mut);display:block;margin-top:6px}
+input[type=number]{width:100%;padding:6px;border-radius:6px;border:1px solid var(--bd);background:#0b1017;color:var(--fg)}
+.ports{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:700px){.ports{grid-template-columns:1fr 1fr}}
+.warnbox{background:#422006;color:#fde68a;padding:8px;border-radius:8px;font-size:.8rem;margin:6px 0}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.scroll{max-height:320px;overflow:auto}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Simulador Paper Solana <span class="badge">SO SIMULACAO</span></h1>
+    <div class="mut" id="hdrMeta">carregando...</div>
+  </div>
+  <div class="mut" id="hdrPrice"></div>
+</header>
+<div class="grid">
+  <div class="card full"><h2>Saude dos processos</h2><div class="row" id="procs"></div><div class="mut" id="jevStatus"></div></div>
+  <div class="card full"><h2>Patrimonio (equity) ao longo do tempo</h2><div style="height:300px"><canvas id="eqChart"></canvas></div></div>
+  <div class="card full"><h2>Portfolio</h2><div class="ports" id="ports"></div></div>
+  <div class="card full"><h2>Ultimas decisoes</h2><div class="scroll"><table><thead><tr><th>BRT</th><th>Port.</th><th>Modelo</th><th>Estado</th><th>Escolha</th><th>Conf</th><th>Skip</th><th>Final</th></tr></thead><tbody id="decBody"></tbody></table></div></div>
+  <div class="card"><h2>Trades</h2><div class="scroll"><table><thead><tr><th>BRT</th><th>Port.</th><th>Lado</th><th>Mark</th><th>fill_mode</th></tr></thead><tbody id="trBody"></tbody></table></div></div>
+  <div class="card full"><h2>Estrategias rule / hibridos</h2>
+    <div class="row" style="margin-bottom:8px"><button id="btnRulesPause" class="secondary">Pausar Rules</button></div>
+    <div class="mut" id="rulesMeta"></div>
+    <div class="ports" id="rulesPorts"></div>
+    <div class="scroll" style="margin-top:8px"><table><thead><tr><th>Meme</th><th>regime</th><th>donch+regime</th><th>hybrid poorjev</th></tr></thead><tbody id="rulesMemeBody"></tbody></table></div>
+  </div>
+  <div class="card full"><h2>Laboratório — hipóteses H1–H4, forks e vereditos</h2>
+    <div class="row" style="margin-bottom:8px"><button id="btnLabPause" class="secondary">Pausar Lab</button></div>
+    <div class="mut" id="labMeta"></div>
+    <div class="mut" style="margin:6px 0">Veredito: <b>inconclusivo</b> até ≥30 round trips fechados e ≥21 dias (≥28 p/ regras 1h e filtros de regime). Só então vencedora/perdedora (p&lt;0,05 líquido de custos, bate B&amp;H e 6%/a USDC, ≥3 de 4 semanas). <b>Lead fork = só base para novos ajustes, não é veredito.</b> Nada é desligado automaticamente.</div>
+    <div class="scroll"><table><thead><tr><th>Hipótese</th><th>Portfólio</th><th>Descrição</th><th>Equity</th><th>PnL desde início</th><th>vs B&amp;H</th><th>Trades</th><th>Exposição</th><th>Veredito (progresso)</th><th>Liga/Desliga</th></tr></thead><tbody id="labBody"></tbody></table></div>
+    <h3 style="margin-top:12px">Linhagens (original → forks, lado a lado)</h3>
+    <div class="scroll"><table><thead><tr><th>Linhagem</th><th>Membros (equity · PnL · trades · veredito)</th></tr></thead><tbody id="linBody"></tbody></table></div>
+    <h3 style="margin-top:12px">Vereditos dos portfólios originais</h3>
+    <div class="scroll"><table><thead><tr><th>Portfólio</th><th>Veredito</th><th>Progresso</th><th>Motivo</th></tr></thead><tbody id="verBody"></tbody></table></div>
+  </div>
+  <div class="card full"><h2>Memecoins (todos os modelos)</h2><div class="mut" id="memeMeta"></div><div class="scroll"><table><thead><tr><th>Simbolo</th><th>Preco</th><th>Fonte</th><th>von b/r</th><th>laya b/r</th><th>poorjev b/r</th></tr></thead><tbody id="memeBody"></tbody></table></div></div>
+  <div class="card full"><h2>Controles de parametros (hot-reload)</h2>
+    <div class="row" style="margin-bottom:8px"><button id="btnSolPause" class="secondary">Pausar SOL</button><button id="btnMemePause" class="secondary">Pausar Meme</button></div>
+    <div class="mut">Alteracoes no proximo ciclo (~15s). Baseline = controle fiel ao artigo.</div>
+    <div class="ports" id="controls"></div>
+  </div>
+  <div class="card"><h2>Backends de modelo</h2><div id="models"></div></div>
+  <div class="card"><h2>Revisao noturna / criterios</h2><div id="reviews"></div></div>
+  <div class="card full"><h2>Log de alteracoes</h2><div class="scroll"><table><thead><tr><th>BRT</th><th>Portfolio</th><th>Campo</th><th>Antigo</th><th>Novo</th></tr></thead><tbody id="chgBody"></tbody></table></div></div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

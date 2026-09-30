@@ -1,0 +1,32 @@
+{
+  "name": "meme_MEW_relaxed",
+  "asset_mode": "token",
+  "sol": 0.0,
+  "usdt": 561.5584282622813,
+  "token": 857527.658211735,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 0.0004976,
+  "benchmark_buy_hold": {
+    "token": 2009646.3022508041,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": -0.5845780108327858,
+  "fees_paid_usdt": 0.47024946956277575,
+  "fees_paid_sol": 0.0,
+  "trade_count": 4,
+  "last_trade_ts": 1790405330.5788484,
+  "trade_timestamps": [
+    1790398610.0136395,
+    1790400290.2261891,
+    1790404911.6294057,
+    1790405330.5788484
+  ],
+  "position": "held",
+  "recent_pnl_mood": "neutral",
+  "created_ts": 1790294875.9827652
+}

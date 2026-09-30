@@ -1,0 +1,40 @@
+{
+  "name": "h2_ensemble_PNUT",
+  "asset_mode": "token",
+  "asset": "PNUT",
+  "sol": 0.0,
+  "usdt": 1008.9584371361348,
+  "token": 0.0,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 0.05448,
+  "benchmark_buy_hold": {
+    "token": 18355.359765051395,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": -0.33006124141979853,
+  "fees_paid_usdt": 0.9421222346881426,
+  "fees_paid_sol": 0.0,
+  "trade_count": 7,
+  "last_trade_ts": 1790334769.7655132,
+  "trade_timestamps": [
+    1790326373.169986,
+    1790327214.33893,
+    1790327634.7398558,
+    1790330579.4325402,
+    1790331000.609982,
+    1790331421.435851,
+    1790334769.7655132
+  ],
+  "position": "sold",
+  "recent_pnl_mood": "buoyed",
+  "created_ts": 1790294866.5670116,
+  "started_brt": "2026-09-24T21:07:46.567012-03:00",
+  "entry_price": null,
+  "peak_price": null,
+  "strategy": "hyp:h2_ensemble_PNUT"
+}

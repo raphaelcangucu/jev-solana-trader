@@ -1,0 +1,632 @@
+{
+  "ok": true,
+  "ts": 1790405632.0343106,
+  "ts_brt": "2026-09-26T03:53:52.034312-03:00",
+  "cycles": 977,
+  "errors": 0,
+  "skipped_no_price": 0,
+  "pid": 41127,
+  "finished": false,
+  "last_symbol": "FARTCOIN",
+  "last_final_baseline": "hold",
+  "last_final_relaxed": "buy",
+  "last_chosen": "buy",
+  "last_conf": 0.367,
+  "last_skip": 0.1562,
+  "last_latency_ms": 754.43,
+  "last_state": "deep quiet lifting calm night green wide soft late mid quiet flat",
+  "last_price": 0.19305,
+  "last_price_source": "gate.io",
+  "last_models": {
+    "von": {
+      "chosen": "buy",
+      "conf": 0.367,
+      "ok": true,
+      "latency_ms": 754.43
+    },
+    "laya": {
+      "chosen": "buy",
+      "conf": 0.0256,
+      "ok": true,
+      "latency_ms": 962.19
+    },
+    "poorjev": {
+      "chosen": "hold",
+      "conf": 0.0,
+      "ok": false,
+      "latency_ms": 85.74
+    }
+  },
+  "extra_latencies_ms": {
+    "poorjev": 85.74,
+    "von": 754.43,
+    "laya": 962.19
+  },
+  "cycle_wall_ms": 10862.0,
+  "meme_models_enabled": [
+    "von",
+    "laya",
+    "poorjev"
+  ],
+  "restart_brt": "2026-09-25T11:37:41.048116-03:00",
+  "rotate_seconds": 60.0,
+  "tokens": {
+    "BONK": {
+      "price": 3.681e-06,
+      "price_source": "gate.io",
+      "von": {
+        "baseline": {
+          "equity_usd": 1000.0,
+          "usdt": 1000.0,
+          "token": 0.0,
+          "trades": 0,
+          "bh_equity": 967.6656151419559
+        },
+        "relaxed": {
+          "equity_usd": 999.612329427525,
+          "usdt": 749.574074395875,
+          "token": 67926719.65,
+          "trades": 3,
+          "bh_equity": 967.6656151419559
+        }
+      },
+      "baseline": {
+        "equity_usd": 1000.0,
+        "usdt": 1000.0,
+        "token": 0.0,
+        "trades": 0,
+        "bh_equity": 967.6656151419559
+      },
+      "relaxed": {
+        "equity_usd": 999.612329427525,
+        "usdt": 749.574074395875,
+        "token": 67926719.65,
+        "trades": 3,
+        "bh_equity": 967.6656151419559
+      },
+      "models": {
+        "laya": {
+          "baseline": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 967.6656151419559,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 967.6656151419559,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        },
+        "poorjev": {
+          "baseline": {
+            "equity_usd": 966.0238227887801,
+            "usdt": 3.1712119389339932,
+            "token": 261573651.4126178,
+            "trades": 20,
+            "bh_equity": 967.6656151419559,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 966.0159523322864,
+            "usdt": 3.1712119389339932,
+            "token": 261571513.28262764,
+            "trades": 20,
+            "bh_equity": 967.6656151419559,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        }
+      },
+      "hybrid_poorjev_regime": {
+        "equity_usd": 966.3040697130148,
+        "usdt": 3.1712119389339932,
+        "token": 261649784.77970138,
+        "trades": 20,
+        "bh_equity": 967.6656151419559,
+        "started_brt": "2026-09-24T21:07:55.970939-03:00",
+        "strategy": "rule:BONK_hybrid_poorjev_regime"
+      }
+    },
+    "WIF": {
+      "price": 0.2453,
+      "price_source": "gate.io",
+      "von": {
+        "baseline": {
+          "equity_usd": 1000.0,
+          "usdt": 1000.0,
+          "token": 0.0,
+          "trades": 0,
+          "bh_equity": 1029.8068849706128
+        },
+        "relaxed": {
+          "equity_usd": 999.2249350535,
+          "usdt": 999.2249350535,
+          "token": 0.0,
+          "trades": 2,
+          "bh_equity": 1029.8068849706128
+        }
+      },
+      "baseline": {
+        "equity_usd": 1000.0,
+        "usdt": 1000.0,
+        "token": 0.0,
+        "trades": 0,
+        "bh_equity": 1029.8068849706128
+      },
+      "relaxed": {
+        "equity_usd": 999.2249350535,
+        "usdt": 999.2249350535,
+        "token": 0.0,
+        "trades": 2,
+        "bh_equity": 1029.8068849706128
+      },
+      "models": {
+        "laya": {
+          "baseline": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1029.8068849706128,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1029.8068849706128,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        },
+        "poorjev": {
+          "baseline": {
+            "equity_usd": 1027.7287149416234,
+            "usdt": 3.1712119389339932,
+            "token": 4176.752967805501,
+            "trades": 20,
+            "bh_equity": 1029.8068849706128,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1027.1339225361985,
+            "usdt": 3.1712119389339932,
+            "token": 4174.328212789501,
+            "trades": 20,
+            "bh_equity": 1029.8068849706128,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        }
+      },
+      "hybrid_poorjev_regime": {
+        "equity_usd": 1026.2828406077394,
+        "usdt": 3.1712119389339932,
+        "token": 4170.858657435,
+        "trades": 20,
+        "bh_equity": 1029.8068849706128,
+        "started_brt": "2026-09-24T21:07:55.970939-03:00",
+        "strategy": "rule:WIF_hybrid_poorjev_regime"
+      }
+    },
+    "POPCAT": {
+      "price": 0.05795,
+      "price_source": "gate.io",
+      "von": {
+        "baseline": {
+          "equity_usd": 1000.0,
+          "usdt": 1000.0,
+          "token": 0.0,
+          "trades": 0,
+          "bh_equity": 1020.7856262110269
+        },
+        "relaxed": {
+          "equity_usd": 998.3003713675,
+          "usdt": 998.3003713675,
+          "token": 0.0,
+          "trades": 2,
+          "bh_equity": 1020.7856262110269
+        }
+      },
+      "baseline": {
+        "equity_usd": 1000.0,
+        "usdt": 1000.0,
+        "token": 0.0,
+        "trades": 0,
+        "bh_equity": 1020.7856262110269
+      },
+      "relaxed": {
+        "equity_usd": 998.3003713675,
+        "usdt": 998.3003713675,
+        "token": 0.0,
+        "trades": 2,
+        "bh_equity": 1020.7856262110269
+      },
+      "models": {
+        "laya": {
+          "baseline": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1020.7856262110269,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1020.7856262110269,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        },
+        "poorjev": {
+          "baseline": {
+            "equity_usd": 1016.3047377732343,
+            "usdt": 3.1712119389339932,
+            "token": 17482.89086858154,
+            "trades": 20,
+            "bh_equity": 1020.7856262110269,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1016.3225847063815,
+            "usdt": 3.1712119389339932,
+            "token": 17483.198839817902,
+            "trades": 20,
+            "bh_equity": 1020.7856262110269,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        }
+      },
+      "hybrid_poorjev_regime": {
+        "equity_usd": 1016.3326531384289,
+        "usdt": 3.1712119389339932,
+        "token": 17483.372583252716,
+        "trades": 20,
+        "bh_equity": 1020.7856262110269,
+        "started_brt": "2026-09-24T21:07:55.970939-03:00",
+        "strategy": "rule:POPCAT_hybrid_poorjev_regime"
+      }
+    },
+    "FARTCOIN": {
+      "price": 0.19305,
+      "price_source": "gate.io",
+      "von": {
+        "baseline": {
+          "equity_usd": 1000.0,
+          "usdt": 1000.0,
+          "token": 0.0,
+          "trades": 0,
+          "bh_equity": 1043.175186426024
+        },
+        "relaxed": {
+          "equity_usd": 996.6442366316816,
+          "usdt": 747.8762415905625,
+          "token": 1288.6195029325,
+          "trades": 5,
+          "bh_equity": 1043.175186426024
+        }
+      },
+      "baseline": {
+        "equity_usd": 1000.0,
+        "usdt": 1000.0,
+        "token": 0.0,
+        "trades": 0,
+        "bh_equity": 1043.175186426024
+      },
+      "relaxed": {
+        "equity_usd": 996.6442366316816,
+        "usdt": 747.8762415905625,
+        "token": 1288.6195029325,
+        "trades": 5,
+        "bh_equity": 1043.175186426024
+      },
+      "models": {
+        "laya": {
+          "baseline": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1043.175186426024,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1043.175186426024,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        },
+        "poorjev": {
+          "baseline": {
+            "equity_usd": 1039.2792941601242,
+            "usdt": 3.1712119389339932,
+            "token": 5367.045232950998,
+            "trades": 20,
+            "bh_equity": 1043.175186426024,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1039.3072261051652,
+            "usdt": 3.1712119389339932,
+            "token": 5367.189920570999,
+            "trades": 20,
+            "bh_equity": 1043.175186426024,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        }
+      },
+      "hybrid_poorjev_regime": {
+        "equity_usd": 1039.117868704079,
+        "usdt": 3.1712119389339932,
+        "token": 5366.2090482525,
+        "trades": 20,
+        "bh_equity": 1043.175186426024,
+        "started_brt": "2026-09-24T21:07:55.970939-03:00",
+        "strategy": "rule:FARTCOIN_hybrid_poorjev_regime"
+      }
+    },
+    "PNUT": {
+      "price": 0.0565,
+      "price_source": "gate.io",
+      "von": {
+        "baseline": {
+          "equity_usd": 1000.0,
+          "usdt": 1000.0,
+          "token": 0.0,
+          "trades": 0,
+          "bh_equity": 1037.0778267254038
+        },
+        "relaxed": {
+          "equity_usd": 998.091848631,
+          "usdt": 998.091848631,
+          "token": 0.0,
+          "trades": 2,
+          "bh_equity": 1037.0778267254038
+        }
+      },
+      "baseline": {
+        "equity_usd": 1000.0,
+        "usdt": 1000.0,
+        "token": 0.0,
+        "trades": 0,
+        "bh_equity": 1037.0778267254038
+      },
+      "relaxed": {
+        "equity_usd": 998.091848631,
+        "usdt": 998.091848631,
+        "token": 0.0,
+        "trades": 2,
+        "bh_equity": 1037.0778267254038
+      },
+      "models": {
+        "laya": {
+          "baseline": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1037.0778267254038,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1037.0778267254038,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        },
+        "poorjev": {
+          "baseline": {
+            "equity_usd": 1032.5578809800086,
+            "usdt": 3.1712119389339932,
+            "token": 18219.233080373,
+            "trades": 20,
+            "bh_equity": 1037.0778267254038,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1032.4524889388902,
+            "usdt": 3.1712119389339932,
+            "token": 18217.3677345125,
+            "trades": 20,
+            "bh_equity": 1037.0778267254038,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        }
+      },
+      "hybrid_poorjev_regime": {
+        "equity_usd": 1032.394881090224,
+        "usdt": 3.1712119389339932,
+        "token": 18216.348126571505,
+        "trades": 20,
+        "bh_equity": 1037.0778267254038,
+        "started_brt": "2026-09-24T21:07:55.970939-03:00",
+        "strategy": "rule:PNUT_hybrid_poorjev_regime"
+      }
+    },
+    "MEW": {
+      "price": 0.0005088,
+      "price_source": "gate.io",
+      "von": {
+        "baseline": {
+          "equity_usd": 1000.0,
+          "usdt": 1000.0,
+          "token": 0.0,
+          "trades": 0,
+          "bh_equity": 1022.5080385852092
+        },
+        "relaxed": {
+          "equity_usd": 997.868500760412,
+          "usdt": 561.5584282622813,
+          "token": 857527.658211735,
+          "trades": 4,
+          "bh_equity": 1022.5080385852092
+        }
+      },
+      "baseline": {
+        "equity_usd": 1000.0,
+        "usdt": 1000.0,
+        "token": 0.0,
+        "trades": 0,
+        "bh_equity": 1022.5080385852092
+      },
+      "relaxed": {
+        "equity_usd": 997.868500760412,
+        "usdt": 561.5584282622813,
+        "token": 857527.658211735,
+        "trades": 4,
+        "bh_equity": 1022.5080385852092
+      },
+      "models": {
+        "laya": {
+          "baseline": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1022.5080385852092,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1022.5080385852092,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        },
+        "poorjev": {
+          "baseline": {
+            "equity_usd": 1014.157900613776,
+            "usdt": 3.1712119389339932,
+            "token": 1987002.1396911202,
+            "trades": 20,
+            "bh_equity": 1022.5080385852092,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1014.1219675089002,
+            "usdt": 3.1712119389339932,
+            "token": 1986931.5164504051,
+            "trades": 20,
+            "bh_equity": 1022.5080385852092,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        }
+      },
+      "hybrid_poorjev_regime": {
+        "equity_usd": 1014.0421619666085,
+        "usdt": 3.1712119389339932,
+        "token": 1986774.665934895,
+        "trades": 20,
+        "bh_equity": 1022.5080385852092,
+        "started_brt": "2026-09-24T21:07:55.970939-03:00",
+        "strategy": "rule:MEW_hybrid_poorjev_regime"
+      }
+    },
+    "GOAT": {
+      "price": 0.01939,
+      "price_source": "gate.io",
+      "von": {
+        "baseline": {
+          "equity_usd": 1000.0,
+          "usdt": 1000.0,
+          "token": 0.0,
+          "trades": 0,
+          "bh_equity": 1008.8449531737774
+        },
+        "relaxed": {
+          "equity_usd": 984.2108983818374,
+          "usdt": 984.2108983818374,
+          "token": 0.0,
+          "trades": 11,
+          "bh_equity": 1008.8449531737774
+        }
+      },
+      "baseline": {
+        "equity_usd": 1000.0,
+        "usdt": 1000.0,
+        "token": 0.0,
+        "trades": 0,
+        "bh_equity": 1008.8449531737774
+      },
+      "relaxed": {
+        "equity_usd": 984.2108983818374,
+        "usdt": 984.2108983818374,
+        "token": 0.0,
+        "trades": 11,
+        "bh_equity": 1008.8449531737774
+      },
+      "models": {
+        "laya": {
+          "baseline": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1008.8449531737774,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1000.0,
+            "usdt": 1000.0,
+            "token": 0.0,
+            "trades": 0,
+            "bh_equity": 1008.8449531737774,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        },
+        "poorjev": {
+          "baseline": {
+            "equity_usd": 1005.597042675512,
+            "usdt": 3.1712119389339932,
+            "token": 51698.08307047849,
+            "trades": 20,
+            "bh_equity": 1008.8449531737774,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          },
+          "relaxed": {
+            "equity_usd": 1005.5886692209338,
+            "usdt": 3.1712119389339932,
+            "token": 51697.6512265085,
+            "trades": 20,
+            "bh_equity": 1008.8449531737774,
+            "started_brt": "2026-09-24T21:07:55.970939-03:00"
+          }
+        }
+      },
+      "hybrid_poorjev_regime": {
+        "equity_usd": 1005.8111469438451,
+        "usdt": 3.1712119389339932,
+        "token": 51709.1250647195,
+        "trades": 20,
+        "bh_equity": 1008.8449531737774,
+        "started_brt": "2026-09-24T21:07:55.970939-03:00",
+        "strategy": "rule:GOAT_hybrid_poorjev_regime"
+      }
+    }
+  },
+  "night_review": "skipped",
+  "paper_only": true,
+  "price_policy": "live_only_no_seed_max_age_120s",
+  "uptime_seconds": 58571.0,
+  "end_at_brt": "2099-12-31T00:00:00-03:00",
+  "gates": {
+    "baseline_min_conf": 0.6,
+    "relaxed_min_conf": 0.35,
+    "relaxed_min_prob_margin": 0.2
+  }
+}

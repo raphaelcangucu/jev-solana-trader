@@ -1,0 +1,33 @@
+{
+  "name": "PNUT_rule_donch_regime_full",
+  "asset_mode": "token",
+  "sol": 0.0,
+  "usdt": 0.0,
+  "token": 17825.917860360998,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 0.05448,
+  "benchmark_buy_hold": {
+    "token": 18355.359765051395,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": 0.0,
+  "fees_paid_usdt": 0.500604,
+  "fees_paid_sol": 0.0,
+  "trade_count": 1,
+  "last_trade_ts": 1790337632.6726801,
+  "trade_timestamps": [
+    1790337632.6726801
+  ],
+  "position": "held",
+  "recent_pnl_mood": "neutral",
+  "created_ts": 1790294882.06573,
+  "strategy": "rule:PNUT_rule_donch_regime_full",
+  "rule_state": {},
+  "started_brt": "2026-09-24T21:07:54.411779-03:00",
+  "sizing": "full"
+}

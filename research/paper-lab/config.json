@@ -1,0 +1,185 @@
+{
+  "paper_only": true,
+  "forbid_keypair_paths": [
+    "/home/box/solana-trader/keypair.json",
+    "/home/box/solana-trader/secret.b58"
+  ],
+  "cycle_seconds": 15,
+  "end_at_brt": "2099-12-31T00:00:00-03:00",
+  "night_review_at_brt": "2026-09-24T04:00:00-03:00",
+  "starting_balances": {
+    "sol": 0.334150878,
+    "usdt": 960.812456,
+    "total_usd": 1000.0,
+    "ref_price": 117.275,
+    "sol_frac": 0.039188,
+    "note": "$52 wallet-mirror mix (0.017392206 SOL + 50.00929 USDT) scaled to $1,000 at SOL=117.275 (2026-09-24T21:07:44.436480-03:00)",
+    "previous_52usd": {
+      "sol": 0.017392206,
+      "usdt": 50.00929
+    }
+  },
+  "gates": {
+    "min_confidence": 0.6,
+    "max_skip_noul": 0.5,
+    "cooldown_seconds": 120,
+    "max_trades_per_hour": 8,
+    "buy_fraction_usdt": 0.25,
+    "min_usdt_trade": 1.0,
+    "min_sol_trade": 0.001
+  },
+  "fees": {
+    "assumed_network_fee_sol": 5e-06,
+    "extra_slippage_bps": 5
+  },
+  "von": {
+    "base_url": "http://127.0.0.1:8765",
+    "timeout_seconds": 30
+  },
+  "market": {
+    "jupiter_quote_url": "https://lite-api.jup.ag/swap/v1/quote",
+    "quote_usdt_amount": 1000000,
+    "slippage_bps": 50,
+    "jupiter_min_interval_seconds": 20,
+    "prefer_secondary_on_429": true,
+    "max_price_age_seconds": 120,
+    "quote_providers": [
+      "jup_lite",
+      "jup_public",
+      "raydium"
+    ],
+    "quote_min_interval_seconds": 1.2,
+    "quote_backoff_base_seconds": 30,
+    "quote_backoff_max_seconds": 600,
+    "quote_cache_seconds": 20,
+    "quote_cache_size_band": [
+      0.5,
+      2.0
+    ],
+    "quote_max_wait_seconds": 8,
+    "quote_backoff_base_by_provider": {
+      "jup_lite": 60,
+      "jup_public": 2,
+      "raydium": 5
+    },
+    "quote_rounds": 2
+  },
+  "memecoins": {
+    "enabled": true,
+    "config_path": "memecoins.json",
+    "rotate_seconds": 60
+  },
+  "gates_relaxed": {
+    "min_confidence": 0.35,
+    "min_prob_margin": 0.2,
+    "max_skip_noul": 0.5,
+    "cooldown_seconds": 120,
+    "max_trades_per_hour": 8,
+    "buy_fraction_usdt": 0.25,
+    "min_usdt_trade": 1.0,
+    "min_sol_trade": 0.001,
+    "calibration_note": "From first ~33 baseline von decisions on this box: confidence clustered at ~0.229 and ~0.379; empirical ~80th percentile \u22480.379. Using min_confidence=0.35 to open on the high cluster. Prob margin (chosen\u2212runner-up) observed p50\u22480.32; requiring >=0.20 for a clear argmax. skip_noul < 0.5 unchanged. Same sizing/cooldown/cap as baseline."
+  },
+  "rule_strategies": {
+    "enabled": true,
+    "cycle_seconds": 30,
+    "note": "Paper rule portfolios from strategy-research REPORT.md. Simulation only.",
+    "strategies": {
+      "grid_sol_2pct": {
+        "enabled": true,
+        "grid_pct": 0.02,
+        "levels": 4,
+        "timeframe": "1h"
+      },
+      "rsi_sol_1h": {
+        "enabled": true,
+        "rsi_period": 14,
+        "lo": 30,
+        "hi": 70,
+        "timeframe": "1h"
+      },
+      "meme_rule_regime": {
+        "enabled": true,
+        "sol_ema_fast": 12,
+        "sol_ema_slow": 26,
+        "timeframe": "1h"
+      },
+      "meme_rule_donch_regime": {
+        "enabled": true,
+        "donchian": 20,
+        "sol_ema_fast": 12,
+        "sol_ema_slow": 26,
+        "timeframe": "1h"
+      },
+      "hybrid_von_relaxed_cap2": {
+        "enabled": true,
+        "max_trades_per_hour": 2,
+        "require_sol_regime_bull_for_buy": true
+      },
+      "hybrid_poorjev_regime": {
+        "enabled": true,
+        "source_profile": "relaxed",
+        "require_sol_regime_bull_for_buy": true
+      }
+    }
+  },
+  "experiment": {
+    "day1_start_brt": "2026-09-24T21:07:46-03:00",
+    "end": "none (runs indefinitely; end_at_brt is a far-future sentinel)",
+    "note": "Continuation past day 1: no day-1 cutoff, no end date. Nothing is ever deactivated/retired (originals, hypotheses, forks).",
+    "previous_runs": [
+      {
+        "name": "run_52usd_2026-09-24",
+        "start_brt": "2026-09-24T00:10:27-03:00",
+        "end_brt": "2026-09-24T21:07:46-03:00",
+        "archive": "archive/run_52usd_2026-09-24"
+      }
+    ],
+    "capital_usd_each": 1000.0
+  },
+  "tuning": {
+    "run_at_brt": "00:30",
+    "eligibility": {
+      "min_closed_rt": 30,
+      "min_days": 7,
+      "min_trades": 10
+    },
+    "lead": {
+      "min_days": 5,
+      "min_trades": 20,
+      "min_margin_pct": 0.5,
+      "consistent_frac": 0.67
+    },
+    "caps": {
+      "per_lineage_days": 7,
+      "total": 40
+    },
+    "history_days": 14,
+    "search": {
+      "max_rel_change": 0.2,
+      "min_improvement_pct": 0.25,
+      "trade_penalty_bps": 2.0,
+      "train_frac": 0.7
+    },
+    "hard_bounds": {
+      "buy_fraction_usdt_max": 0.5,
+      "max_trades_per_hour_max": 8,
+      "leverage": "never"
+    },
+    "note": "Originals are never modified; tuning creates forks {lineage}__forkN (max 1 per lineage per 7 days, 40 total). Lead fork = base for further tuning only (not a winner verdict). Nothing is ever retired; trailing forks are labeled 'atr\u00e1s da original'.",
+    "rotate_at_brt": "01:00"
+  },
+  "verdict": {
+    "min_closed_rt": 30,
+    "min_days": 21,
+    "min_days_rule_regime": 28,
+    "usdc_apy": 0.06,
+    "p_max": 0.05,
+    "weeks_consistent": [
+      3,
+      4
+    ],
+    "require_bear_regime_for_rule": false
+  },
+  "live_trading_enabled": false
+}

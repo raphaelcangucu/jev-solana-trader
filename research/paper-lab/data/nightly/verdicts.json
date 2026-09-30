@@ -1,0 +1,1932 @@
+{
+  "ts": 1790404674.7742128,
+  "ts_brt": "2026-09-26T03:37:54.774215-03:00",
+  "verdicts": {
+    "baseline": {
+      "portfolio": "baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "baseline",
+      "parent": null
+    },
+    "relaxed": {
+      "portfolio": "relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 41,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "relaxed",
+      "parent": null
+    },
+    "v2": {
+      "portfolio": "v2",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 1,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "v2",
+      "parent": null
+    },
+    "laya_baseline": {
+      "portfolio": "laya_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "laya_baseline",
+      "parent": null
+    },
+    "laya_relaxed": {
+      "portfolio": "laya_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "laya_relaxed",
+      "parent": null
+    },
+    "poorjev_baseline": {
+      "portfolio": "poorjev_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 2,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "poorjev_baseline",
+      "parent": null
+    },
+    "poorjev_relaxed": {
+      "portfolio": "poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 2,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "poorjev_relaxed",
+      "parent": null
+    },
+    "hybrid_von_relaxed_cap2": {
+      "portfolio": "hybrid_von_relaxed_cap2",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 41,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "1/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "hybrid_von_relaxed_cap2",
+      "parent": null
+    },
+    "grid_sol_2pct": {
+      "portfolio": "grid_sol_2pct",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 0,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "grid_sol_2pct",
+      "parent": null
+    },
+    "rsi_sol_1h": {
+      "portfolio": "rsi_sol_1h",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "1/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "rsi_sol_1h",
+      "parent": null
+    },
+    "meme_BONK_baseline": {
+      "portfolio": "meme_BONK_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_BONK_baseline",
+      "parent": null
+    },
+    "BONK_laya_baseline": {
+      "portfolio": "BONK_laya_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_laya_baseline",
+      "parent": null
+    },
+    "BONK_poorjev_baseline": {
+      "portfolio": "BONK_poorjev_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_poorjev_baseline",
+      "parent": null
+    },
+    "meme_BONK_relaxed": {
+      "portfolio": "meme_BONK_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 3,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_BONK_relaxed",
+      "parent": null
+    },
+    "BONK_laya_relaxed": {
+      "portfolio": "BONK_laya_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_laya_relaxed",
+      "parent": null
+    },
+    "BONK_poorjev_relaxed": {
+      "portfolio": "BONK_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_poorjev_relaxed",
+      "parent": null
+    },
+    "BONK_hybrid_poorjev_regime": {
+      "portfolio": "BONK_hybrid_poorjev_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 20,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_hybrid_poorjev_regime",
+      "parent": null
+    },
+    "BONK_rule_regime": {
+      "portfolio": "BONK_rule_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_rule_regime",
+      "parent": null
+    },
+    "BONK_rule_donch_regime": {
+      "portfolio": "BONK_rule_donch_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 0,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_rule_donch_regime",
+      "parent": null
+    },
+    "BONK_rule_regime_full": {
+      "portfolio": "BONK_rule_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_rule_regime_full",
+      "parent": null
+    },
+    "BONK_rule_donch_regime_full": {
+      "portfolio": "BONK_rule_donch_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 0,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "BONK_rule_donch_regime_full",
+      "parent": null
+    },
+    "meme_WIF_baseline": {
+      "portfolio": "meme_WIF_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_WIF_baseline",
+      "parent": null
+    },
+    "WIF_laya_baseline": {
+      "portfolio": "WIF_laya_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_laya_baseline",
+      "parent": null
+    },
+    "WIF_poorjev_baseline": {
+      "portfolio": "WIF_poorjev_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_poorjev_baseline",
+      "parent": null
+    },
+    "meme_WIF_relaxed": {
+      "portfolio": "meme_WIF_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 2,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_WIF_relaxed",
+      "parent": null
+    },
+    "WIF_laya_relaxed": {
+      "portfolio": "WIF_laya_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_laya_relaxed",
+      "parent": null
+    },
+    "WIF_poorjev_relaxed": {
+      "portfolio": "WIF_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_poorjev_relaxed",
+      "parent": null
+    },
+    "WIF_hybrid_poorjev_regime": {
+      "portfolio": "WIF_hybrid_poorjev_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 20,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_hybrid_poorjev_regime",
+      "parent": null
+    },
+    "WIF_rule_regime": {
+      "portfolio": "WIF_rule_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_rule_regime",
+      "parent": null
+    },
+    "WIF_rule_donch_regime": {
+      "portfolio": "WIF_rule_donch_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_rule_donch_regime",
+      "parent": null
+    },
+    "WIF_rule_regime_full": {
+      "portfolio": "WIF_rule_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_rule_regime_full",
+      "parent": null
+    },
+    "WIF_rule_donch_regime_full": {
+      "portfolio": "WIF_rule_donch_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "WIF_rule_donch_regime_full",
+      "parent": null
+    },
+    "meme_POPCAT_baseline": {
+      "portfolio": "meme_POPCAT_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_POPCAT_baseline",
+      "parent": null
+    },
+    "POPCAT_laya_baseline": {
+      "portfolio": "POPCAT_laya_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_laya_baseline",
+      "parent": null
+    },
+    "POPCAT_poorjev_baseline": {
+      "portfolio": "POPCAT_poorjev_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_poorjev_baseline",
+      "parent": null
+    },
+    "meme_POPCAT_relaxed": {
+      "portfolio": "meme_POPCAT_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 2,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_POPCAT_relaxed",
+      "parent": null
+    },
+    "POPCAT_laya_relaxed": {
+      "portfolio": "POPCAT_laya_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_laya_relaxed",
+      "parent": null
+    },
+    "POPCAT_poorjev_relaxed": {
+      "portfolio": "POPCAT_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_poorjev_relaxed",
+      "parent": null
+    },
+    "POPCAT_hybrid_poorjev_regime": {
+      "portfolio": "POPCAT_hybrid_poorjev_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 20,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_hybrid_poorjev_regime",
+      "parent": null
+    },
+    "POPCAT_rule_regime": {
+      "portfolio": "POPCAT_rule_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_rule_regime",
+      "parent": null
+    },
+    "POPCAT_rule_donch_regime": {
+      "portfolio": "POPCAT_rule_donch_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_rule_donch_regime",
+      "parent": null
+    },
+    "POPCAT_rule_regime_full": {
+      "portfolio": "POPCAT_rule_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_rule_regime_full",
+      "parent": null
+    },
+    "POPCAT_rule_donch_regime_full": {
+      "portfolio": "POPCAT_rule_donch_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "POPCAT_rule_donch_regime_full",
+      "parent": null
+    },
+    "meme_FARTCOIN_baseline": {
+      "portfolio": "meme_FARTCOIN_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_FARTCOIN_baseline",
+      "parent": null
+    },
+    "FARTCOIN_laya_baseline": {
+      "portfolio": "FARTCOIN_laya_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_laya_baseline",
+      "parent": null
+    },
+    "FARTCOIN_poorjev_baseline": {
+      "portfolio": "FARTCOIN_poorjev_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_poorjev_baseline",
+      "parent": null
+    },
+    "meme_FARTCOIN_relaxed": {
+      "portfolio": "meme_FARTCOIN_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 2,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 4,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "2/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_FARTCOIN_relaxed",
+      "parent": null
+    },
+    "FARTCOIN_laya_relaxed": {
+      "portfolio": "FARTCOIN_laya_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_laya_relaxed",
+      "parent": null
+    },
+    "FARTCOIN_poorjev_relaxed": {
+      "portfolio": "FARTCOIN_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_poorjev_relaxed",
+      "parent": null
+    },
+    "FARTCOIN_hybrid_poorjev_regime": {
+      "portfolio": "FARTCOIN_hybrid_poorjev_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 20,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_hybrid_poorjev_regime",
+      "parent": null
+    },
+    "FARTCOIN_rule_regime": {
+      "portfolio": "FARTCOIN_rule_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_rule_regime",
+      "parent": null
+    },
+    "FARTCOIN_rule_donch_regime": {
+      "portfolio": "FARTCOIN_rule_donch_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_rule_donch_regime",
+      "parent": null
+    },
+    "FARTCOIN_rule_regime_full": {
+      "portfolio": "FARTCOIN_rule_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_rule_regime_full",
+      "parent": null
+    },
+    "FARTCOIN_rule_donch_regime_full": {
+      "portfolio": "FARTCOIN_rule_donch_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "FARTCOIN_rule_donch_regime_full",
+      "parent": null
+    },
+    "meme_PNUT_baseline": {
+      "portfolio": "meme_PNUT_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_PNUT_baseline",
+      "parent": null
+    },
+    "PNUT_laya_baseline": {
+      "portfolio": "PNUT_laya_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_laya_baseline",
+      "parent": null
+    },
+    "PNUT_poorjev_baseline": {
+      "portfolio": "PNUT_poorjev_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_poorjev_baseline",
+      "parent": null
+    },
+    "meme_PNUT_relaxed": {
+      "portfolio": "meme_PNUT_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 2,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_PNUT_relaxed",
+      "parent": null
+    },
+    "PNUT_laya_relaxed": {
+      "portfolio": "PNUT_laya_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_laya_relaxed",
+      "parent": null
+    },
+    "PNUT_poorjev_relaxed": {
+      "portfolio": "PNUT_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_poorjev_relaxed",
+      "parent": null
+    },
+    "PNUT_hybrid_poorjev_regime": {
+      "portfolio": "PNUT_hybrid_poorjev_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 20,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_hybrid_poorjev_regime",
+      "parent": null
+    },
+    "PNUT_rule_regime": {
+      "portfolio": "PNUT_rule_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_rule_regime",
+      "parent": null
+    },
+    "PNUT_rule_donch_regime": {
+      "portfolio": "PNUT_rule_donch_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_rule_donch_regime",
+      "parent": null
+    },
+    "PNUT_rule_regime_full": {
+      "portfolio": "PNUT_rule_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_rule_regime_full",
+      "parent": null
+    },
+    "PNUT_rule_donch_regime_full": {
+      "portfolio": "PNUT_rule_donch_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "PNUT_rule_donch_regime_full",
+      "parent": null
+    },
+    "meme_MEW_baseline": {
+      "portfolio": "meme_MEW_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_MEW_baseline",
+      "parent": null
+    },
+    "MEW_laya_baseline": {
+      "portfolio": "MEW_laya_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_laya_baseline",
+      "parent": null
+    },
+    "MEW_poorjev_baseline": {
+      "portfolio": "MEW_poorjev_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_poorjev_baseline",
+      "parent": null
+    },
+    "meme_MEW_relaxed": {
+      "portfolio": "meme_MEW_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 2,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_MEW_relaxed",
+      "parent": null
+    },
+    "MEW_laya_relaxed": {
+      "portfolio": "MEW_laya_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_laya_relaxed",
+      "parent": null
+    },
+    "MEW_poorjev_relaxed": {
+      "portfolio": "MEW_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_poorjev_relaxed",
+      "parent": null
+    },
+    "MEW_hybrid_poorjev_regime": {
+      "portfolio": "MEW_hybrid_poorjev_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 20,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_hybrid_poorjev_regime",
+      "parent": null
+    },
+    "MEW_rule_regime": {
+      "portfolio": "MEW_rule_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_rule_regime",
+      "parent": null
+    },
+    "MEW_rule_donch_regime": {
+      "portfolio": "MEW_rule_donch_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 0,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_rule_donch_regime",
+      "parent": null
+    },
+    "MEW_rule_regime_full": {
+      "portfolio": "MEW_rule_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_rule_regime_full",
+      "parent": null
+    },
+    "MEW_rule_donch_regime_full": {
+      "portfolio": "MEW_rule_donch_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 0,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "MEW_rule_donch_regime_full",
+      "parent": null
+    },
+    "meme_GOAT_baseline": {
+      "portfolio": "meme_GOAT_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_GOAT_baseline",
+      "parent": null
+    },
+    "GOAT_laya_baseline": {
+      "portfolio": "GOAT_laya_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_laya_baseline",
+      "parent": null
+    },
+    "GOAT_poorjev_baseline": {
+      "portfolio": "GOAT_poorjev_baseline",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_poorjev_baseline",
+      "parent": null
+    },
+    "meme_GOAT_relaxed": {
+      "portfolio": "meme_GOAT_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 4,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 11,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "4/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "meme_GOAT_relaxed",
+      "parent": null
+    },
+    "GOAT_laya_relaxed": {
+      "portfolio": "GOAT_laya_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_laya_relaxed",
+      "parent": null
+    },
+    "GOAT_poorjev_relaxed": {
+      "portfolio": "GOAT_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_poorjev_relaxed",
+      "parent": null
+    },
+    "GOAT_hybrid_poorjev_regime": {
+      "portfolio": "GOAT_hybrid_poorjev_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 20,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_hybrid_poorjev_regime",
+      "parent": null
+    },
+    "GOAT_rule_regime": {
+      "portfolio": "GOAT_rule_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_rule_regime",
+      "parent": null
+    },
+    "GOAT_rule_donch_regime": {
+      "portfolio": "GOAT_rule_donch_regime",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 0,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_rule_donch_regime",
+      "parent": null
+    },
+    "GOAT_rule_regime_full": {
+      "portfolio": "GOAT_rule_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 1,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_rule_regime_full",
+      "parent": null
+    },
+    "GOAT_rule_donch_regime_full": {
+      "portfolio": "GOAT_rule_donch_regime_full",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 0,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "GOAT_rule_donch_regime_full",
+      "parent": null
+    },
+    "h1_exits_von_relaxed": {
+      "portfolio": "h1_exits_von_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 4,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 92,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "4/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h1_exits_von_relaxed",
+      "parent": null
+    },
+    "h1_exits_BONK_poorjev_relaxed": {
+      "portfolio": "h1_exits_BONK_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 2,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 43,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "2/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h1_exits_BONK_poorjev_relaxed",
+      "parent": null
+    },
+    "h1_exits_WIF_poorjev_relaxed": {
+      "portfolio": "h1_exits_WIF_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 21,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h1_exits_WIF_poorjev_relaxed",
+      "parent": null
+    },
+    "h1_exits_POPCAT_poorjev_relaxed": {
+      "portfolio": "h1_exits_POPCAT_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 21,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h1_exits_POPCAT_poorjev_relaxed",
+      "parent": null
+    },
+    "h1_exits_FARTCOIN_poorjev_relaxed": {
+      "portfolio": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 2,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 28,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "2/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "parent": null
+    },
+    "h1_exits_PNUT_poorjev_relaxed": {
+      "portfolio": "h1_exits_PNUT_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 21,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h1_exits_PNUT_poorjev_relaxed",
+      "parent": null
+    },
+    "h1_exits_MEW_poorjev_relaxed": {
+      "portfolio": "h1_exits_MEW_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 21,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h1_exits_MEW_poorjev_relaxed",
+      "parent": null
+    },
+    "h1_exits_GOAT_poorjev_relaxed": {
+      "portfolio": "h1_exits_GOAT_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h1_exits_GOAT_poorjev_relaxed",
+      "parent": null
+    },
+    "h2_ensemble_sol": {
+      "portfolio": "h2_ensemble_sol",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h2_ensemble_sol",
+      "parent": null
+    },
+    "h2_ensemble_BONK": {
+      "portfolio": "h2_ensemble_BONK",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 3,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 8,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "3/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h2_ensemble_BONK",
+      "parent": null
+    },
+    "h2_ensemble_WIF": {
+      "portfolio": "h2_ensemble_WIF",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 5,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 13,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "5/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h2_ensemble_WIF",
+      "parent": null
+    },
+    "h2_ensemble_POPCAT": {
+      "portfolio": "h2_ensemble_POPCAT",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 2,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 11,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "2/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h2_ensemble_POPCAT",
+      "parent": null
+    },
+    "h2_ensemble_FARTCOIN": {
+      "portfolio": "h2_ensemble_FARTCOIN",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 4,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 12,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "4/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h2_ensemble_FARTCOIN",
+      "parent": null
+    },
+    "h2_ensemble_PNUT": {
+      "portfolio": "h2_ensemble_PNUT",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 2,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 7,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "2/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h2_ensemble_PNUT",
+      "parent": null
+    },
+    "h2_ensemble_MEW": {
+      "portfolio": "h2_ensemble_MEW",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 2,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 5,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "2/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h2_ensemble_MEW",
+      "parent": null
+    },
+    "h2_ensemble_GOAT": {
+      "portfolio": "h2_ensemble_GOAT",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 1,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 2,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "1/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h2_ensemble_GOAT",
+      "parent": null
+    },
+    "h3_limit_poorjev_relaxed": {
+      "portfolio": "h3_limit_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 2,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h3_limit_poorjev_relaxed",
+      "parent": null
+    },
+    "h3_limit_hybrid_von_cap2": {
+      "portfolio": "h3_limit_hybrid_von_cap2",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 28,
+        "trades": 20,
+        "bear_regime_seen": false,
+        "rule_or_regime": true,
+        "text": "0/30 RT fechados \u00b7 1.3/28 dias \u00b7 regime baixista visto: n\u00e3o"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h3_limit_hybrid_von_cap2",
+      "parent": null
+    },
+    "h4_hours_poorjev_relaxed": {
+      "portfolio": "h4_hours_poorjev_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 0,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h4_hours_poorjev_relaxed",
+      "parent": null
+    },
+    "h4_hours_von_relaxed": {
+      "portfolio": "h4_hours_von_relaxed",
+      "verdict": "inconclusivo",
+      "progress": {
+        "closed_rt": 0,
+        "min_closed_rt": 30,
+        "days": 1.27,
+        "min_days": 21,
+        "trades": 20,
+        "bear_regime_seen": null,
+        "rule_or_regime": false,
+        "text": "0/30 RT fechados \u00b7 1.3/21 dias"
+      },
+      "reason": "m\u00ednimos n\u00e3o atingidos",
+      "status": "active",
+      "lineage": "h4_hours_von_relaxed",
+      "parent": null
+    }
+  }
+}

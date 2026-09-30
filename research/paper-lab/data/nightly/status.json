@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "ts": 1790405635.018671,
+  "ts_brt": "2026-09-26T03:53:55.018690-03:00",
+  "pid": 41145,
+  "finished": false,
+  "next_run_brt": "2026-09-27T00:30:00-03:00",
+  "next_rotation_brt": "2026-09-27T01:00:00-03:00",
+  "last_run": {
+    "ts_brt": "2026-09-26T00:30:51.565109-03:00",
+    "review": "/home/box/solana-trader/paper/reviews/2026-09-26.md"
+  },
+  "last_rotation": {
+    "stamp": "20260926T010052",
+    "rotated": [
+      "logs/lab_decisions.jsonl",
+      "logs/decisions.jsonl",
+      "logs/meme_decisions.jsonl"
+    ],
+    "compressed": 0,
+    "ts_brt": "2026-09-26T01:00:52.106942-03:00"
+  },
+  "paper_only": true
+}

@@ -6,6 +6,8 @@ Carteira do experimento: `GNJv4FcMb4j1A6NFiVaaHkGVTZ5p5A7ea9GsFgccS75r`.
 
 A comparação que escolheu o von está em `research/jev-alts/`. O livro de partida está em `docs/EXPERIMENT.md`.
 
+Passagem de contexto (estado do projeto, laboratório de paper trading e próximos passos): `docs/HANDOFF.md`.
+
 ## Objetivo
 
 Ver se um loop curto, com estado só em adjetivos e portões de confiança, melhora o resultado desse livro pequeno em relação a deixar o saldo da foto parado.

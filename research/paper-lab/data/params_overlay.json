@@ -1,0 +1,11 @@
+{
+  "bots": {
+    "sol_paused": false,
+    "meme_paused": false
+  },
+  "portfolios": {
+    "relaxed": {
+      "min_confidence": 0.35
+    }
+  }
+}

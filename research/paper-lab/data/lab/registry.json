@@ -1,0 +1,647 @@
+{
+  "portfolios": {
+    "h1_exits_von_relaxed": {
+      "name": "h1_exits_von_relaxed",
+      "hyp": "H1",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "params": {
+        "exits": {
+          "tp": 0.025,
+          "sl": 0.015,
+          "trail": 0.01,
+          "trail_arm": 0.01,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas (TP/SL/trailing) \u2014 von relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.563555-03:00",
+      "strategy": "hyp:h1_exits_von_relaxed",
+      "lineage": "h1_exits_von_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_BONK_poorjev_relaxed": {
+      "name": "h1_exits_BONK_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "BONK_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed BONK",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.563942-03:00",
+      "strategy": "hyp:h1_exits_BONK_poorjev_relaxed",
+      "lineage": "h1_exits_BONK_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_WIF_poorjev_relaxed": {
+      "name": "h1_exits_WIF_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "WIF_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed WIF",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.564213-03:00",
+      "strategy": "hyp:h1_exits_WIF_poorjev_relaxed",
+      "lineage": "h1_exits_WIF_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_POPCAT_poorjev_relaxed": {
+      "name": "h1_exits_POPCAT_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "POPCAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed POPCAT",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.564440-03:00",
+      "strategy": "hyp:h1_exits_POPCAT_poorjev_relaxed",
+      "lineage": "h1_exits_POPCAT_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_FARTCOIN_poorjev_relaxed": {
+      "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "FARTCOIN_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed FARTCOIN",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.564653-03:00",
+      "strategy": "hyp:h1_exits_FARTCOIN_poorjev_relaxed",
+      "lineage": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_PNUT_poorjev_relaxed": {
+      "name": "h1_exits_PNUT_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "PNUT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed PNUT",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.564847-03:00",
+      "strategy": "hyp:h1_exits_PNUT_poorjev_relaxed",
+      "lineage": "h1_exits_PNUT_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_MEW_poorjev_relaxed": {
+      "name": "h1_exits_MEW_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "MEW_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed MEW",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.565071-03:00",
+      "strategy": "hyp:h1_exits_MEW_poorjev_relaxed",
+      "lineage": "h1_exits_MEW_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_GOAT_poorjev_relaxed": {
+      "name": "h1_exits_GOAT_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "GOAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed GOAT",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.565258-03:00",
+      "strategy": "hyp:h1_exits_GOAT_poorjev_relaxed",
+      "lineage": "h1_exits_GOAT_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_sol": {
+      "name": "h2_ensemble_sol",
+      "hyp": "H2",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble von/poorjev/laya (percentil) \u2014 SOL",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.565432-03:00",
+      "strategy": "hyp:h2_ensemble_sol",
+      "lineage": "h2_ensemble_sol",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_BONK": {
+      "name": "h2_ensemble_BONK",
+      "hyp": "H2",
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 BONK",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.565733-03:00",
+      "strategy": "hyp:h2_ensemble_BONK",
+      "lineage": "h2_ensemble_BONK",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_WIF": {
+      "name": "h2_ensemble_WIF",
+      "hyp": "H2",
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 WIF",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.565961-03:00",
+      "strategy": "hyp:h2_ensemble_WIF",
+      "lineage": "h2_ensemble_WIF",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_POPCAT": {
+      "name": "h2_ensemble_POPCAT",
+      "hyp": "H2",
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 POPCAT",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.566307-03:00",
+      "strategy": "hyp:h2_ensemble_POPCAT",
+      "lineage": "h2_ensemble_POPCAT",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_FARTCOIN": {
+      "name": "h2_ensemble_FARTCOIN",
+      "hyp": "H2",
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 FARTCOIN",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.566672-03:00",
+      "strategy": "hyp:h2_ensemble_FARTCOIN",
+      "lineage": "h2_ensemble_FARTCOIN",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_PNUT": {
+      "name": "h2_ensemble_PNUT",
+      "hyp": "H2",
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 PNUT",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.567012-03:00",
+      "strategy": "hyp:h2_ensemble_PNUT",
+      "lineage": "h2_ensemble_PNUT",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_MEW": {
+      "name": "h2_ensemble_MEW",
+      "hyp": "H2",
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 MEW",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.567320-03:00",
+      "strategy": "hyp:h2_ensemble_MEW",
+      "lineage": "h2_ensemble_MEW",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_GOAT": {
+      "name": "h2_ensemble_GOAT",
+      "hyp": "H2",
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 GOAT",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.567672-03:00",
+      "strategy": "hyp:h2_ensemble_GOAT",
+      "lineage": "h2_ensemble_GOAT",
+      "parent": null,
+      "is_original": true
+    },
+    "h3_limit_poorjev_relaxed": {
+      "name": "h3_limit_poorjev_relaxed",
+      "hyp": "H3",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exec": {
+          "mode": "limit",
+          "offset_bps": 10,
+          "ttl_min": 15,
+          "fee_bps": 10
+        }
+      },
+      "label": "H3 Ordem limite \u2014 poorjev relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.567919-03:00",
+      "strategy": "hyp:h3_limit_poorjev_relaxed",
+      "lineage": "h3_limit_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h3_limit_hybrid_von_cap2": {
+      "name": "h3_limit_hybrid_von_cap2",
+      "hyp": "H3",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "params": {
+        "exec": {
+          "mode": "limit",
+          "offset_bps": 10,
+          "ttl_min": 15,
+          "fee_bps": 10
+        },
+        "gates": {
+          "max_trades_per_hour": 2
+        }
+      },
+      "label": "H3 Ordem limite \u2014 hybrid von relaxed cap2",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.568169-03:00",
+      "strategy": "hyp:h3_limit_hybrid_von_cap2",
+      "lineage": "h3_limit_hybrid_von_cap2",
+      "parent": null,
+      "is_original": true
+    },
+    "h4_hours_poorjev_relaxed": {
+      "name": "h4_hours_poorjev_relaxed",
+      "hyp": "H4",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "hours": [
+          5,
+          10,
+          11,
+          12,
+          18
+        ]
+      },
+      "label": "H4 Filtro de hor\u00e1rio \u2014 poorjev relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.568400-03:00",
+      "strategy": "hyp:h4_hours_poorjev_relaxed",
+      "lineage": "h4_hours_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h4_hours_von_relaxed": {
+      "name": "h4_hours_von_relaxed",
+      "hyp": "H4",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "params": {
+        "hours": [
+          5,
+          10,
+          11,
+          12,
+          18
+        ]
+      },
+      "label": "H4 Filtro de hor\u00e1rio \u2014 von relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-09-24T21:07:46.568631-03:00",
+      "strategy": "hyp:h4_hours_von_relaxed",
+      "lineage": "h4_hours_von_relaxed",
+      "parent": null,
+      "is_original": true
+    }
+  },
+  "lineages": {
+    "h1_exits_von_relaxed": {
+      "root": "h1_exits_von_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_von_relaxed"
+      ]
+    },
+    "h1_exits_BONK_poorjev_relaxed": {
+      "root": "h1_exits_BONK_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_BONK_poorjev_relaxed"
+      ]
+    },
+    "h1_exits_WIF_poorjev_relaxed": {
+      "root": "h1_exits_WIF_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_WIF_poorjev_relaxed"
+      ]
+    },
+    "h1_exits_POPCAT_poorjev_relaxed": {
+      "root": "h1_exits_POPCAT_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_POPCAT_poorjev_relaxed"
+      ]
+    },
+    "h1_exits_FARTCOIN_poorjev_relaxed": {
+      "root": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_FARTCOIN_poorjev_relaxed"
+      ]
+    },
+    "h1_exits_PNUT_poorjev_relaxed": {
+      "root": "h1_exits_PNUT_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_PNUT_poorjev_relaxed"
+      ]
+    },
+    "h1_exits_MEW_poorjev_relaxed": {
+      "root": "h1_exits_MEW_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_MEW_poorjev_relaxed"
+      ]
+    },
+    "h1_exits_GOAT_poorjev_relaxed": {
+      "root": "h1_exits_GOAT_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_GOAT_poorjev_relaxed"
+      ]
+    },
+    "h2_ensemble_sol": {
+      "root": "h2_ensemble_sol",
+      "lead": null,
+      "members": [
+        "h2_ensemble_sol"
+      ]
+    },
+    "h2_ensemble_BONK": {
+      "root": "h2_ensemble_BONK",
+      "lead": null,
+      "members": [
+        "h2_ensemble_BONK"
+      ]
+    },
+    "h2_ensemble_WIF": {
+      "root": "h2_ensemble_WIF",
+      "lead": null,
+      "members": [
+        "h2_ensemble_WIF"
+      ]
+    },
+    "h2_ensemble_POPCAT": {
+      "root": "h2_ensemble_POPCAT",
+      "lead": null,
+      "members": [
+        "h2_ensemble_POPCAT"
+      ]
+    },
+    "h2_ensemble_FARTCOIN": {
+      "root": "h2_ensemble_FARTCOIN",
+      "lead": null,
+      "members": [
+        "h2_ensemble_FARTCOIN"
+      ]
+    },
+    "h2_ensemble_PNUT": {
+      "root": "h2_ensemble_PNUT",
+      "lead": null,
+      "members": [
+        "h2_ensemble_PNUT"
+      ]
+    },
+    "h2_ensemble_MEW": {
+      "root": "h2_ensemble_MEW",
+      "lead": null,
+      "members": [
+        "h2_ensemble_MEW"
+      ]
+    },
+    "h2_ensemble_GOAT": {
+      "root": "h2_ensemble_GOAT",
+      "lead": null,
+      "members": [
+        "h2_ensemble_GOAT"
+      ]
+    },
+    "h3_limit_poorjev_relaxed": {
+      "root": "h3_limit_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h3_limit_poorjev_relaxed"
+      ]
+    },
+    "h3_limit_hybrid_von_cap2": {
+      "root": "h3_limit_hybrid_von_cap2",
+      "lead": null,
+      "members": [
+        "h3_limit_hybrid_von_cap2"
+      ]
+    },
+    "h4_hours_poorjev_relaxed": {
+      "root": "h4_hours_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h4_hours_poorjev_relaxed"
+      ]
+    },
+    "h4_hours_von_relaxed": {
+      "root": "h4_hours_von_relaxed",
+      "lead": null,
+      "members": [
+        "h4_hours_von_relaxed"
+      ]
+    }
+  },
+  "caps": {
+    "per_lineage_days": 7,
+    "total": 40
+  }
+}
