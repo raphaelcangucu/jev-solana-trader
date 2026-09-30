@@ -2,6 +2,27 @@
 
 Documento de continuidade. Resume o trabalho feito em Cursor até 2026-09-26 e o que falta. Escrito em 2026-09-29 a partir do repositório, dos anexos da sessão Cursor e da exportação do laboratório de paper trading (`jev-paper-export`).
 
+## 0. Estado em 2026-09-30 (branch `feat/scoreboard-and-percentile-review`)
+
+Decisões do utilizador nesta data: a experiência **recomeça do zero em 2026-09-30**, e tudo corre em **paper trading** para simular o que se pode ganhar. `LIVE_TRADING` continua desligado. Os dados até 2026-09-26 ficam arquivados e só serviram para validar o método da revisão.
+
+Passos da secção 7:
+
+| Passo | Estado |
+| --- | --- |
+| 1. Estado atual do lab | Substituído pelo reinício. Execução 2 arquivada em `research/paper-lab/archive/run_1000usd_2026-09-24/`; `config.json` marca a execução 3 (US$1.000, 2026-09-30). **Falta correr no host:** `scripts/stop.sh && funding/stop.sh`, `python scripts/maintenance/restart_run.py --archive-name run_1000usd_2026-09-24 --capital 1000 --dry-run`, depois sem `--dry-run`, e `scripts/start.sh`. |
+| 2. Placar do bot real | Feito: `python -m jev_trader score [--json]`, sobre o livro de papel. |
+| 3. Separar beta de seleção | Parcial: a auditoria passa a avaliar compras a 15 min (hit rate do `relaxed` 35,9%, do híbrido 33,3% na execução 2). Destaque do excesso ajustado à exposição nos relatórios e H1 aplicado ao `relaxed` continuam por fazer. |
+| 4. Revisão noturna | Feito: corte por percentil (P90) em `bot/confidence_audit.py`, título com a data revisada. Comparação com a barra 0,8 em `archive/run_1000usd_2026-09-24/reviews/percentile_vs_fixed_0.8.md`. |
+| 5. `rewrite --approve` | Feito: `python -m jev_trader rewrite --propose / --approve <ficheiro> / --reject <ficheiro>`, `config/criteria.json` só por aprovação. |
+| 6. Lab portável | Feito: `PAPER_LAB_ROOT` (por omissão, a pasta do lab); 35 testes em `research/paper-lab/tests/`. |
+
+Bot real em paper: o livro parte de `config/experiment.json` (0.017392206 SOL + 50.00929 USDT, lido do RPC público às 00:50 BRT, SOL = 119,305). Em dry-run cada decisão que passa os portões vira um fill simulado (`logs/paper_book.json`, `logs/paper_trades.jsonl`), com o mesmo tamanho do swap ao vivo e 10 bps de custo. Logs antigos em `logs/archive/run0_2026-09-23/`.
+
+**Atenção:** com `CONFIDENCE_THRESHOLD=0.55` (valor do artigo) o von, cuja confiança fica em ~0,2–0,45, nunca passa o portão, e o livro de papel fica parado. Para o paper medir alguma coisa é preciso baixar o limiar (o `relaxed` do lab usa 0,35 com margem de 0,20) — decisão pendente do utilizador.
+
+Testes: `pytest -q` na raiz → 85 passed (50 do bot, 35 do lab; o lab precisa de `numpy`, extra `pip install -e .[lab]`).
+
 ## 1. Contexto e objetivo
 
 O projeto testa, com dinheiro pequeno e registo público, o padrão de alex saint (@alexsssaint), "System One": a cada ~15 s o mercado vira uma frase de ~12 adjetivos (nenhum número no texto do modelo), um classificador responde `buy` / `sell` / `hold` com confiança e um veto `skip_this_cycle`; confiança baixa ou skip alto viram `hold` (fail-closed). À noite, um passe relê os erros confiantes e propõe critérios novos, sempre com portão humano.
