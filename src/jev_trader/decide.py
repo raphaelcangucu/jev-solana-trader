@@ -6,22 +6,18 @@ import math
 from dataclasses import dataclass
 
 from jev_trader.config import Config
+from jev_trader.criteria import DEFAULT_CRITERIA, load_criteria, questions_for
 
-ARTICLE_QUESTIONS = {
-    "action": {
-        "type": "choice",
-        "instructions": "buy on strength only when the book can absorb it",
-        "criteria": {
-            "buy": "the move is strong and depth is not thin",
-            "sell": "the move is fading or fees are climbing",
-            "hold": "anything else",
-        },
-    },
-    "skip_this_cycle": {
-        "type": "noul",
-        "instructions": "conditions are too hostile to trade at all",
-    },
-}
+ACTION_INSTRUCTIONS = "buy on strength only when the book can absorb it"
+
+# As perguntas do artigo, fixas. Um `config/criteria.json` aprovado e válido substitui os critérios.
+ARTICLE_QUESTIONS = questions_for(DEFAULT_CRITERIA, ACTION_INSTRUCTIONS)
+
+
+def current_questions(cfg: Config) -> dict:
+    """Critérios aprovados se existirem e forem válidos; senão as frases do artigo (fail-safe)."""
+    criteria, _source = load_criteria(getattr(cfg, "criteria_path", None))
+    return questions_for(criteria, ACTION_INSTRUCTIONS)
 
 
 @dataclass(frozen=True)
@@ -163,7 +159,7 @@ def ask_system_one(state: str, cfg: Config) -> ModelAnswer:
 def _ask_http(state: str, cfg: Config) -> ModelAnswer:
     import httpx
 
-    payload = {"model": cfg.von_model, "state": state, "questions": ARTICLE_QUESTIONS}
+    payload = {"model": cfg.von_model, "state": state, "questions": current_questions(cfg)}
     timeout = httpx.Timeout(cfg.von_timeout_s, connect=min(2.0, cfg.von_timeout_s))
     with httpx.Client(timeout=timeout) as client:
         response = client.post(f"{cfg.von_base_url}/v1/systemone", json=payload)
@@ -180,18 +176,19 @@ def _ask_local(state: str, cfg: Config) -> ModelAnswer:
 
     choice = getattr(von, "choice", None)
     noul = getattr(von, "noul", None)
+    spec = current_questions(cfg)
     if callable(choice) and callable(noul):
         questions = {
             "action": choice(
-                instructions=ARTICLE_QUESTIONS["action"]["instructions"],
-                criteria=ARTICLE_QUESTIONS["action"]["criteria"],
+                instructions=spec["action"]["instructions"],
+                criteria=spec["action"]["criteria"],
             ),
             "skip_this_cycle": noul(
-                instructions=ARTICLE_QUESTIONS["skip_this_cycle"]["instructions"],
+                instructions=spec["skip_this_cycle"]["instructions"],
             ),
         }
     else:
-        questions = ARTICLE_QUESTIONS
+        questions = spec
     system_one = getattr(von, "system_one", None)
     if not callable(system_one):
         raise RuntimeError("von.system_one is unavailable")

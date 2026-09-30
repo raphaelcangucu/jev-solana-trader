@@ -57,6 +57,10 @@ class Config:
     jupiter_api_key: str | None
     rpc_url: str
     log_dir: Path
+    # Paper trading: custo (slippage + fee) contra o trader, em pontos-base sobre o `px_in`.
+    paper_cost_bps: float = 10.0
+    experiment_path: Path = Path("config/experiment.json")
+    criteria_path: Path = Path("config/criteria.json")
 
     @property
     def decisions_path(self) -> Path:
@@ -65,6 +69,22 @@ class Config:
     @property
     def trades_path(self) -> Path:
         return self.log_dir / "trades.jsonl"
+
+    @property
+    def paper_book_path(self) -> Path:
+        return self.log_dir / "paper_book.json"
+
+    @property
+    def paper_trades_path(self) -> Path:
+        return self.log_dir / "paper_trades.jsonl"
+
+    @property
+    def proposals_dir(self) -> Path:
+        return self.log_dir / "rewrite_proposals"
+
+    @property
+    def approvals_path(self) -> Path:
+        return self.log_dir / "rewrite_approvals.jsonl"
 
 
 def load_config(dotenv: Path | None = None) -> Config:
@@ -92,4 +112,7 @@ def load_config(dotenv: Path | None = None) -> Config:
         jupiter_api_key=_path_or_none("JUPITER_API_KEY"),
         rpc_url=os.environ.get("SOLANA_RPC_URL", "https://api.mainnet-beta.solana.com").strip(),
         log_dir=Path(os.environ.get("LOG_DIR", "logs").strip() or "logs"),
+        paper_cost_bps=_float("PAPER_COST_BPS", 10.0),
+        experiment_path=Path(os.environ.get("EXPERIMENT_PATH", "").strip() or "config/experiment.json"),
+        criteria_path=Path(os.environ.get("CRITERIA_PATH", "").strip() or "config/criteria.json"),
     )

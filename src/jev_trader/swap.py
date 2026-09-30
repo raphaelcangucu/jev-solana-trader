@@ -124,11 +124,17 @@ def execute_swap(cfg: Config, *, side: str, confidence: float) -> dict:
     }
 
 
-def _order_spec(cfg: Config, *, side: str, confidence: float) -> tuple[str, str, str, int, int]:
+def order_size_ui(cfg: Config, *, side: str, confidence: float) -> float:
+    """Tamanho nominal da ordem (USDT na compra, SOL na venda). O paper usa a mesma conta."""
     if side == "buy":
-        ui = min(cfg.buy_usdt, cfg.max_buy_usdt) * confidence
+        return min(cfg.buy_usdt, cfg.max_buy_usdt) * confidence
+    return min(cfg.sell_sol, cfg.max_sell_sol) * confidence
+
+
+def _order_spec(cfg: Config, *, side: str, confidence: float) -> tuple[str, str, str, int, int]:
+    ui = order_size_ui(cfg, side=side, confidence=confidence)
+    if side == "buy":
         return USDT_MINT, WSOL_MINT, str(_ui_to_atoms(ui, USDT_DECIMALS)), USDT_DECIMALS, SOL_DECIMALS
-    ui = min(cfg.sell_sol, cfg.max_sell_sol) * confidence
     return WSOL_MINT, USDT_MINT, str(_ui_to_atoms(ui, SOL_DECIMALS)), SOL_DECIMALS, USDT_DECIMALS
 
 
