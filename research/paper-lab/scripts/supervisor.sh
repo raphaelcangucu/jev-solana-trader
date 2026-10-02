@@ -6,7 +6,7 @@ JEV_ALTS="${JEV_ALTS_ROOT:-/workspace/jev-alts}"         # venvs + hf-cache dos 
 export PAPER_LAB_ROOT="$ROOT" JEV_ALTS_ROOT="$JEV_ALTS"
 RUN=$ROOT/run
 LOG=$ROOT/logs/supervisor.log
-PY=$JEV_ALTS/venvs/von/bin/python
+PY="${LAB_PYTHON:-$JEV_ALTS/venvs/von/bin/python}"   # bots do lab: fastapi/uvicorn/numpy já vêm no venv do von
 mkdir -p "$RUN" "$ROOT/logs"
 export PYTHONUNBUFFERED=1
 export VON_DEVICE=cpu
@@ -61,6 +61,7 @@ ensure_dashboard() {
   fi
 }
 ensure_tunnel() {
+  [[ "${DISABLE_TUNNEL:-0}" == "1" ]] && return 0   # macOS local: sem túnel público
   if [[ -f $RUN/tunnel.pid ]] && kill -0 "$(cat $RUN/tunnel.pid)" 2>/dev/null; then return 0; fi
   if [[ -x $LAB/scripts/start_tunnel.sh ]]; then
     echo "$(date -Iseconds) starting tunnel" >>"$LOG"
