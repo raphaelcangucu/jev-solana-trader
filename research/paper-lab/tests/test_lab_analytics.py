@@ -87,3 +87,18 @@ def test_verdict_is_inconclusive_before_minimums(tmp_path):
     v = A.verdict(meta, {"relaxed": [{"ts": t0 + 10, "side": "sell"}]}, now_ts=t0 + 2 * 86400)
     assert v["verdict"] == "inconclusivo" and v["reason"] == "mínimos não atingidos"
     assert v["progress"]["closed_rt"] == 1 and v["progress"]["min_days"] == 21
+
+
+def test_exposure_adjusted_excess_and_table(tmp_path):
+    t0 = 1_790_000_000.0
+    meta = {"name": "test", "start_ts": t0, "equity": str(_equity(tmp_path, t0)), "asset": "SOL"}
+    s = A.window_stats(meta, {}, t0, t0 + 3600)
+    # excesso ajustado = PnL − exposição média × retorno do ativo (× valor inicial) = PnL − static
+    assert s["ex_exposure"] == pytest.approx(s["pnl"] - s["static_usd"])
+    assert s["static_usd"] > 0 and s["ex_exposure"] < s["pnl"]
+    tbl, rows = A.stats_table({"test": meta}, {}, t0, t0 + 3600)
+    head = tbl.splitlines()[0]
+    assert "Excesso aj. exposição $" in head and head.index("Excesso aj. exposição") < head.index("Timing $ (p)")
+    assert "Exposição média %" in head and "beta" in A.STATS_LEGEND
+    line = tbl.splitlines()[2]
+    assert f"**{A.fmt(s['ex_exposure'], 3, True)}**" in line

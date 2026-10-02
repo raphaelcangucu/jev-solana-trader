@@ -16,6 +16,7 @@ from bot.lib import (
     read_jsonl, USDT,
 )
 from bot.backends import load_models_cfg, decide_many
+from bot import params as P
 
 STOP = False
 def _sig(*_a):
@@ -129,20 +130,61 @@ def sim_trade(side, data, gcfg, fees, market, price, decision_id, trades_log, mi
 
 def apply_and_maybe_trade(name, pdata, path, eqp, gcfg, profile, dec, st, price, price_src,
                           allow, cfg, trades_log, decisions_log, sym, mint, decimals, sol_usd,
-                          model="von", strategy=None):
+                          model="von", strategy=None, eff=None, regime_bull=None):
+    """Portões + fill simulado. `eff` = parâmetros efetivos (bot/params.py): margem, regime, horário, saídas,
+    teto de exposição e custos. Sem `eff`, comportamento antigo."""
+    eff = eff or {}
+    fees, market = P.fees_market(eff, cfg) if eff else (cfg["fees"], cfg["market"])
+    chosen = dec["chosen_action"]
+    extra = []
+    info = {}
+    if eff:
+        ex = eff.get("exits") or {}
+        if allow and ex.get("enabled"):
+            why = P.check_exit(pdata, ex, price)
+            if why:
+                before = float(pdata.get("token") or 0)
+                try:
+                    tr_x = sim_trade("sell", pdata, gcfg, fees, market, price, str(uuid.uuid4()),
+                                     trades_log, mint, decimals, sol_usd, strategy=strategy)
+                except Exception as e:
+                    tr_x = None
+                    info["exit_error"] = f"{type(e).__name__}:{e}"
+                if tr_x:
+                    P.track_fill(pdata, "sell", before, tr_x["fill"], price)
+                    pdata["reentry_block_until"] = time.time() + 60 * float(ex.get("reentry_cooldown_min", 30))
+                    write_json(path, pdata)
+                info.update(exit_reason=why, exit_traded=bool(tr_x))
+        chosen, rr = P.regime_block(eff, chosen, regime_bull)
+        if rr:
+            info["model_action"] = dec["chosen_action"]
+        extra += rr + P.pre_gate(eff, chosen, pdata, brt_now().hour, time.time())
     gates = apply_gates(
-        dec["chosen_action"], dec["confidence"], dec["skip_noul"], pdata, gcfg, price,
+        chosen, dec["confidence"], dec["skip_noul"], pdata, gcfg, price,
         probabilities=dec.get("probabilities"), profile=profile,
+        margin_gate=gcfg.get("margin_gate") if eff else None,
     )
     final = gates["final_action"] if allow else "hold"
-    extra = [] if allow else ["run_ended"]
+    if any(r in ("outside_hours", "reentry_cooldown") for r in extra):
+        final = "hold"
+    if not allow:
+        extra.append("run_ended")
+    g_trade = gcfg
+    if final == "buy" and eff:
+        g_trade, why = P.cap_buy(gcfg, pdata, price)
+        if why:
+            final = "hold"
+            extra.append(why)
     did = str(uuid.uuid4())
     traded = False
     if allow and final in ("buy", "sell"):
         try:
-            tr = sim_trade(final, pdata, gcfg, cfg["fees"], cfg["market"], price, did,
+            before = float(pdata.get("token") or 0)
+            tr = sim_trade(final, pdata, g_trade, fees, market, price, did,
                            trades_log, mint, decimals, sol_usd, strategy=strategy)
             traded = tr is not None
+            if traded and (eff.get("exits") or {}).get("enabled"):
+                P.track_fill(pdata, final, before, tr["fill"], price)
             write_json(path, pdata)
         except Exception as e:
             final = "hold"
@@ -159,16 +201,17 @@ def apply_and_maybe_trade(name, pdata, path, eqp, gcfg, profile, dec, st, price,
         "gate_profile": profile, "symbol": sym, "mint": mint,
         "state": st["state"], "features": st["features"],
         "price_usd": price, "price_source": price_src,
-        "chosen_action": dec["chosen_action"], "probabilities": dec["probabilities"],
+        "chosen_action": chosen, "probabilities": dec["probabilities"],
         "confidence": dec["confidence"], "skip_noul": dec["skip_noul"],
         "final_action": final, "gate_reasons": gates["gate_reasons"] + extra,
-        "blocked_trade": gates["blocked_trade"] or (final == "hold" and dec["chosen_action"] in ("buy", "sell")),
+        "blocked_trade": gates["blocked_trade"] or (final == "hold" and chosen in ("buy", "sell")),
         "latency_ms": dec["latency_ms"], "von_ok": dec["ok"], "von_error": dec.get("error"),
         "traded": traded, "equity_usd": eq, "token": pdata.get("token"), "usdt": pdata["usdt"],
         "bh_equity": bh_equity(pdata, price), "criteria_version": "baseline",
         "night_review": "skipped_for_memecoins",
         "model": model or dec.get("model") or "von",
         "strategy": strategy,
+        **info,
     }
     append_jsonl(decisions_log, row)
     return row
@@ -184,9 +227,7 @@ def main() -> int:
     end_at = datetime.fromisoformat(cfg["end_at_brt"])
     start_usdt = float(meme.get("start_usdt_each", 1000.0))
     criteria = load_criteria(ROOT / "criteria_baseline.json")
-    gates_base = cfg["gates"]
-    gates_relaxed = cfg.get("gates_relaxed") or dict(gates_base)
-    gates_relaxed.setdefault("min_prob_margin", 0.20)
+    # Parâmetros por portfólio: params.json via bot/params.py (hot reload; overlay do dashboard por cima).
     max_age = float(cfg["market"].get("max_price_age_seconds", 120))
 
     decisions_log = ROOT / "logs" / "meme_decisions.jsonl"
@@ -392,19 +433,21 @@ def main() -> int:
             else:
                 dec = dict(dec); dec["model"] = "von"
 
+            eff_b = P.effective(f"meme_{sym}_baseline")
             row_b = apply_and_maybe_trade(
                 f"meme_{sym}_baseline", pdata_b, port_dir / f"{sym}_baseline.json",
-                eq_dir / f"{sym}_baseline.jsonl", gates_base, "baseline",
-                dec, st, price, price_src, allow, cfg, trades_log, decisions_log,
-                sym, t["mint"], int(t["decimals"]), sol_usd, model="von",
+                eq_dir / f"{sym}_baseline.jsonl", eff_b["gates"], "baseline",
+                dec, st, price, price_src, allow and not eff_b["paused"], cfg, trades_log, decisions_log,
+                sym, t["mint"], int(t["decimals"]), sol_usd, model="von", eff=eff_b,
             )
             write_json(port_dir / f"{sym}_baseline.json", pdata_b)
 
+            eff_r = P.effective(f"meme_{sym}_relaxed")
             row_r = apply_and_maybe_trade(
                 f"meme_{sym}_relaxed", pdata_r, port_dir / f"{sym}_relaxed.json",
-                eq_dir / f"{sym}_relaxed.jsonl", gates_relaxed, "relaxed",
-                dec, st, price, price_src, allow, cfg, trades_log, decisions_log,
-                sym, t["mint"], int(t["decimals"]), sol_usd, model="von",
+                eq_dir / f"{sym}_relaxed.jsonl", eff_r["gates"], "relaxed",
+                dec, st, price, price_src, allow and not eff_r["paused"], cfg, trades_log, decisions_log,
+                sym, t["mint"], int(t["decimals"]), sol_usd, model="von", eff=eff_r,
             )
             write_json(port_dir / f"{sym}_relaxed.json", pdata_r)
 
@@ -417,70 +460,45 @@ def main() -> int:
                 # ensure portfolios exist
                 ensure_extra_ports(sym, price, restart_brt)
                 entry = extra_ports.get(mid, {}).get(sym) or {}
-                for profile, gcfg in (("baseline", gates_base), ("relaxed", gates_relaxed)):
+                for profile in ("baseline", "relaxed"):
                     pdata = entry.get(profile)
                     if not pdata:
                         continue
                     pname = f"{sym}_{mid}_{profile}"
                     fpath = port_dir / f"{sym}_{mid}_{profile}.json"
                     epath = eq_dir / f"{sym}_{mid}_{profile}.jsonl"
+                    eff_m = P.effective(pname)
                     row_m = apply_and_maybe_trade(
-                        pname, pdata, fpath, epath, gcfg, profile,
-                        dec_m, st, price, price_src, allow, cfg, trades_log, decisions_log,
-                        sym, t["mint"], int(t["decimals"]), sol_usd, model=mid,
+                        pname, pdata, fpath, epath, eff_m["gates"], profile,
+                        dec_m, st, price, price_src, allow and not eff_m["paused"], cfg, trades_log, decisions_log,
+                        sym, t["mint"], int(t["decimals"]), sol_usd, model=mid, eff=eff_m,
                     )
                     write_json(fpath, pdata)
                     extra_summary.append(f"{mid[0]}{profile[0]}={row_m['final_action']}/{row_m['confidence']:.2f}")
 
-            # Hybrid: copy poorjev relaxed decision; block buys unless SOL EMA regime bull
-            rules_st = {}
-            rsp = ROOT / "data" / "rules" / "status.json"
-            if rsp.exists():
-                try:
-                    rules_st = json.loads(rsp.read_text())
-                except Exception:
-                    rules_st = {}
-            sol_bull = ((rules_st.get("indicators") or {}).get("sol") or {}).get("regime_bull")
+            # Hybrid: copy poorjev relaxed decision; filtro de regime de SOL e portões vêm de params.json (types.hybrid)
+            sol_bull = P.sol_regime_bull()
             h_cfg = ((cfg.get("rule_strategies") or {}).get("strategies") or {}).get("hybrid_poorjev_regime") or {}
             h_enabled = bool((cfg.get("rule_strategies") or {}).get("enabled", True)) and h_cfg.get("enabled", True)
-            # overlay pause
-            try:
-                ov = json.loads((ROOT / "data" / "params_overlay.json").read_text())
-            except Exception:
-                ov = {}
+            ov = P.STORE.overlay()
             if (ov.get("bots") or {}).get("rules_paused"):
                 h_enabled = False
             pname_h = f"{sym}_hybrid_poorjev_regime"
-            if ((ov.get("portfolios") or {}).get(pname_h) or {}).get("paused"):
-                h_enabled = False
-            if ((ov.get("portfolios") or {}).get("hybrid_poorjev_regime") or {}).get("paused"):
+            eff_h = P.effective(pname_h)  # pausa: o próprio nome ou a chave de grupo hybrid_poorjev_regime
+            if eff_h["paused"]:
                 h_enabled = False
             dec_pj = decs.get("poorjev")
             if h_enabled and dec_pj and sym in hybrid_ports:
                 dec_h = dict(dec_pj); dec_h["model"] = "poorjev+rules"
-                extra_r = []
-                if dec_h.get("chosen_action") == "buy":
-                    if sol_bull is None:
-                        dec_h["chosen_action"] = "hold"; extra_r.append("sol_regime_unknown")
-                    elif h_cfg.get("require_sol_regime_bull_for_buy", True) and not sol_bull:
-                        dec_h["chosen_action"] = "hold"; extra_r.append("sol_regime_bear_block_buy")
                 pdata_h = hybrid_ports[sym]
                 fpath_h = port_dir / f"{pname_h}.json"
                 epath_h = eq_dir / f"{pname_h}.jsonl"
-                g_h = dict(gates_relaxed)
-                ov_h = (ov.get("portfolios") or {}).get(pname_h) or {}
-                for k in ("min_confidence", "min_prob_margin", "max_skip_noul",
-                          "buy_fraction_usdt", "cooldown_seconds", "max_trades_per_hour"):
-                    if k in ov_h and ov_h[k] is not None:
-                        g_h[k] = ov_h[k]
                 row_h = apply_and_maybe_trade(
-                    pname_h, pdata_h, fpath_h, epath_h, g_h, "relaxed",
+                    pname_h, pdata_h, fpath_h, epath_h, eff_h["gates"], "relaxed",
                     dec_h, st, price, price_src, allow, cfg, trades_log, decisions_log,
                     sym, t["mint"], int(t["decimals"]), sol_usd,
-                    model="poorjev+rules", strategy=f"rule:{pname_h}",
+                    model="poorjev+rules", strategy=f"rule:{pname_h}", eff=eff_h, regime_bull=sol_bull,
                 )
-                if extra_r:
-                    row_h["gate_reasons"] = list(row_h.get("gate_reasons") or []) + extra_r
                 write_json(fpath_h, pdata_h)
                 extra_summary.append(f"hyb={row_h['final_action']}/{row_h['confidence']:.2f}")
 
@@ -572,10 +590,11 @@ def main() -> int:
                 "uptime_seconds": round(time.time() - started, 1),
                 "end_at_brt": cfg["end_at_brt"],
                 "gates": {
-                    "baseline_min_conf": gates_base["min_confidence"],
-                    "relaxed_min_conf": gates_relaxed["min_confidence"],
-                    "relaxed_min_prob_margin": gates_relaxed.get("min_prob_margin"),
+                    "baseline_min_conf": eff_b["gates"]["min_confidence"],
+                    "relaxed_min_conf": eff_r["gates"]["min_confidence"],
+                    "relaxed_min_prob_margin": eff_r["gates"].get("min_prob_margin"),
                 },
+                "params": {"path": str(P.params_path()), "errors": dict(P.STORE.errors), "doc_errors": list(P.STORE.doc_errors)},
             })
             extra_part = " ".join(extra_summary) or "extra=none"
             print(

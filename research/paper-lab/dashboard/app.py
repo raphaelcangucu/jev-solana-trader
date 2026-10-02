@@ -17,6 +17,7 @@ _LAB = str(Path(__file__).resolve().parents[1])  # código do lab (research/pape
 if _LAB not in _sys_paths.path:
     _sys_paths.path.insert(0, _LAB)
 from bot.paths import ROOT, LAB_DIR  # noqa: E402  (ROOT = PAPER_LAB_ROOT ou a pasta do lab)
+from bot import params as P  # noqa: E402  (params.json por tipo de teste; resolver + validação)
 DASH = ROOT / "dashboard"          # dados locais: .auth, url.txt (fora do git)
 DASH_CODE = LAB_DIR / "dashboard"  # código: static/, defaults.py, api_v2.py
 BRT = timezone(timedelta(hours=-3))
@@ -452,9 +453,15 @@ def api_params(_: str = Depends(require_auth)):
         d = df(name)
         ov = (overlay.get("portfolios") or {}).get(name) or {}
         merged = dict(d)
-        for k in ED:
-            if k in ov and ov[k] is not None:
-                merged[k] = ov[k]
+        try:  # valores efetivos (params.json + overlay) quando o nome é um portfólio real
+            eff, _prov, errs = mod.effective_for(name)
+            if not eff.get("failsafe"):
+                merged.update({k: (eff.get("gates") or {}).get(k) for k in ED})
+            merged["params_errors"] = errs
+        except Exception:
+            for k in ED:
+                if k in ov and ov[k] is not None:
+                    merged[k] = ov[k]
         merged["paused"] = bool(ov.get("paused"))
         merged["is_baseline_control"] = name == "baseline" or name.endswith("_baseline") or name == "meme_baseline"
         out["portfolios"][name] = merged
@@ -490,6 +497,7 @@ async def api_set_params(portfolio: str, request: Request, _: str = Depends(requ
         if old != new:
             cur["paused"] = new
             changes.append(log_param_change(portfolio, "paused", old, new))
+    pending = []
     for field in EDITABLE:
         if field not in body:
             continue
@@ -499,7 +507,14 @@ async def api_set_params(portfolio: str, request: Request, _: str = Depends(requ
         old = cur.get(field, default_for(portfolio).get(field))
         if old != val:
             cur[field] = val
-            changes.append(log_param_change(portfolio, field, old, val))
+            pending.append((field, old, val))
+    # Limites de segurança e coerência: o resolver valida o portfólio inteiro com o overlay novo antes de gravar.
+    if pending and P.classify(portfolio) is not None:
+        errs = P.check_overlay_patch(portfolio, overlay)
+        if errs:
+            raise HTTPException(400, "params inválidos: " + "; ".join(errs[:5]))
+    for field, old, val in pending:
+        changes.append(log_param_change(portfolio, field, old, val))
     save_overlay(overlay)
     return {"ok": True, "portfolio": portfolio, "changes": changes,
             "warning": "Baseline é o controle fiel ao artigo — altere com cuidado." if (portfolio == "baseline" or portfolio.endswith("_baseline")) else None}
@@ -517,11 +532,54 @@ def api_restore(portfolio: str, _: str = Depends(require_auth)):
     ports = overlay.setdefault("portfolios", {})
     old = dict(ports.get(portfolio) or {})
     defaults = default_for(portfolio)
-    ports[portfolio] = {"paused": False, **defaults}
+    # Restaurar = apagar os overrides em tempo real: volta a valer params.json (tipo/perfil/portfólio).
+    ports[portfolio] = {"paused": False}
     for field in list(EDITABLE) + ["paused"]:
-        log_param_change(portfolio, field, old.get(field), ports[portfolio].get(field), who="restore")
+        if field in old:
+            log_param_change(portfolio, field, old.get(field), defaults.get(field) if field != "paused" else False, who="restore")
     save_overlay(overlay)
-    return {"ok": True, "portfolio": portfolio, "params": ports[portfolio]}
+    return {"ok": True, "portfolio": portfolio, "params": {"paused": False, **defaults}}
+
+
+# ---- params.json por tipo de teste (leitura com proveniência; edição validada) ----
+@app.get("/api/params/effective/{portfolio}")
+def api_params_effective(portfolio: str, static: bool = False, _: str = Depends(require_auth)):
+    """Parâmetros efetivos de um portfólio, com a camada de cada valor e os erros de validação."""
+    eff, prov, errs, meta = P.explain(portfolio, use_overlay=not static)
+    if meta.get("test_type") is None and errs and "desconhecido" in errs[0]:
+        raise HTTPException(404, "unknown portfolio")
+    return {"portfolio": portfolio, "meta": meta, "effective": eff, "provenance": prov, "errors": errs,
+            "summary": P.summary(eff), "params_path": str(P.params_path()), "static": static}
+
+
+@app.get("/api/params/types")
+def api_params_types(_: str = Depends(require_auth)):
+    """Vista por tipo de teste (sem camada de portfólio) + documento bruto."""
+    doc = P.STORE.doc() or {}
+    out = {}
+    for t in sorted(doc.get("types") or {}):
+        eff, prov, errs = P.type_view(t, doc=doc)
+        out[t] = {"effective": eff, "provenance": prov, "errors": errs, "summary": P.summary(eff),
+                  "layer": (doc.get("types") or {}).get(t)}
+    return {"params_path": str(P.params_path()), "doc_errors": P.STORE.doc_errors, "types": out,
+            "profiles": doc.get("profiles"), "defaults": doc.get("defaults")}
+
+
+@app.get("/api/params/doc")
+def api_params_doc(_: str = Depends(require_auth)):
+    return {"params_path": str(P.params_path()), "doc": P.STORE.doc(), "doc_errors": P.STORE.doc_errors}
+
+
+@app.post("/api/params/layer/{section}/{key}")
+async def api_params_layer(section: str, key: str, request: Request, _: str = Depends(require_auth)):
+    """Edita uma camada de params.json (types/profiles/models/assets/portfolios). Corpo: {"set": {grupo: {...}},
+    "unset": ["grupo.chave"]} ou só o objeto de set. Recusa (400) se algum portfólio ficar inválido."""
+    body = await request.json()
+    try:
+        res = P.write_layer(section, key, body, who="dashboard")
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"ok": True, **res}
 
 
 @app.post("/api/bots/{bot}/pause")
@@ -603,6 +661,15 @@ def _port_summary(name: str, file: Path, asset: str):
             "exposure_pct": (q * (px or 0) / eq * 100) if eq else None}
 
 
+def _lab_params(name, e):
+    """Parâmetros efetivos (sem campos internos) para a vista do lab; forks mostram também o diff."""
+    try:
+        eff = P.explain(name, meta=e)[0]
+        return {k: eff.get(k) for k in ("gates", "exec", "exits", "hours", "ensemble", "regime_filter")}
+    except Exception:
+        return e.get("params")
+
+
 @app.get("/api/lab")
 def api_lab(_: str = Depends(require_auth)):
     import sys as _s
@@ -620,7 +687,8 @@ def api_lab(_: str = Depends(require_auth)):
     for n, e in (reg.get("portfolios") or {}).items():
         s = _port_summary(n, R.port_path(n), e["asset"])
         s.update({"label": e.get("label"), "hyp": e.get("hyp"), "kind": e.get("kind"), "status": e.get("status"),
-                  "parent": e.get("parent"), "lineage": e.get("lineage"), "params": e.get("params"),
+                  "parent": e.get("parent"), "lineage": e.get("lineage"), "params": _lab_params(n, e),
+                  "test_type": e.get("test_type"),
                   "params_diff": e.get("params_diff"), "created_brt": e.get("created_brt"), "paused": paused.get(n, False),
                   "verdict": (verdicts.get(n) or {}).get("verdict", "inconclusivo"),
                   "progress": ((verdicts.get(n) or {}).get("progress") or {}).get("text")})

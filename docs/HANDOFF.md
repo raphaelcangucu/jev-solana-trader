@@ -12,16 +12,18 @@ Passos da secção 7:
 | --- | --- |
 | 1. Estado atual do lab | Substituído pelo reinício. Execução 2 arquivada em `research/paper-lab/archive/run_1000usd_2026-09-24/`; `config.json` marca a execução 3 (US$1.000, 2026-09-30). **Falta correr no host:** `scripts/stop.sh && funding/stop.sh`, `python scripts/maintenance/restart_run.py --archive-name run_1000usd_2026-09-24 --capital 1000 --dry-run`, depois sem `--dry-run`, e `scripts/start.sh`. |
 | 2. Placar do bot real | Feito: `python -m jev_trader score [--json]`, sobre o livro de papel. |
-| 3. Separar beta de seleção | Parcial: a auditoria passa a avaliar compras a 15 min (hit rate do `relaxed` 35,9%, do híbrido 33,3% na execução 2). Destaque do excesso ajustado à exposição nos relatórios e H1 aplicado ao `relaxed` continuam por fazer. |
+| 3. Separar beta de seleção | Feito: relatórios com exposição média, excesso ajustado à exposição e *timing* lado a lado; novos portfólios `h1_exits_hybrid_von_cap2` (saídas no híbrido) e `relaxed_expcap50` (exposição SOL ≤ 50%). |
 | 4. Revisão noturna | Feito: corte por percentil (P90) em `bot/confidence_audit.py`, título com a data revisada. Comparação com a barra 0,8 em `archive/run_1000usd_2026-09-24/reviews/percentile_vs_fixed_0.8.md`. |
 | 5. `rewrite --approve` | Feito: `python -m jev_trader rewrite --propose / --approve <ficheiro> / --reject <ficheiro>`, `config/criteria.json` só por aprovação. |
 | 6. Lab portável | Feito: `PAPER_LAB_ROOT` (por omissão, a pasta do lab); 35 testes em `research/paper-lab/tests/`. |
 
 Bot real em paper: o livro parte de `config/experiment.json` (0.017392206 SOL + 50.00929 USDT, lido do RPC público às 00:50 BRT, SOL = 119,305). Em dry-run cada decisão que passa os portões vira um fill simulado (`logs/paper_book.json`, `logs/paper_trades.jsonl`), com o mesmo tamanho do swap ao vivo e 10 bps de custo. Logs antigos em `logs/archive/run0_2026-09-23/`.
 
-**Atenção:** com `CONFIDENCE_THRESHOLD=0.55` (valor do artigo) o von, cuja confiança fica em ~0,2–0,45, nunca passa o portão, e o livro de papel fica parado. Para o paper medir alguma coisa é preciso baixar o limiar (o `relaxed` do lab usa 0,35 com margem de 0,20) — decisão pendente do utilizador.
+**Parâmetros por tipo de teste (2026-10-01):** `research/paper-lab/params.json` + `bot/params.py`, camadas padrão → perfil → tipo → modelo → ativo → portfólio → diff do fork → overlay; o tuner lê o espaço de busca por tipo; `scripts/params_check.py` valida tudo. Bot real: `config/params.json`, perfil `relaxed_paper` por omissão (conf ≥ 0,35, margem ≥ 0,20, skip < 0,5).
 
-Testes: `pytest -q` na raiz → 85 passed (50 do bot, 35 do lab; o lab precisa de `numpy`, extra `pip install -e .[lab]`).
+**Run local (desde 2026-10-01 22:24 BRT até 2026-10-30):** no Mac, worktree `~/jev-lab/code` (branch `run/local-2026-09-30`), modelos em `~/jev-alts` (von 1.3, Laya, poorjev), launchd `com.jev.paperlab`, `com.jev.trader-paper`, `com.jev.caffeinate` (`scripts/macos/install_launchd.sh --status`). Dashboard em 127.0.0.1:8787, credencial em `research/paper-lab/dashboard/.auth` do worktree.
+
+Testes: `pytest -q` na raiz → 130 passed (bot e lab; o lab precisa de `numpy`, extra `pip install -e .[lab]`).
 
 ## 1. Contexto e objetivo
 

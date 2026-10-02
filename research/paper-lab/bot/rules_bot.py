@@ -15,6 +15,7 @@ from bot.lib import (
 from bot.rules_engine import (
     CandleBook, grid_signal, rsi_signal, MEME_GATE_PAIRS, load_rule_enabled,
 )
+from bot import params as P
 
 STOP = False
 
@@ -258,7 +259,7 @@ def main() -> int:
     rules_cfg = cfg.get("rule_strategies") or {}
     cycle = float(rules_cfg.get("cycle_seconds", 30))
     end_at = datetime.fromisoformat(cfg["end_at_brt"])
-    gates = dict(cfg["gates"])
+    # Portões e parâmetros das regras por portfólio: params.json (types.rule_*), via bot/params.py.
     bal = cfg["starting_balances"]
     meme_cfg = json.loads((ROOT / "memecoins.json").read_text())
     tokens = meme_cfg["tokens"]
@@ -369,13 +370,7 @@ def main() -> int:
             finished = True
             print("rules_bot end window", flush=True)
         try:
-            overlay = {}
-            pop = ROOT / "data" / "params_overlay.json"
-            if pop.exists():
-                try:
-                    overlay = json.loads(pop.read_text())
-                except Exception:
-                    overlay = {}
+            overlay = P.STORE.overlay()
             if (overlay.get("bots") or {}).get("rules_paused"):
                 allow = False
 
@@ -405,14 +400,10 @@ def main() -> int:
             # ---- SOL GRID ----
             strat = "grid_sol_2pct"
             tag = f"rule:{strat}"
-            gcfg = dict(gates)
-            enabled = load_rule_enabled(overlay, strat, rules_cfg)
-            ovp = (overlay.get("portfolios") or {}).get(strat) or {}
-            if ovp.get("paused"):
-                enabled = False
-            for k in ("buy_fraction_usdt", "cooldown_seconds", "max_trades_per_hour"):
-                if k in ovp and ovp[k] is not None:
-                    gcfg[k] = ovp[k]
+            eff = P.effective(strat)
+            gcfg, rp = eff["gates"], eff.get("rule") or {}
+            fees, market = P.fees_market(eff, cfg)
+            enabled = load_rule_enabled(overlay, strat, rules_cfg) and not eff["paused"]
             signal = "hold"
             reasons = []
             traded = False
@@ -428,7 +419,7 @@ def main() -> int:
                 rs = dict(grid.get("rule_state") or {})
                 # evaluate on closed bar close
                 px_bar = float(ind["close"])
-                signal, rs2 = grid_signal(rs, px_bar, grid_pct=0.02, levels=4)
+                signal, rs2 = grid_signal(rs, px_bar, grid_pct=float(rp.get("grid_pct", 0.02)), levels=int(rp.get("levels", 4)))
                 grid["rule_state"] = rs2
                 ok, why = _cooldown_ok(grid, gcfg, time.time())
                 final = signal
@@ -439,9 +430,14 @@ def main() -> int:
                     final = "hold"; reasons.append("insufficient_usdt")
                 if final == "sell" and float(grid["sol"]) < float(gcfg["min_sol_trade"]):
                     final = "hold"; reasons.append("insufficient_sol")
+                g_trade = gcfg
+                if final == "buy":
+                    g_trade, why = P.cap_buy(gcfg, grid, sol_px)
+                    if why:
+                        final = "hold"; reasons.append(why)
                 if final in ("buy", "sell"):
                     try:
-                        tr = sim_trade_sol(final, grid, gcfg, cfg["fees"], cfg["market"],
+                        tr = sim_trade_sol(final, grid, g_trade, fees, market,
                                            sol_px, did, trades_log, tag)
                         traded = tr is not None
                         if traded:
@@ -485,14 +481,12 @@ def main() -> int:
             # ---- SOL RSI ----
             strat = "rsi_sol_1h"
             tag = f"rule:{strat}"
-            gcfg = dict(gates)
-            enabled = load_rule_enabled(overlay, strat, rules_cfg)
-            ovp = (overlay.get("portfolios") or {}).get(strat) or {}
-            if ovp.get("paused"):
-                enabled = False
-            for k in ("buy_fraction_usdt", "cooldown_seconds", "max_trades_per_hour"):
-                if k in ovp and ovp[k] is not None:
-                    gcfg[k] = ovp[k]
+            eff = P.effective(strat)
+            gcfg, rp = eff["gates"], eff.get("rule") or {}
+            fees, market = P.fees_market(eff, cfg)
+            enabled = load_rule_enabled(overlay, strat, rules_cfg) and not eff["paused"]
+            rsi_n = int(rp.get("rsi_period", 14))
+            ind_rsi = ind if rsi_n == 14 else book.sol_indicators(rsi_period=rsi_n)
             signal = "hold"
             reasons = []
             traded = False
@@ -504,7 +498,7 @@ def main() -> int:
             elif not can_trade_sol:
                 reasons.append("waiting_new_bar_after_start" if allow else "run_ended")
             else:
-                signal = rsi_signal(ind.get("rsi"), ind.get("rsi_prev"), 30, 70)
+                signal = rsi_signal(ind_rsi.get("rsi"), ind_rsi.get("rsi_prev"), float(rp.get("lo", 30)), float(rp.get("hi", 70)))
                 final = signal
                 ok, why = _cooldown_ok(rsi_p, gcfg, time.time())
                 if final in ("buy", "sell") and not ok:
@@ -513,9 +507,14 @@ def main() -> int:
                     final = "hold"; reasons.append("insufficient_usdt")
                 if final == "sell" and float(rsi_p["sol"]) < float(gcfg["min_sol_trade"]):
                     final = "hold"; reasons.append("insufficient_sol")
+                g_trade = gcfg
+                if final == "buy":
+                    g_trade, why = P.cap_buy(gcfg, rsi_p, sol_px)
+                    if why:
+                        final = "hold"; reasons.append(why)
                 if final in ("buy", "sell"):
                     try:
-                        tr = sim_trade_sol(final, rsi_p, gcfg, cfg["fees"], cfg["market"],
+                        tr = sim_trade_sol(final, rsi_p, g_trade, fees, market,
                                            sol_px, did, trades_log, tag)
                         traded = tr is not None
                         if not traded:
@@ -535,7 +534,8 @@ def main() -> int:
                          chosen_action=signal, final_action=signal, gate_reasons=reasons,
                          confidence=1.0, skip_noul=0.0, traded=traded,
                          price_usd=sol_px, price_source=sol_src, model="rule",
-                         indicators={"rsi": ind.get("rsi"), "rsi_prev": ind.get("rsi_prev"), "bar_ts": bar_ts},
+                         indicators={"rsi": ind_rsi.get("rsi"), "rsi_prev": ind_rsi.get("rsi_prev"), "bar_ts": bar_ts,
+                                     "rsi_period": rsi_n},
                          equity_usd=eq, sol=rsi_p["sol"], usdt=rsi_p["usdt"],
                          bar_acted=bool(can_trade_sol and enabled))
             snap_ports[strat] = {
@@ -552,6 +552,12 @@ def main() -> int:
             # ---- MEMES: regime + donch_regime ----
             meme_snap = {}
             bull = bool(ind.get("sol_regime_bull"))
+            bull_by = {(12, 26): bull}  # regime por (ema_fast, ema_slow) de params.json, calculado uma vez por ciclo
+
+            def _bull(f, s_):
+                if (f, s_) not in bull_by:
+                    bull_by[(f, s_)] = bool(book.sol_indicators(ema_fast=f, ema_slow=s_).get("sol_regime_bull"))
+                return bull_by[(f, s_)]
             for sym, pdata in list(regime_ports.items()):
                 tmeta = token_by_sym.get(sym) or {}
                 mint = tmeta.get("mint")
@@ -580,20 +586,15 @@ def main() -> int:
                     kind = "regime" if snap_kind.startswith("regime") else "donch"
                     is_full = snap_kind.endswith("_full")
                     tag = f"rule:{strat_name}"
-                    gcfg = dict(gates)
-                    enabled = load_rule_enabled(overlay, strat_name, rules_cfg)
-                    # also allow group pause keys
-                    group_key = ("meme_rule_regime" if kind == "regime" else "meme_rule_donch_regime") + ("_full" if is_full else "")
-                    if ((overlay.get("portfolios") or {}).get(group_key) or {}).get("paused"):
-                        enabled = False
-                    if ((overlay.get("portfolios") or {}).get(strat_name) or {}).get("paused"):
-                        enabled = False
-                    ovp = (overlay.get("portfolios") or {}).get(strat_name) or {}
-                    for k in ("buy_fraction_usdt", "cooldown_seconds", "max_trades_per_hour"):
-                        if k in ovp and ovp[k] is not None:
-                            gcfg[k] = ovp[k]
-                    if is_full:
-                        gcfg["buy_fraction_usdt"] = 1.0  # all-in (spot, no leverage)
+                    # params.json: types.rule_regime / rule_donchian (+ variants.full: compra 100%, spot sem alavancagem)
+                    eff = P.effective(strat_name)
+                    gcfg, rp = eff["gates"], eff.get("rule") or {}
+                    fees, market = P.fees_market(eff, cfg)
+                    # pausa: o próprio nome ou a chave de grupo meme_rule_*[_full] (pause_keys em lab_registry.originals)
+                    enabled = load_rule_enabled(overlay, strat_name, rules_cfg) and not eff["paused"]
+                    p_bull = _bull(int(rp.get("ema_fast", 12)), int(rp.get("ema_slow", 26)))
+                    n_d = int(rp.get("donchian", 20))
+                    mi_p = mi if n_d == 20 else book.meme_indicators(sym, donchian=n_d)
                     signal = "hold"
                     reasons = []
                     traded = False
@@ -605,19 +606,19 @@ def main() -> int:
                     else:
                         held = float(port.get("token") or 0) > 1e-12
                         if kind == "regime":
-                            if bull and not held:
+                            if p_bull and not held:
                                 signal = "buy"
-                            elif (not bull) and held:
+                            elif (not p_bull) and held:
                                 signal = "sell"
                             else:
                                 signal = "hold"
                         else:
                             # donch only when SOL bull for buys; sells always on donch sell or regime exit
-                            dsig = mi.get("donchian20_signal") or "hold"
-                            if not bull and held:
+                            dsig = mi_p.get("donchian20_signal") or "hold"
+                            if not p_bull and held:
                                 signal = "sell"
                                 reasons.append("sol_regime_exit")
-                            elif bull and dsig == "buy" and not held:
+                            elif p_bull and dsig == "buy" and not held:
                                 signal = "buy"
                             elif dsig == "sell" and held:
                                 signal = "sell"
@@ -631,9 +632,14 @@ def main() -> int:
                             final = "hold"; reasons.append("insufficient_usdt")
                         if final == "sell" and float(port.get("token") or 0) * px < float(gcfg["min_usdt_trade"]):
                             final = "hold"; reasons.append("insufficient_token")
+                        g_trade = gcfg
+                        if final == "buy":
+                            g_trade, why = P.cap_buy(gcfg, port, px)
+                            if why:
+                                final = "hold"; reasons.append(why)
                         if final in ("buy", "sell"):
                             try:
-                                tr = sim_trade_meme(final, port, gcfg, cfg["fees"], cfg["market"],
+                                tr = sim_trade_meme(final, port, g_trade, fees, market,
                                                     px, did, meme_tr_log, mint, decs, sol_usd, tag)
                                 traded = tr is not None
                                 if not traded:
@@ -654,7 +660,7 @@ def main() -> int:
                                  gate_reasons=reasons, confidence=1.0, skip_noul=0.0,
                                  traded=traded, price_usd=px, price_source=mark.get("source"),
                                  model="rule",
-                                 indicators={"sol_regime_bull": bull, "donch": mi.get("donchian20_signal"),
+                                 indicators={"sol_regime_bull": p_bull, "donch": mi_p.get("donchian20_signal"),
                                              "sol_ema12": ind.get("ema12"), "sol_ema26": ind.get("ema26"),
                                              "bar_ts": m_bar},
                                  equity_usd=eq, token=port.get("token"), usdt=port["usdt"],

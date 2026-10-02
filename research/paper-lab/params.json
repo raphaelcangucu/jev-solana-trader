@@ -1,0 +1,273 @@
+{
+  "version": 1,
+  "paper_only": true,
+  "note": "Fonte única dos parâmetros do laboratório (paper only), por tipo de teste. Ordem das camadas: defaults → profiles.<perfil> (com extends) → types.<tipo> → types.<tipo>.variants.<variante> → models.<modelo> → assets.<sol|meme> → assets.meme.symbols.<SYM> → portfolios.<nome> → overlay em tempo real (data/params_overlay.json, escrito pelo dashboard). Forks: parâmetros efetivos do pai (sem o overlay do pai) → diff do fork (data/lab/registry.json) → portfolios.<fork> → overlay do fork. Resolver: bot/params.py; verificação: scripts/params_check.py. Ver README, secção 'Parâmetros por tipo de teste'.",
+  "defaults": {
+    "note": "Valores do portão fiel ao artigo (baseline) e da execução simulada. Chaves desconhecidas são erro de validação.",
+    "gates": {
+      "min_confidence": 0.6,
+      "min_prob_margin": 0.0,
+      "margin_gate": false,
+      "max_skip_noul": 0.5,
+      "cooldown_seconds": 120,
+      "max_trades_per_hour": 8,
+      "buy_fraction_usdt": 0.25,
+      "min_usdt_trade": 1.0,
+      "min_sol_trade": 0.001,
+      "max_exposure_frac": null
+    },
+    "exec": {
+      "mode": "market",
+      "extra_slippage_bps": 5,
+      "slippage_bps": 50,
+      "network_fee_sol": 5e-06,
+      "offset_bps": 10,
+      "ttl_min": 15,
+      "fee_bps": 10
+    },
+    "exits": {
+      "enabled": false,
+      "reentry_cooldown_min": 30
+    },
+    "hours": null,
+    "regime_filter": {
+      "enabled": false,
+      "require_bull_for_buy": true,
+      "block_if_unknown": true
+    },
+    "tuning": {
+      "enabled": true,
+      "params": [
+        "gates.min_confidence",
+        "gates.max_skip_noul",
+        "gates.cooldown_seconds",
+        "gates.max_trades_per_hour",
+        "gates.buy_fraction_usdt",
+        "gates.min_prob_margin",
+        "exits.tp",
+        "exits.sl",
+        "exits.trail",
+        "exits.trail_arm",
+        "exits.reentry_cooldown_min",
+        "exec.offset_bps",
+        "exec.ttl_min",
+        "exec.fee_bps"
+      ],
+      "bounds": {
+        "gates.buy_fraction_usdt": [0.05, 0.5],
+        "gates.max_trades_per_hour": [1, 8],
+        "gates.cooldown_seconds": [30, 3600],
+        "gates.min_confidence": [0.0, 0.99],
+        "gates.min_prob_margin": [0.0, 0.9],
+        "gates.max_skip_noul": [0.05, 0.95]
+      },
+      "max_rel_change": 0.2,
+      "steps": [0.8, 0.9, 1.1, 1.2],
+      "train_frac": 0.7,
+      "min_improvement_pct": 0.25,
+      "trade_penalty_bps": 2.0
+    },
+    "limits": {
+      "buy_fraction_usdt_max": 0.5,
+      "max_trades_per_hour_max": 8,
+      "max_exposure_frac_max": 1.0,
+      "leverage": "never"
+    }
+  },
+  "profiles": {
+    "baseline": {
+      "note": "Fiel ao artigo: conf ≥ 0,6 e skip < 0,5 (valores de defaults). O von quase nunca passa."
+    },
+    "relaxed": {
+      "note": "Calibrado nas primeiras ~33 decisões do von (confiança em ~0,229 e ~0,379; P80 ≈ 0,379): conf ≥ 0,35 e margem de probabilidade (escolhida − segunda) ≥ 0,20, skip < 0,5. Mesmo tamanho/cooldown/teto do baseline.",
+      "gates": {
+        "min_confidence": 0.35,
+        "min_prob_margin": 0.2,
+        "margin_gate": true
+      }
+    },
+    "v2": {
+      "extends": "relaxed",
+      "note": "Critérios reescritos pela revisão noturna (criteria_v2.json) com o portão relaxed."
+    }
+  },
+  "types": {
+    "model_gated": {
+      "note": "Modelo (von/laya/poorjev/jev) com portão de confiança; o perfil (baseline/relaxed/v2) vem de profiles."
+    },
+    "hybrid": {
+      "note": "Decisão do modelo (perfil relaxed) com filtro de regime de SOL nas compras (EMA rápida > lenta do rules_bot).",
+      "regime_filter": {
+        "enabled": true
+      }
+    },
+    "rule_grid": {
+      "note": "Grade em barras de 1 h (rules_bot).",
+      "rule": {
+        "grid_pct": 0.02,
+        "levels": 4,
+        "timeframe": "1h"
+      },
+      "tuning": {
+        "params": ["rule.grid_pct", "rule.levels"]
+      }
+    },
+    "rule_rsi": {
+      "note": "RSI em barras de 1 h: compra ao cruzar lo para cima, vende ao cruzar hi para baixo.",
+      "rule": {
+        "rsi_period": 14,
+        "lo": 30,
+        "hi": 70,
+        "timeframe": "1h"
+      },
+      "tuning": {
+        "params": ["rule.rsi_period", "rule.lo", "rule.hi"]
+      }
+    },
+    "rule_regime": {
+      "note": "Segura a memecoin só enquanto SOL EMA rápida > EMA lenta (1 h).",
+      "rule": {
+        "ema_fast": 12,
+        "ema_slow": 26,
+        "timeframe": "1h"
+      },
+      "tuning": {
+        "params": ["rule.ema_fast", "rule.ema_slow"]
+      },
+      "variants": {
+        "full": {
+          "note": "Variante fiel à pesquisa: 100% dentro com sinal ligado (spot, sem alavancagem).",
+          "gates": {
+            "buy_fraction_usdt": 1.0
+          },
+          "limits": {
+            "buy_fraction_usdt_max": 1.0
+          }
+        }
+      }
+    },
+    "rule_donchian": {
+      "note": "Rompimento de Donchian na moeda, compras só com regime de alta em SOL; sai no rompimento para baixo ou no fim do regime.",
+      "rule": {
+        "donchian": 20,
+        "ema_fast": 12,
+        "ema_slow": 26,
+        "timeframe": "1h"
+      },
+      "tuning": {
+        "params": ["rule.ema_fast", "rule.ema_slow", "rule.donchian"]
+      },
+      "variants": {
+        "full": {
+          "note": "Variante fiel à pesquisa: 100% dentro com sinal ligado (spot, sem alavancagem).",
+          "gates": {
+            "buy_fraction_usdt": 1.0
+          },
+          "limits": {
+            "buy_fraction_usdt_max": 1.0
+          }
+        }
+      }
+    },
+    "lab_h1_exits": {
+      "note": "H1: saídas TP/SL/trailing sobre as decisões da fonte; níveis por ativo em assets.<sol|meme>.exits.",
+      "exits": {
+        "enabled": true
+      }
+    },
+    "lab_h2_ensemble": {
+      "note": "H2: percentil da confiança de cada modelo na sua janela; ≥ min_agree modelos concordando e percentil médio ≥ pct_threshold.",
+      "ensemble": {
+        "min_agree": 2,
+        "pct_threshold": 0.8,
+        "min_window": 100
+      },
+      "tuning": {
+        "params": [
+          "gates.cooldown_seconds",
+          "gates.max_trades_per_hour",
+          "gates.buy_fraction_usdt",
+          "exits.tp",
+          "exits.sl",
+          "exits.trail",
+          "exits.trail_arm",
+          "exits.reentry_cooldown_min",
+          "exec.offset_bps",
+          "exec.ttl_min",
+          "exec.fee_bps",
+          "ensemble.pct_threshold"
+        ]
+      }
+    },
+    "lab_h3_limit": {
+      "note": "H3: ordem limite a mid ∓ offset_bps, validade ttl_min, preenche só se o mark cruzar o limite; taxa fee_bps + rede, sem slippage.",
+      "exec": {
+        "mode": "limit"
+      }
+    },
+    "lab_h4_hours": {
+      "note": "H4: só opera nas horas BRT listadas (compras e vendas).",
+      "hours": [5, 10, 11, 12, 18]
+    },
+    "funding_carry": {
+      "note": "Carry de funding (funding/funding_carry.py) NÃO lê este ficheiro: é um serviço à parte com regras em funding/config.json (rules), incluindo perp_leverage 2 na perna curta, o que o limite 'sem alavancagem' do lab recusaria. Fica documentado aqui, sem ligação."
+    },
+    "real_bot": {
+      "note": "O bot real (src/jev_trader) lê config/params.json na raiz do repositório (defaults + profiles.<PARAMS_PROFILE>, padrão relaxed_paper; variáveis de ambiente sobrepõem). Sem ligação a este ficheiro."
+    }
+  },
+  "models": {
+    "von": {"note": "von local (127.0.0.1:8765)."},
+    "laya": {"note": "Laya (shim local :8766)."},
+    "poorjev": {"note": "poorjev (shim local :8767)."},
+    "jev": {"note": "Jev hospedado; desligado sem JEV_API_KEY."},
+    "ensemble": {"note": "H2: von + poorjev + laya."},
+    "rule": {"note": "Regras clássicas (sem modelo)."}
+  },
+  "assets": {
+    "sol": {
+      "note": "Níveis de saída para SOL (usados quando exits.enabled).",
+      "exits": {
+        "tp": 0.025,
+        "sl": 0.015,
+        "trail": 0.01,
+        "trail_arm": 0.01
+      }
+    },
+    "meme": {
+      "note": "Níveis de saída para memecoins (usados quando exits.enabled). symbols.<SYM> sobrepõe por moeda.",
+      "exits": {
+        "tp": 0.06,
+        "sl": 0.04,
+        "trail": 0.03,
+        "trail_arm": 0.03
+      },
+      "symbols": {}
+    }
+  },
+  "portfolios": {
+    "hybrid_von_relaxed_cap2": {
+      "note": "Teto de 2 trades/h (antes fixo no sol_bot).",
+      "gates": {
+        "max_trades_per_hour": 2
+      }
+    },
+    "h3_limit_hybrid_von_cap2": {
+      "gates": {
+        "max_trades_per_hour": 2
+      }
+    },
+    "h1_exits_hybrid_von_cap2": {
+      "note": "Passo 3 do HANDOFF: H1 (saídas) aplicado ao híbrido, contra a deriva só-compra. Fonte = decisões do hybrid_von_relaxed_cap2 (já filtradas pelo regime).",
+      "gates": {
+        "max_trades_per_hour": 2
+      }
+    },
+    "relaxed_expcap50": {
+      "note": "Passo 3 do HANDOFF: von relaxed com exposição máxima a SOL de 50% do valor do portfólio (separa beta de seleção).",
+      "gates": {
+        "max_exposure_frac": 0.5
+      }
+    }
+  }
+}
