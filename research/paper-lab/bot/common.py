@@ -299,7 +299,7 @@ def jupiter_quote(cfg, input_mint, output_mint, amount_in, in_decimals, slippage
     last = None
     for attempt in range(6):
         if time.time() < _JUP_LOCK:
-            time.sleep(min(30, _JUP_LOCK - time.time()))
+            time.sleep(max(0.0, min(30, _JUP_LOCK - time.time())))
         if time.time() - _JUP_LAST < float(cfg["market"].get("jupiter_min_interval_seconds", 20)):
             time.sleep(1)
         code, body = http_get(url)

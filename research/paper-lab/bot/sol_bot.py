@@ -479,7 +479,7 @@ def main() -> int:
                 sleep_for = max(0.5, cycle - (time.time() - t0))
                 end_sleep = time.time() + sleep_for
                 while time.time() < end_sleep and not STOP:
-                    time.sleep(min(0.5, end_sleep - time.time()))
+                    time.sleep(max(0.0, min(0.5, end_sleep - time.time())))
                 continue
 
             history = read_jsonl(prices_log)[-2000:]
@@ -715,7 +715,7 @@ def main() -> int:
         sleep_for = max(0.5, cycle - (time.time() - t0))
         end_sleep = time.time() + sleep_for
         while time.time() < end_sleep and not STOP:
-            time.sleep(min(0.5, end_sleep - time.time()))
+            time.sleep(max(0.0, min(0.5, end_sleep - time.time())))
     print(f"sol_bot stopped cycles={cycles} errors={errors}", flush=True)
     return 0
 

@@ -404,7 +404,7 @@ def main() -> int:
                 sleep_for = max(1.0, rotate - (time.time() - t0))
                 end_sleep = time.time() + sleep_for
                 while time.time() < end_sleep and not STOP:
-                    time.sleep(min(0.5, end_sleep - time.time()))
+                    time.sleep(max(0.0, min(0.5, end_sleep - time.time())))
                 continue
 
             price = float(mark["price_usd"])
@@ -622,7 +622,7 @@ def main() -> int:
         sleep_for = max(1.0, rotate - (time.time() - t0))
         end_sleep = time.time() + sleep_for
         while time.time() < end_sleep and not STOP:
-            time.sleep(min(0.5, end_sleep - time.time()))
+            time.sleep(max(0.0, min(0.5, end_sleep - time.time())))
 
     print(f"meme_bot stopped cycles={cycles} errors={errors}", flush=True)
     return 0
