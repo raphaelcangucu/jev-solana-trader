@@ -2,6 +2,7 @@
 # One-shot: restart if not running or heartbeat stale (>10 min). Safe to call from any supervisor/cron/@reboot.
 # `watchdog.sh --loop` keeps checking every 5 min (foreground).
 cd "$(dirname "$0")"
+mkdir -p logs run data   # pastas de execução (fora do git)
 check() {
 
   PIDF=run/funding.pid

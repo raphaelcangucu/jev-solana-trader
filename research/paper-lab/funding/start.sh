@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 cd "$(dirname "$0")"
+mkdir -p logs run data   # pastas de execução (fora do git)
 PIDF=run/funding.pid
 if [ -f "$PIDF" ] && kill -0 "$(cat $PIDF)" 2>/dev/null; then echo "already running pid $(cat $PIDF)"; exit 0; fi
 # setsid não existe em macOS; nohup chega para sobreviver ao fim da shell.
