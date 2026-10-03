@@ -5,6 +5,7 @@
 #   bash scripts/macos/install_launchd.sh --uninstall # pára e remove os plists (não apaga dados)
 #   bash scripts/macos/install_launchd.sh --install-night | --uninstall-night | --kick-night   # só a revisão noturna
 #   bash scripts/macos/install_launchd.sh --install-trader-b | --uninstall-trader-b   # só o livro B do bot real (opcional)
+#   bash scripts/macos/install_launchd.sh --install-tunnel | --uninstall-tunnel       # túnel cloudflared para o painel (opcional)
 # Agentes: com.jev.paperlab (supervisor do lab), com.jev.trader-paper (bot real, dry-run), com.jev.caffeinate,
 # com.jev.night-claude (revisão noturna autónoma com o Claude Code, todos os dias à hora de config.json
 # claude_night.run_at, padrão 01:30 local; sem RunAtLoad nem KeepAlive).
@@ -18,7 +19,8 @@ DOMAIN="gui/$(id -u)"
 LOGS="$PAPER_LAB_ROOT/logs"
 LABELS=(com.jev.paperlab com.jev.trader-paper com.jev.caffeinate com.jev.night-claude)
 TRADER_B=com.jev.trader-paper-exits
-ALL_LABELS=("${LABELS[@]}" "$TRADER_B")
+TUNNEL=com.jev.tunnel
+ALL_LABELS=("${LABELS[@]}" "$TRADER_B" "$TUNNEL")
 # bash 3.2 do macOS: sem arrays associativos.
 script_for() {
   case "$1" in
@@ -27,6 +29,7 @@ script_for() {
     com.jev.caffeinate) echo "$LAB/scripts/macos/caffeinate_service.sh" ;;
     com.jev.night-claude) echo "$LAB/scripts/macos/night_claude.sh" ;;
     com.jev.trader-paper-exits) echo "$LAB/scripts/macos/trader_service.sh" ;;
+    com.jev.tunnel) echo "$LAB/scripts/macos/tunnel_service.sh" ;;
   esac
 }
 
@@ -114,12 +117,13 @@ case "${1:-install}" in
       fi
     done
     ;;
-  install|--install|--install-night|--install-trader-b)
+  install|--install|--install-night|--install-trader-b|--install-tunnel)
     # --install-night: só o agente da revisão noturna (não reinicia o lab nem o bot real que já correm).
     # --install-trader-b: só o livro B do bot real (não toca no livro A nem no lab).
     TARGETS=("${LABELS[@]}")
     if [[ "${1:-install}" == "--install-night" ]]; then TARGETS=(com.jev.night-claude); fi
     if [[ "${1:-install}" == "--install-trader-b" ]]; then TARGETS=("$TRADER_B"); mkdir -p "$REPO/logs/paper_b"; fi
+    if [[ "${1:-install}" == "--install-tunnel" ]]; then TARGETS=("$TUNNEL"); fi
     mkdir -p "$AGENTS" "$LOGS"
     for l in "${TARGETS[@]}"; do
       chmod +x "$(script_for "$l")"
@@ -139,9 +143,13 @@ case "${1:-install}" in
     launchctl bootout "$DOMAIN/$TRADER_B" 2>/dev/null && echo "parado $TRADER_B" || echo "$TRADER_B não estava carregado"
     rm -f "$AGENTS/$TRADER_B.plist"
     ;;
+  --uninstall-tunnel)
+    launchctl bootout "$DOMAIN/$TUNNEL" 2>/dev/null && echo "parado $TUNNEL" || echo "$TUNNEL não estava carregado"
+    rm -f "$AGENTS/$TUNNEL.plist" "$PAPER_LAB_ROOT/dashboard/url.txt" "$PAPER_LAB_ROOT/run/tunnel.pid"
+    ;;
   --kick-night)
     # Corre a revisão noturna agora (primeira corrida supervisionada); log em logs/claude_night_<dia>.log.
     launchctl kickstart "$DOMAIN/com.jev.night-claude" && echo "com.jev.night-claude lançado; log: $LOGS/claude_night_*.log"
     ;;
-  *) echo "uso: $0 [--install|--install-night|--install-trader-b|--status|--uninstall|--uninstall-night|--uninstall-trader-b|--kick-night]" >&2; exit 2 ;;
+  *) echo "uso: $0 [--install|--install-night|--install-trader-b|--status|--uninstall|--uninstall-night|--uninstall-trader-b|--install-tunnel|--uninstall-tunnel|--kick-night]" >&2; exit 2 ;;
 esac

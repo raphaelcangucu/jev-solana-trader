@@ -80,7 +80,8 @@ def main() -> int:
     free = shutil.disk_usage(str(ROOT)).free / 1e9
     L += ["## Saúde", "",
           f"- Processos: {'todos ativos' if not down else 'PARADOS: ' + ', '.join(down)} · heartbeat/erros: " + "; ".join(st_lines),
-          f"- Reinícios nas últimas {a.hours:g} h: {', '.join(f'{k}×{v}' for k, v in rs.items()) or 'nenhum'} · disco livre {free:.0f} GB", ""]
+          (f"- Painel no telemóvel: {(ROOT / 'dashboard' / 'url.txt').read_text().strip()} (login do .auth)\n" if (ROOT / "dashboard" / "url.txt").exists() and _alive("tunnel") else "")
+          + f"- Reinícios nas últimas {a.hours:g} h: {', '.join(f'{k}×{v}' for k, v in rs.items()) or 'nenhum'} · disco livre {free:.0f} GB", ""]
 
     # 2) placar
     cat, _ = A.catalog(); tb = A.load_trades()
