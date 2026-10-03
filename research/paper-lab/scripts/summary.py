@@ -118,7 +118,11 @@ def main() -> int:
     rb = _real_bot()
     L += ["", "## Bot real (paper, livro da carteira)", ""]
     if rb and "erro" not in rb:
-        L.append("```json"); L.append(json.dumps(rb, ensure_ascii=False, indent=1)[:1500]); L.append("```")
+        pb, ph, hr, dd, tr = rb["paper_book"], rb["pnl_vs_hold"], rb["hit_rate"], rb["drawdown"], rb["trades"]
+        L += [f"- Livro de papel: {pb['sol']:.6f} SOL + {pb['usdt']:.2f} USDT = US$ {ph['paper_value_usd']:.2f} (SOL {rb['last_px']})",
+              f"- PnL contra segurar o livro: {ph['usd']:+.2f} US$ ({ph['pct']:+.2f}%)",
+              f"- Hit rate a 15 min: {hr['hits']}/{hr['resolved']}" + (f" ({hr['rate'] * 100:.0f}%)" if hr.get("rate") is not None else ""),
+              f"- Max drawdown: {dd['pct']:.2f}% · trades: {tr['total']} ({tr['buy']} compras / {tr['sell']} vendas)"]
     else:
         L.append(f"- indisponível: {(rb or {}).get('erro')}")
     L.append("")
