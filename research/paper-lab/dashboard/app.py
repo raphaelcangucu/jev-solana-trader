@@ -51,8 +51,9 @@ def _session_token() -> str:
 
 
 def _creds_ok(username: str, password: str) -> bool:
+    """Utilizador sem distinção de maiúsculas; espaços nas pontas ignorados (teclados de telemóvel)."""
     user, pw = read_auth()
-    return secrets.compare_digest(username, user) & secrets.compare_digest(password, pw)
+    return secrets.compare_digest(username.strip().lower(), user.strip().lower()) & secrets.compare_digest(password.strip(), pw.strip())
 
 
 def require_auth(request: Request, credentials: HTTPBasicCredentials | None = Depends(security)):
@@ -78,8 +79,8 @@ form{background:#181b22;padding:24px 28px;border-radius:10px;display:grid;gap:10
 input,button{font:inherit;padding:8px 10px;border-radius:6px;border:1px solid #333;background:#0f1115;color:inherit}
 button{background:#2d6cdf;border:0;cursor:pointer}p{margin:0;color:#f87171;font-size:14px}</style></head>
 <body><form method="post" action="/login"><strong>Paper lab (simulação)</strong>
-<input name="username" placeholder="utilizador" autocomplete="username" required>
-<input name="password" type="password" placeholder="senha" autocomplete="current-password" required>
+<input name="username" placeholder="utilizador" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+<input name="password" type="password" placeholder="senha" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" required>
 <button type="submit">Entrar</button>__ERR__</form></body></html>"""
 
 
