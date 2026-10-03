@@ -5,7 +5,8 @@ Decisão do utilizador (2026-10-03): à noite, sem aprovação humana, o Claude 
 originais) com parâmetros ou critérios novos, e acompanha-os nos dias seguintes. SÓ paper, com limites duros:
 
   context [--hours 24]         contexto compacto (≤ ~6k tokens) para a reflexão
-  fork --parent N --diff JSON --reason T [--dry-run]            fork de parâmetros (lab_registry.create_fork)
+  fork --parent N --diff JSON --reason T [--dry-run]            fork de parâmetros (lab_registry.create_fork; pais de
+                               regra → fork executado pelo rules_bot, diff em rule/gates.buy_fraction_usdt/exits/regime_filter)
   criteria-fork --parent N --criteria-file F --reason T [--dry-run]   fork cuja diferença é o texto dos critérios
   realbot-criteria --criteria-file F --reason T                 critérios do bot real, aprovação autónoma SÓ em paper
   journal --file F             copia o diário da noite para reviews/claude_night_<data BRT>.md (nunca sobrescreve)
@@ -39,9 +40,11 @@ WHO = "claude-night"
 PARAM_LOG = ROOT / "logs" / "param_changes.jsonl"
 DEFAULTS = {"enabled": True, "model": "claude-fable-5-1", "max_forks_per_night": 6, "per_lineage_days": 2,
             "total_forks": 80, "max_realbot_per_night": 1, "run_at": "01:30", "experiment_days": 30}
-# Grupos que um fork de parâmetros pode mudar. limits/tuning (segurança e tuner), criteria (só criteria-fork) e
-# rule (o executor do lab não corre regras) ficam de fora.
+# Grupos que um fork de parâmetros pode mudar. limits/tuning (segurança e tuner) e criteria (só criteria-fork) ficam
+# de fora. Pais de regra (kind=rule, executados pelo rules_bot): só rule.* do tipo, gates.buy_fraction_usdt, exits.* e
+# regime_filter.* (lab_registry.RULE_KEYS / RULE_FORK_GROUPS).
 DIFF_GROUPS = ("gates", "exec", "exits", "hours", "ensemble", "regime_filter")
+RULE_TYPES = tuple(R.RULE_KEYS)
 REASON_MIN, REASON_MAX = 40, 800
 TYPES_SHOWN = ("model_gated", "hybrid", "lab_h1_exits", "lab_h2_ensemble", "lab_h3_limit", "lab_h4_hours")
 SYMS = R.SYMS
@@ -186,11 +189,15 @@ def check_diff(parent: str, diff, reg: dict) -> list[str]:
     if not isinstance(diff, dict) or not diff:
         return ["--diff tem de ser um objeto JSON não vazio, ex.: {\"gates\": {\"cooldown_seconds\": 300}}"]
     errs = []
-    for g, v in diff.items():
-        if g not in DIFF_GROUPS:
-            errs.append(f"grupo '{g}' não permitido (permitidos: {', '.join(DIFF_GROUPS)})")
-        elif g != "hours" and not isinstance(v, dict):
-            errs.append(f"{g}: tem de ser um objeto")
+    pm = reg["portfolios"].get(parent) or R.originals().get(parent) or {}
+    if pm.get("kind") == "rule":
+        errs = R.check_rule_diff(pm.get("test_type"), diff)
+    else:
+        for g, v in diff.items():
+            if g not in DIFF_GROUPS:
+                errs.append(f"grupo '{g}' não permitido (permitidos: {', '.join(DIFF_GROUPS)})")
+            elif g != "hours" and not isinstance(v, dict):
+                errs.append(f"{g}: tem de ser um objeto")
     if errs:
         return errs
     peff, _prov, perr, _m = P.explain(parent, meta=reg["portfolios"].get(parent), use_overlay=False, registry=reg)
@@ -237,8 +244,8 @@ def cmd_fork(a) -> int:
         reason = check_reason(a.reason)
         diff = json.loads(a.diff)
         meta = parent_meta(a.parent, reg)
-        if meta.get("kind") not in ("gated", "ensemble"):
-            raise ValueError(f"pai {a.parent} kind={meta.get('kind')}: o lab só executa forks de portões/ensemble")
+        if meta.get("kind") not in ("gated", "ensemble", "rule"):
+            raise ValueError(f"pai {a.parent} kind={meta.get('kind')}: só forks de portões/ensemble (lab_bot) ou de regras (rules_bot)")
         errs = check_diff(a.parent, diff, reg)
         if errs:
             raise ValueError("; ".join(errs))
@@ -551,7 +558,8 @@ def _audit_rows(now, hours):
 
 def _price_series(now, hours):
     from bot import confidence_audit as CA, logio
-    since = now - hours * 3600 - 3600
+    # + janela da banda por volatilidade (review.band_window_s, 3 dias) antes da janela auditada
+    since = now - hours * 3600 - 3600 - float(CA.review_cfg(load_cfg())["band_window_s"])
     out = {}
     try:
         out.update(CA.build_series(logio.iter_rows(ROOT / "data" / "prices.jsonl", since_ts=since), asset="SOL"))
@@ -569,13 +577,16 @@ def sec_mistakes(now, hours):
     rc = CA.review_cfg(load_cfg())
     groups = _audit_rows(now, hours); prices = _price_series(now, hours)
     L = [f"## Erros confiantes por família de modelo ({hours:g} h; corte P{rc['confidence_percentile']:g} por família, "
-         f"erro = {int(rc['horizon_s'] / 60)} min contra a chamada além de {rc['band'] * 100:.1f}%)", ""]
+         f"erro = {int(rc['horizon_s'] / 60)} min contra a chamada além da banda "
+         + (f"por ativo = {rc['band_k']:g} × mediana |ret. 15 min| em {rc['band_window_s'] / 86400:g} d" if rc["band_mode"] == "vol"
+            else f"{rc['band'] * 100:.1f}%") + "; palavras por lift = % erros − % acertos)", ""]
     if not groups:
         return L + ["- sem decisões na janela."]
     for key in sorted(groups):
         rows = CA.dedupe_calls(groups[key])
         a = CA.audit(rows, prices=prices, percentile_p=rc["confidence_percentile"], horizon_s=rc["horizon_s"],
-                     band=rc["band"], tolerance_s=rc["tolerance_s"], candidates="chosen", tie_rule=rc["tie_rule"])
+                     band=rc["band"], tolerance_s=rc["tolerance_s"], candidates="chosen", tie_rule=rc["tie_rule"],
+                     lift_params=CA.lift_kwargs(rc), **CA.band_kwargs(rc))
         ans = [r for r in rows if CA.is_answered(r)]
         if not ans:
             L.append(f"- **{key}**: {len(rows)} chamadas, nenhuma respondida (fail-closed)."); continue
@@ -584,22 +595,20 @@ def sec_mistakes(now, hours):
                  f"(buy {act['buy']}/sell {act['sell']}/hold {act['hold']}), {a['n_confident']} confiantes buy/sell → "
                  f"{a['n_resolved']} resolvidas: **{a['n_mistakes']} erros** ({a['mistake_episodes']} episódios), "
                  f"{a['n_correct']} acertos, {a['n_flat']} flat; hit {_f((a['hit_rate'] or 0) * 100, 0)}%.")
+        if a["band_by_asset"]:
+            L.append("  - banda usada: " + ", ".join(f"{k} {b * 100:.3f}% ({a['bands'][k].get('source')})"
+                                                     for k, b in sorted(a["band_by_asset"].items())))
         outs = a.get("outcomes") or []
         mis = [o for o in outs if o["outcome"] == "mistake"]; cor = [o for o in outs if o["outcome"] == "correct"]
         if mis:
             states = Counter((o["side"], o["state"]) for o in mis).most_common(3)
             L.append("  - estados dos erros: " + "; ".join(f"{s} `{st}` ×{c}" for (s, st), c in states))
-            cw = Counter(); mw = Counter()
-            for o in mis:
-                mw.update(set(str(o["state"]).split()) - CA.NON_MARKET_WORDS)
-            for o in cor:
-                cw.update(set(str(o["state"]).split()) - CA.NON_MARKET_WORDS)
-            share = lambda c, n, w: c[w] / n if n else 0.0
-            words = set(mw) | set(cw)
-            lift = sorted(words, key=lambda w: share(mw, len(mis), w) - share(cw, len(cor), w), reverse=True)
-            fmtw = lambda w: f"{w} {share(mw, len(mis), w) * 100:.0f}%/{share(cw, len(cor), w) * 100:.0f}%"
-            L.append("  - adjetivos (% nos erros / % nos acertos): mais nos erros " + ", ".join(fmtw(w) for w in lift[:5])
-                     + (" · mais nos acertos " + ", ".join(fmtw(w) for w in lift[::-1][:3]) if cor else ""))
+            rows_l = CA.word_lift(outs, **CA.lift_kwargs(rc))
+            pc = lambda x: "–" if x is None else f"{x * 100:.0f}%"
+            fmtw = lambda r: f"{r['word']} {pc(r['err_share'])}/{pc(r['ok_share'])} (lift {_f(r['lift'], 2, sign=True)})"
+            L.append("  - adjetivos (% nos erros / % nos acertos): mais nos erros " + ", ".join(fmtw(r) for r in rows_l[:5])
+                     + (" · mais nos acertos " + ", ".join(fmtw(r) for r in rows_l[::-1][:3]) if cor else "")
+                     + f" · elegíveis p/ frases (lift ≥ {rc['lift_min']:g}, suporte): {', '.join(a['lift_words']['all']) or '–'}")
         rest = [r for r in ans if r.get("chosen_action") not in ("buy", "sell") or CA._conf(r) is None
                 or (a["cutoff"] is not None and CA._conf(r) < a["cutoff"])]
         confs = sorted(CA._conf(r) for r in ans)
@@ -650,7 +659,7 @@ def sec_caps(reg):
 
 def sec_tunables():
     L = ["## Parâmetros ajustáveis por tipo (fork --diff; limites = tuning.bounds, senão validação dura)", "",
-         f"- Grupos permitidos no diff: {', '.join(DIFF_GROUPS)} (nunca limits/tuning/rule; critérios só por criteria-fork). "
+         f"- Grupos permitidos no diff (pais com portões/ensemble): {', '.join(DIFF_GROUPS)} (nunca limits/tuning; critérios só por criteria-fork). "
          "Tetos duros: compra ≤ 50% do USDT, ≤ 8 trades/h, exposição ≤ 100%, sem alavancagem; cooldown 30–3600 s."]
     by_list: dict = {}
     for t in TYPES_SHOWN:
@@ -666,6 +675,22 @@ def sec_tunables():
         L.append(f"- {', '.join(ts)}: {ps}")
     L.append("- Saídas (exits.*) e limite (exec.*) só têm efeito com exits.enabled=true / exec.mode=limit no efetivo; "
              "hours = lista de horas BRT; regime_filter = só compra com SOL em alta.")
+    L += ["", "Regras (pais grid_sol_2pct, rsi_sol_1h, {SYM}_rule_regime[_full], {SYM}_rule_donch_regime[_full] e os seus "
+          "forks; executadas pelo rules_bot em barras de 1 h). Diff só em `rule.*` do tipo, `gates.buy_fraction_usdt`, "
+          "`exits.*` (TP/SL/trailing a cada ciclo; enabled=true usa os níveis do ativo) e `regime_filter.*` (compras só com "
+          "SOL EMA12>26); nada de cooldown/trades/h/exec/hours:"]
+    fmt = lambda b, p: f" [{', '.join(f'{x:g}' for x in b[p])}]" if p in b else ""
+    for t in RULE_TYPES:
+        try:
+            eff, _prov, _errs = P.type_view(t, asset_class="sol" if t in ("rule_grid", "rule_rsi") else "meme")
+        except Exception:
+            continue
+        b = (eff.get("tuning") or {}).get("bounds") or {}
+        cur = eff.get("rule") or {}
+        ks = ", ".join(f"rule.{k}={cur.get(k)}{fmt(b, 'rule.' + k)}" for k in R.RULE_KEYS[t])
+        bf = (eff.get("gates") or {}).get("buy_fraction_usdt")
+        L.append(f"- {t}: {ks}; gates.buy_fraction_usdt={bf:g}{fmt(b, 'gates.buy_fraction_usdt')}"
+                 + (" (variante _full: 1, limites [0.05, 1])" if t in ("rule_regime", "rule_donchian") else ""))
     return L
 
 
@@ -692,7 +717,9 @@ def sec_realbot():
             au = pr["audit"]["percentile"]
             L.append(f"- Auditoria do dia {day} (P90 nearest-rank, só ações que passaram os portões): corte {_f(au['cutoff'], 3)}, "
                      f"{au['n_answered']} respondidas, {au['n_confident']} confiantes, {au['n_resolved']} resolvidas, "
-                     f"**{au['n_mistakes']} erros**; palavras {dict(list(au['word_counts'].items())[:6])}.")
+                     f"**{au['n_mistakes']} erros**, {au['n_correct']} acertos (banda {au['band'] * 100:.3f}%, "
+                     f"{pr['audit']['band_mode']}); palavras com lift (compra/venda): "
+                     f"{', '.join(au['lift_words']['buy']) or '–'} / {', '.join(au['lift_words']['sell']) or '–'}.")
         except Exception as ex:
             L.append(f"- auditoria indisponível: {str(ex)[:120]}")
         guard = RW.paper_guard(root, os.environ)

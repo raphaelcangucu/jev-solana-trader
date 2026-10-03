@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Paper rule-based portfolios (SOL grid/RSI + meme regime/donch). Simulation only."""
+"""Paper rule-based portfolios (SOL grid/RSI + meme regime/donch). Simulation only.
+
+Também executa os forks de regras do registry do lab (classe RuleForks): mesmos sinais, parâmetros do fork."""
 from __future__ import annotations
 import json, os, signal as osignal, sys, time, traceback, uuid
 from datetime import datetime
@@ -13,9 +15,10 @@ from bot.lib import (
     fetch_meme_prices, append_jsonl, write_json, read_jsonl, USDT, SOL,
 )
 from bot.rules_engine import (
-    CandleBook, grid_signal, rsi_signal, MEME_GATE_PAIRS, load_rule_enabled,
+    CandleBook, grid_signal, rsi_signal, MEME_GATE_PAIRS, load_rule_enabled, meme_rule_signal, RULE_KIND,
 )
 from bot import params as P
+from bot import lab_registry as R
 
 STOP = False
 
@@ -251,6 +254,273 @@ def log_decision(path, **kwargs):
     return row
 
 
+class RuleForks:
+    """Executor dos forks de regras: entradas do registry do lab com `kind=rule` e pai (`lab_registry.is_rule_fork`).
+
+    Corre no mesmo ciclo e com o mesmo CandleBook dos originais, com os mesmos sinais (grid_signal, rsi_signal,
+    meme_rule_signal) e os mesmos portões (cooldown, trades/h, mínimos, teto de exposição), mas com os parâmetros
+    efetivos do fork (params.json: pai sem overlay + diff do registry + portfolios.<fork> + overlay do fork).
+    Extras só dos forks: `exits` (TP/SL/trailing a cada ciclo, no preço de marcação; reentrada bloqueada
+    `reentry_cooldown_min`) e `regime_filter` (compras só com SOL EMA 12 > 26).
+
+    Estado em data/lab/portfolios/<fork>.json (criado por create_fork com os saldos atuais do pai), equity em
+    data/lab/equity/<fork>.jsonl, trades nos logs dos originais (trades.jsonl / meme_trades.jsonl, portfolio=<fork>),
+    decisões em logs/lab_decisions.jsonl — o mesmo formato dos forks do lab_bot (catalog, veredito, resumo, dashboard).
+    Recarrega o registry por mtime. Fail-closed: parâmetros inválidos (erros do resolver), estado em falta ou erro
+    interno → hold, registado (sem nunca afetar os originais)."""
+
+    EQ_EVERY = 60.0
+
+    def __init__(self, log=print):
+        self.log = log
+        self._key = ("never",)
+        self.reg: dict = {"portfolios": {}, "lineages": {}}
+        self.entries: dict = {}
+        self.ports: dict = {}
+        self.last_bar: dict = {}
+        self.last_eq: dict = {}
+        self._warned: dict = {}
+        self.trades_sol = ROOT / "logs" / "trades.jsonl"
+        self.trades_meme = ROOT / "logs" / "meme_trades.jsonl"
+        self.decisions = ROOT / "logs" / "lab_decisions.jsonl"
+
+    @staticmethod
+    def _reg_key():
+        try:
+            st = R.REG.stat()
+            return (st.st_mtime_ns, st.st_size)
+        except FileNotFoundError:
+            return None
+
+    def refresh(self, force: bool = False) -> bool:
+        """Relê o registry se mudou (mtime/tamanho). True se recarregou."""
+        k = self._reg_key()
+        if not force and k == self._key:
+            return False
+        reg = R.load()
+        reg.pop("_mtime", None)
+        self._key = k
+        self.reg = reg
+        new = {n: e for n, e in (reg.get("portfolios") or {}).items()
+               if R.is_rule_fork(e) and e.get("status", "active") == "active"}
+        added = sorted(set(new) - set(self.entries))
+        self.ports = {}  # relê o estado do disco depois de uma mudança no registry
+        self.entries = new
+        if added:
+            self.log(f"rules_bot: forks de regra ativos +{added} (total {len(new)})", flush=True)
+        return True
+
+    def _warn(self, name, msg):
+        if self._warned.get(name) != msg:
+            self._warned[name] = msg
+            self.log(f"rules_bot fork {name}: {msg}", flush=True)
+
+    def port(self, name):
+        if name not in self.ports:
+            self.ports[name] = json.loads(R.port_path(name).read_text())
+        return self.ports[name]
+
+    def _log_eq(self, name, port, px, force=False):
+        now = time.time()
+        if not force and now - self.last_eq.get(name, 0.0) < self.EQ_EVERY:
+            return
+        self.last_eq[name] = now
+        sol_mode = port.get("asset_mode", "sol") == "sol"
+        append_jsonl(R.eq_path(name), {
+            "ts": now, "price": px, "sol": port.get("sol", 0.0), "token": port.get("token", 0.0), "usdt": port["usdt"],
+            "equity": equity_sol(port, px) if sol_mode else equity_meme(port, px),
+            "bh_equity": bh_sol(port, px) if sol_mode else bh_meme(port, px),
+            "all_usdt_equity": float(port["benchmark_all_usdt"]["usdt"]), "trade_count": port["trade_count"],
+            "portfolio": name})
+
+    def step(self, book, *, ind, sol_px, marks, allow, overlay, rules_cfg, cfg, token_by_sym, bull, now=None) -> dict:
+        """Um ciclo para todos os forks de regra. `ind` = book.sol_indicators() (12/26/14) do ciclo; `bull(f, s)` = regime
+        de SOL com EMAs f/s. Devolve o resumo por fork para data/rules/status.json."""
+        self.refresh()
+        cache: dict = {}
+        out = {}
+        for name, e in sorted(self.entries.items()):
+            try:
+                out[name] = self._one(name, e, book, ind, float(sol_px), marks or {}, allow, overlay or {}, rules_cfg or {},
+                                      cfg, token_by_sym or {}, bull, cache, now if now is not None else time.time())
+            except Exception as ex:
+                self._warn(name, f"erro (hold): {type(ex).__name__}: {ex}")
+                out[name] = {"error": f"{type(ex).__name__}: {ex}", "last_signal": "hold", "parent": e.get("parent")}
+        return out
+
+    def _one(self, name, e, book, ind, sol_px, marks, allow, overlay, rules_cfg, cfg, token_by_sym, bull, cache, now):
+        kind = RULE_KIND.get(e.get("test_type"))
+        asset = e.get("asset") or "SOL"
+        tag = e.get("strategy") or f"fork:{name}"
+        port = self.port(name)
+        eff = P.effective(name, meta=e, registry=self.reg)
+        perr = P.STORE.errors.get(name)
+        rp = eff.get("rule") or {}
+        gcfg = eff["gates"]
+        ex = eff.get("exits") or {}
+        fees, market = P.fees_market(eff, cfg)
+        bad = None
+        if perr:
+            bad = "params_invalidos"
+            self._warn(name, f"parâmetros inválidos → hold: {'; '.join(perr[:3])}")
+        elif eff.get("failsafe") or not kind or not rp:
+            bad = "params_invalidos"
+            self._warn(name, f"sem parâmetros de regra válidos (tipo {e.get('test_type')!r}) → hold")
+        enabled = load_rule_enabled(overlay, name, rules_cfg) and not eff.get("paused")
+
+        # preço de marcação e barra fechada de 1 h que conta para este fork
+        mint, decs, mi = None, 6, {}
+        if asset == "SOL":
+            px = sol_px
+            bar_ts, ready = ind.get("bar_ts"), bool(ind.get("ready"))
+        else:
+            mark = marks.get(asset) or {}
+            px = float(mark.get("price_usd") or 0)
+            if px <= 0 and book.memes.get(asset):
+                px = float(book.memes[asset][-1]["close"])
+            tmeta = token_by_sym.get(asset) or {}
+            mint, decs = tmeta.get("mint"), int(tmeta.get("decimals") or 6)
+            n_d = int(rp.get("donchian", 20))
+            ck = ("meme", asset, n_d)
+            if ck not in cache:
+                cache[ck] = book.meme_indicators(asset, donchian=n_d)
+            mi = cache[ck]
+            bar_ts, ready = mi.get("bar_ts"), bool(mi.get("ready"))
+            if not mint:
+                bad = bad or "sem_mint"
+        if px <= 0:
+            return {"last_signal": "hold", "gate_reasons": ["sem_preco"], "parent": e.get("parent"), "strategy": tag}
+
+        sol_mode = asset == "SOL"
+        qty_of = (lambda: float(port.get("sol") or 0)) if sol_mode else (lambda: float(port.get("token") or 0))
+
+        def trade(side, g):
+            before = qty_of()
+            if sol_mode:
+                tr = sim_trade_sol(side, port, g, fees, market, px, did, self.trades_sol, tag)
+            else:
+                tr = sim_trade_meme(side, port, g, fees, market, px, did, self.trades_meme, mint, decs, sol_px, tag)
+            if tr:
+                P.track_fill(port, side, before, tr["fill"], px)
+            return tr
+
+        def log_dec(chosen, final, reasons, traded, extra=None):
+            eq = equity_sol(port, px) if sol_mode else equity_meme(port, px)
+            append_jsonl(self.decisions, {
+                "ts": time.time(), "ts_brt": brt_iso(), "portfolio": name, "strategy": tag, "asset": asset,
+                "model": "rule", "rule": kind, "parent": e.get("parent"), "decision_id": did, "chosen_action": chosen,
+                "confidence": None, "final_action": final, "gate_reasons": reasons, "traded": traded, "price_usd": px,
+                "equity_usd": eq, "bar_ts": bar_ts, "params_rule": {k: v for k, v in rp.items() if k != "timeframe"},
+                **(extra or {})})
+
+        dirty = False
+        signal, reasons, traded = "hold", [], False
+        did = str(uuid.uuid4())
+
+        # 1) saídas (só forks com exits.enabled): a cada ciclo, no preço de marcação; ignoram cooldown (como no lab_bot)
+        if allow and enabled and not bad and ex.get("enabled") and qty_of() * px >= 1.0:
+            before_peak = port.get("peak_price")
+            why = P.check_exit(port, ex, px)
+            dirty = dirty or port.get("peak_price") != before_peak
+            if why:
+                tr = trade("sell", gcfg)
+                traded = tr is not None
+                if traded:
+                    port["reentry_block_until"] = now + 60 * float(ex.get("reentry_cooldown_min", 30))
+                    if kind == "grid":
+                        port["rule_state"] = dict(port.get("rule_state") or {}, buys_open=0, ref=px)
+                log_dec("sell", "sell" if traded else "hold", [why] + ([] if traded else ["sim_trade_none"]), traded,
+                        {"exit": why, "entry_price": port.get("entry_price"), "peak_price": port.get("peak_price")})
+                signal, reasons, dirty = ("sell" if traded else "hold"), [why], True
+                did = str(uuid.uuid4())
+
+        # 2) sinal da regra numa barra de 1 h nova, fechada depois do arranque do rules_bot e da criação do fork
+        new_bar = ready and bar_ts is not None and bar_ts != self.last_bar.get(name)
+        start = max(float(book.started_ts or 0), float(port.get("created_ts") or 0))
+        can = bool(allow and new_bar and (bar_ts + 3600) > start)
+        if can and not traded:
+            self.last_bar[name] = bar_ts
+            dirty = True
+            ind_x = {"bar_ts": bar_ts}
+            chosen = "hold"
+            if not enabled:
+                reasons = ["paused_or_disabled"]
+            elif bad:
+                reasons = [bad]
+            else:
+                reasons = []
+                if kind == "grid":
+                    rs = dict(port.get("rule_state") or {})
+                    if not rs:
+                        rs = {"ref": float(ind["close"]), "buys_open": 0}
+                    chosen, rs2 = grid_signal(rs, float(ind["close"]), grid_pct=float(rp["grid_pct"]), levels=int(rp["levels"]))
+                    port["rule_state"] = rs2
+                    ind_x["grid"] = dict(rs2)
+                elif kind == "rsi":
+                    n = int(rp["rsi_period"])
+                    ck = ("rsi", n)
+                    if ck not in cache:
+                        cache[ck] = ind if n == 14 else book.sol_indicators(rsi_period=n)
+                    ir = cache[ck]
+                    chosen = rsi_signal(ir.get("rsi"), ir.get("rsi_prev"), float(rp["lo"]), float(rp["hi"]))
+                    ind_x.update(rsi=ir.get("rsi"), rsi_prev=ir.get("rsi_prev"))
+                else:
+                    p_bull = bull(int(rp["ema_fast"]), int(rp["ema_slow"]))
+                    held = float(port.get("token") or 0) > 1e-12
+                    chosen, rr = meme_rule_signal(kind, held, p_bull, mi.get("donchian20_signal") or "hold")
+                    reasons += rr
+                    ind_x.update(sol_regime_bull=p_bull, donch=mi.get("donchian20_signal"))
+                final = chosen
+                if final == "buy" and (eff.get("regime_filter") or {}).get("enabled"):
+                    final, rr = P.regime_block(eff, final, ind.get("sol_regime_bull") if ind.get("ready") else None)
+                    reasons += rr
+                if final == "buy" and ex.get("enabled") and now < float(port.get("reentry_block_until") or 0):
+                    final = "hold"; reasons.append("reentry_cooldown")
+                ok, why = _cooldown_ok(port, gcfg, time.time())
+                if final in ("buy", "sell") and not ok:
+                    final = "hold"; reasons.append(why)
+                if final == "buy" and float(port["usdt"]) * float(gcfg["buy_fraction_usdt"]) < float(gcfg["min_usdt_trade"]):
+                    final = "hold"; reasons.append("insufficient_usdt")
+                if final == "sell":
+                    if sol_mode and qty_of() < float(gcfg["min_sol_trade"]):
+                        final = "hold"; reasons.append("insufficient_sol")
+                    elif not sol_mode and qty_of() * px < float(gcfg["min_usdt_trade"]):
+                        final = "hold"; reasons.append("insufficient_token")
+                g_trade = gcfg
+                if final == "buy":
+                    g_trade, why = P.cap_buy(gcfg, port, px)
+                    if why:
+                        final = "hold"; reasons.append(why)
+                if final in ("buy", "sell"):
+                    try:
+                        traded = trade(final, g_trade) is not None
+                    except Exception as ex_:
+                        traded = False; reasons.append(f"sim_err:{type(ex_).__name__}")
+                    if not traded:
+                        reasons.append("sim_trade_none"); final = "hold"
+                    elif kind == "grid":
+                        rs = port["rule_state"]
+                        if final == "buy":
+                            rs["buys_open"] = int(rs.get("buys_open") or 0) + 1
+                        else:
+                            rs["buys_open"] = 0
+                            rs["ref"] = float(ind["close"])
+                signal = final
+            log_dec(chosen, signal, reasons, traded, {"indicators": ind_x})
+        elif can and traded:
+            self.last_bar[name] = bar_ts  # a saída já operou neste ciclo; a barra fica consumida
+
+        if dirty or traded:
+            write_json(R.port_path(name), port)
+        self._log_eq(name, port, px, force=traded)
+        eq = equity_sol(port, px) if sol_mode else equity_meme(port, px)
+        return {"equity_usd": eq, "usdt": port["usdt"], ("sol" if sol_mode else "token"): qty_of(),
+                "trades": port["trade_count"], "last_signal": signal, "position": port.get("position"),
+                "gate_reasons": reasons, "bh_equity": bh_sol(port, px) if sol_mode else bh_meme(port, px),
+                "strategy": tag, "parent": e.get("parent"), "lineage": e.get("lineage"), "asset": asset,
+                "rule": {k: v for k, v in rp.items() if k != "timeframe"}, "params_ok": not bad}
+
+
 def main() -> int:
     osignal.signal(osignal.SIGTERM, _sig)
     osignal.signal(osignal.SIGINT, _sig)
@@ -341,6 +611,11 @@ def main() -> int:
                 fp["sizing"] = "full"
                 write_json(meme_port / f"{n}.json", fp)
             store[sym] = fp
+
+    # Forks de regras (registry do lab): mesmos sinais com parâmetros próprios; hot reload do registry por mtime.
+    forks = RuleForks()
+    forks.refresh(force=True)
+    print(f"rules_bot forks de regra: {sorted(forks.entries) or 'nenhum'}", flush=True)
 
     # last acted bar tracking (don't re-act same bar)
     last_sol_bar = None
@@ -605,25 +880,10 @@ def main() -> int:
                         reasons.append("waiting_new_bar_after_start" if allow else "run_ended")
                     else:
                         held = float(port.get("token") or 0) > 1e-12
-                        if kind == "regime":
-                            if p_bull and not held:
-                                signal = "buy"
-                            elif (not p_bull) and held:
-                                signal = "sell"
-                            else:
-                                signal = "hold"
-                        else:
-                            # donch only when SOL bull for buys; sells always on donch sell or regime exit
-                            dsig = mi_p.get("donchian20_signal") or "hold"
-                            if not p_bull and held:
-                                signal = "sell"
-                                reasons.append("sol_regime_exit")
-                            elif p_bull and dsig == "buy" and not held:
-                                signal = "buy"
-                            elif dsig == "sell" and held:
-                                signal = "sell"
-                            else:
-                                signal = "hold"
+                        # regime: segura só com SOL em alta; donch: compra no rompimento com SOL em alta, vende no
+                        # rompimento para baixo ou na saída do regime (rules_engine.meme_rule_signal, igual nos forks)
+                        signal, rr = meme_rule_signal(kind, held, p_bull, mi_p.get("donchian20_signal") or "hold")
+                        reasons += rr
                         final = signal
                         ok, why = _cooldown_ok(port, gcfg, time.time())
                         if final in ("buy", "sell") and not ok:
@@ -674,6 +934,14 @@ def main() -> int:
                 if can_m:
                     last_meme_bar[sym] = m_bar
 
+            # ---- FORKS de regras: depois dos originais, isolados (um erro aqui nunca afeta os originais) ----
+            try:
+                fork_snap = forks.step(book, ind=ind, sol_px=sol_px, marks=marks, allow=allow, overlay=overlay,
+                                       rules_cfg=rules_cfg, cfg=cfg, token_by_sym=token_by_sym, bull=_bull)
+            except Exception as fe:
+                fork_snap = {"_error": f"{type(fe).__name__}: {fe}"}
+                print(f"rules_bot forks error: {fe}\n{traceback.format_exc()}", flush=True)
+
             cycles += 1
             status = {
                 "ok": True, "ts": time.time(), "ts_brt": brt_iso(), "cycles": cycles,
@@ -693,6 +961,7 @@ def main() -> int:
                 },
                 "portfolios": snap_ports,
                 "meme_portfolios": meme_snap,
+                "rule_forks": fork_snap,
                 "uptime_seconds": round(time.time() - started, 1),
                 "end_at_brt": cfg["end_at_brt"],
             }

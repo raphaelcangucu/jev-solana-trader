@@ -13,20 +13,31 @@ from jev_trader.rewrite import (
     approve,
     build_proposal,
     percentile_cutoff,
+    propose_criteria,
     reject,
+    vol_band,
+    word_lift,
     write_proposal,
 )
+from jev_trader.score import build_timeline
 from test_paper import _cfg
 
 EXP = replace(DEFAULT_EXPERIMENT, run_id="runR", start_t="2026-09-30T00:00:00-03:00")
+# Palavras de fundo (quiet/flat/calm/held…) aparecem nos erros E nos acertos: lift 0, nunca disparam frase.
 BUY_STATE = "thin quiet flat violent flat gray wide calm late late loud held"
+BUY_OK_STATE = "deep quiet flat calm flat gray tight calm mid mid quiet held"
 SELL_STATE = "deep quiet pumping calm pumping green tight calm early early quiet held"
+SELL_OK_STATE = "deep quiet fading calm dumping red tight calm late late quiet held"
 HOLD_STATE = "deep quiet flat calm flat gray tight calm mid mid quiet held"
+
+
+def _t(minute: int) -> str:
+    return f"2026-09-30T{1 + minute // 60:02d}:{minute % 60:02d}:00-03:00"
 
 
 def _row(minute, *, conf, action="hold", model_action="hold", px=100.0, state=HOLD_STATE, source="von-http"):
     return {
-        "t": f"2026-09-30T01:{minute:02d}:00-03:00",
+        "t": _t(minute),
         "state": state,
         "action": action,
         "model_action": model_action,
@@ -36,28 +47,40 @@ def _row(minute, *, conf, action="hold", model_action="hold", px=100.0, state=HO
     }
 
 
+# (minuto, lado, estado, preço 15 min depois). Episódios separados por 20 min (> 5 min).
+TRADES = (
+    [(m, "buy", BUY_STATE, 99.0) for m in (0, 20, 40)]
+    + [(m, "buy", BUY_OK_STATE, 101.0) for m in (60, 80, 100)]
+    + [(m, "sell", SELL_STATE, 101.0) for m in (120, 140, 160)]
+    + [(m, "sell", SELL_OK_STATE, 99.0) for m in (110, 130, 150)]
+)
+
+
 def von_like_log(*, with_mistakes: bool = True) -> list[dict]:
-    """41 ciclos com confiança de von (~0.2 a 0.45), portão de confiança baixado para deixar passar ~0.3+."""
-    special = {0, 5, 10, 12}
+    """180 ciclos (1/min) com confiança de von (~0.2 a 0.38) e 12 trades confiantes (0.45): 3 compras e 3 vendas
+    erradas (estados com palavras distintivas, 3 episódios cada) e 3 + 3 certas (só palavras de fundo em comum)."""
+    special = {m for m, *_ in TRADES} | {12}
     rows = []
-    for minute in range(41):
+    for minute in range(180):
         if minute in special:
             continue
         rows.append(_row(minute, conf=round(0.20 + (minute % 10) * 0.02, 2)))
-    rows += [
-        _row(0, conf=0.45, action="buy", model_action="buy", state=BUY_STATE),
-        _row(5, conf=0.44, action="buy", model_action="buy", state=BUY_STATE),
-        _row(10, conf=0.43, action="sell", model_action="sell", state=SELL_STATE),
-        # Compra de confiança baixa que também erra: fica abaixo do percentil e não conta.
-        _row(12, conf=0.30, action="buy", model_action="buy", state=BUY_STATE),
-    ]
+    for minute, side, state, _later in TRADES:
+        rows.append(_row(minute, conf=0.45, action=side, model_action=side, state=state))
+    # Compra de confiança baixa que também erra: fica abaixo do percentil e não conta.
+    rows.append(_row(12, conf=0.30, action="buy", model_action="buy", state=BUY_STATE))
     if with_mistakes:
-        prices = {15: 99.0, 20: 98.0, 25: 101.0, 27: 97.0}
-        rows = [dict(row, px_in=prices.get(int(row["t"][14:16]), row["px_in"])) for row in rows]
+        prices = {m + 15: later for m, _side, _state, later in TRADES}
+        prices[27] = 97.0
+        rows = [dict(row, px_in=prices.get(_minute(row["t"]), row["px_in"])) for row in rows]
     # Ciclos sem resposta do von não entram no percentil.
-    rows.append(_row(41, conf=0.0, model_action=None, source="fail-closed"))
+    rows.append(_row(181, conf=0.0, model_action=None, source="fail-closed"))
     rows.sort(key=lambda row: row["t"])
     return rows
+
+
+def _minute(t: str) -> int:
+    return (int(t[11:13]) - 1) * 60 + int(t[14:16])
 
 
 def _proposal(rows, current=None, **kwargs):
@@ -88,13 +111,13 @@ def test_percentile_catches_confident_mistakes_the_fixed_bar_never_sees():
     fixed = proposal["audit"]["fixed"]
     pct = proposal["audit"]["percentile"]
     assert fixed["bar"] == 0.8 and fixed["n_confident"] == 0 and fixed["n_mistakes"] == 0
-    assert pct["n_answered"] == 41
+    assert pct["n_answered"] == 180
     assert pct["cutoff"] == 0.38
-    assert pct["n_confident"] == 3
-    assert pct["n_resolved"] == 3
-    assert pct["n_mistakes"] == 3
-    assert [m["t"][11:16] for m in pct["mistakes"]] == ["01:00", "01:05", "01:10"]
-    assert pct["word_counts"]["thin"] == 2
+    assert pct["n_confident"] == 12
+    assert pct["n_resolved"] == 12
+    assert pct["n_mistakes"] == 6 and pct["n_correct"] == 6 and pct["n_flat"] == 0
+    assert [m["t"][11:16] for m in pct["mistakes"]] == ["01:00", "01:20", "01:40", "03:00", "03:20", "03:40"]
+    assert pct["word_counts"]["thin"] == 3
     assert proposal["audit"]["driver"] == "percentile"
     assert proposal["changed"] is True
     assert proposal["status"] == "pending"
@@ -102,10 +125,21 @@ def test_percentile_catches_confident_mistakes_the_fixed_bar_never_sees():
     assert proposed["buy"].startswith(DEFAULT_CRITERIA["buy"] + "; ")
     assert "only when depth is deep not thin" in proposed["buy"]
     assert "not late in the range" in proposed["buy"]
+    assert "not when the tape is flat and gray" not in proposed["buy"]  # gray está nos acertos também: lift 0
     assert "not while the move is pumping green" in proposed["sell"]
+    assert "not early in the range" in proposed["sell"]
     assert "when the tape is violent or loud" in proposed["hold"]
     assert proposed["skip"] == DEFAULT_CRITERIA["skip"]
     assert not any(ch.isdigit() for text in proposed.values() for ch in text)
+    # banda por volatilidade (série px_in quase parada → piso) e tabela de lift legível
+    audit = proposal["audit"]
+    assert audit["band_mode"] == "vol" and audit["band_fixed"] == 0.001
+    assert audit["band_detail"]["source"] == "vol" and audit["band_detail"]["clamped"] == "floor"
+    assert audit["band"] == pytest.approx(0.0005) and pct["mistakes"][0]["band"] == pytest.approx(0.0005)
+    lift = {row["word"]: row for row in pct["word_lift"]["buy"]}
+    assert lift["thin"]["err_share"] == 1.0 and lift["thin"]["ok_share"] == 0.0 and lift["thin"]["eligible"]
+    assert lift["thin"]["episodes"] == 3
+    assert set(pct["lift_words"]["buy"]) == {"thin", "violent", "wide", "late", "loud"}
 
 
 def test_no_mistakes_means_no_change():
@@ -114,6 +148,70 @@ def test_no_mistakes_means_no_change():
     assert proposal["changed"] is False
     assert proposal["proposed_criteria"] == proposal["current_criteria"] == DEFAULT_CRITERIA
     assert proposal["additions"] == {}
+
+
+def test_baseline_words_get_zero_lift_and_no_phrase():
+    # Erros e acertos no MESMO estado: todas as palavras têm lift 0 → nenhuma frase, apesar dos erros.
+    rows = [dict(row, state=HOLD_STATE) for row in von_like_log()]
+    proposal = _proposal(rows)
+    pct = proposal["audit"]["percentile"]
+    assert pct["n_mistakes"] == 6 and pct["n_correct"] == 6
+    assert all(row["lift"] == 0 and not row["eligible"] for side in ("buy", "sell") for row in pct["word_lift"][side])
+    assert pct["lift_words"] == {"buy": [], "sell": []}
+    assert proposal["changed"] is False and proposal["additions"] == {}
+    assert proposal["proposed_criteria"] == DEFAULT_CRITERIA
+
+
+def test_lift_needs_support_and_reference():
+    mistakes = [{"t": _t(m), "action": "buy", "state": BUY_STATE} for m in (0, 1, 2)]  # 1 só episódio
+    correct = [{"t": _t(m), "action": "buy", "state": BUY_OK_STATE} for m in (60, 80, 100)]
+    assert propose_criteria(dict(DEFAULT_CRITERIA), mistakes, correct)[1] == {}
+    spread = [{"t": _t(m), "action": "buy", "state": BUY_STATE} for m in (0, 20, 40)]
+    assert propose_criteria(dict(DEFAULT_CRITERIA), spread, correct)[1]["buy"]
+    assert propose_criteria(dict(DEFAULT_CRITERIA), spread)[1] == {}  # sem acertos de referência: sem contraste
+    assert propose_criteria(dict(DEFAULT_CRITERIA), spread, correct[:2])[1] == {}  # < 3 acertos
+    table = {r["word"]: r for r in word_lift(spread, correct)}
+    assert table["quiet"]["lift"] == 0 and not table["quiet"]["eligible"]
+    assert table["tight"]["lift"] == -1.0 and table["thin"]["lift"] == 1.0
+
+
+def _alternating(n=180, lo=100.0, hi=101.0, trade=None):
+    rows = [_row(m, conf=round(0.20 + (m % 10) * 0.02, 2), px=lo if m % 2 == 0 else hi) for m in range(n)]
+    if trade is not None:
+        rows = [r for r in rows if _minute(r["t"]) != trade["minute"]]
+        rows.append(_row(trade["minute"], conf=0.45, action="buy", model_action="buy", px=trade["px"], state=BUY_STATE))
+        rows.sort(key=lambda row: row["t"])
+    return rows
+
+
+def test_vol_band_from_decision_series():
+    timeline = build_timeline(_alternating())
+    end = timeline.times[-1]
+    info = vol_band(timeline, end)
+    # 15 min é ímpar: retornos alternam +1% e −0,99%; banda = 0,5 × mediana
+    assert info["source"] == "vol" and info["clamped"] is None and info["n"] > 100
+    assert info["median_abs_ret"] == pytest.approx(0.00995, abs=1e-4)
+    assert info["band"] == pytest.approx(0.5 * info["median_abs_ret"])
+    wild = vol_band(build_timeline(_alternating(lo=100.0, hi=110.0)), end)
+    assert wild["band"] == 0.015 and wild["clamped"] == "cap"
+    calm = vol_band(build_timeline(_alternating(lo=100.0, hi=100.0)), end)
+    assert calm["band"] == 0.0005 and calm["clamped"] == "floor"
+    short = vol_band(build_timeline(_alternating(n=20)), timeline.times[19])
+    assert short["source"] == "fallback_fixed" and short["band"] == 0.001
+    assert vol_band(timeline, None)["source"] == "fallback_fixed"
+
+
+def test_real_bot_rewrite_uses_vol_band():
+    # Compra a 101.3 que 15 min depois está a 101 (−0,30%): erro com banda fixa 0,1%; flat com a banda de vol (~0,5%).
+    rows = _alternating(trade={"minute": 100, "px": 101.3})
+    vol = _proposal(rows)["audit"]
+    fixed = _proposal(rows, band_mode="fixed")["audit"]
+    assert vol["band_mode"] == "vol" and vol["band"] == pytest.approx(0.004975, abs=1e-4)
+    assert vol["percentile"]["n_resolved"] == 1 and vol["percentile"]["n_mistakes"] == 0 and vol["percentile"]["n_flat"] == 1
+    assert fixed["band"] == 0.001 and fixed["band_detail"] == {"band": 0.001, "source": "fixed"}
+    assert fixed["percentile"]["n_mistakes"] == 1
+    with pytest.raises(RewriteError):
+        _proposal(rows, band_mode="bogus")
 
 
 def test_rewrite_is_idempotent_on_already_added_phrases():
@@ -127,7 +225,7 @@ def test_review_date_filters_the_brt_day_and_labels_the_file(tmp_path):
     same_day = _proposal(rows, review_date=date(2026, 9, 30))
     assert same_day["date"] == "2026-09-30"
     assert same_day["title"].endswith("2026-09-30")
-    assert same_day["audit"]["percentile"]["n_mistakes"] == 3
+    assert same_day["audit"]["percentile"]["n_mistakes"] == 6
     other_day = _proposal(rows, review_date=date(2026, 10, 2))
     assert other_day["window"]["n_decisions"] == 0
     assert other_day["changed"] is False
@@ -214,7 +312,7 @@ def test_rewrite_cli_propose_approve_and_invalid(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(cli, "load_config", lambda: cfg)
     assert cli.main(["rewrite", "--propose", "--date", "2026-09-30"]) == 0
     summary = json.loads(capsys.readouterr().out)
-    assert summary["changed"] is True and summary["percentile_mistakes"] == 3 and summary["fixed_mistakes"] == 0
+    assert summary["changed"] is True and summary["percentile_mistakes"] == 6 and summary["fixed_mistakes"] == 0
     path = tmp_path / "rewrite_proposals" / "2026-09-30.json"
     assert json.loads(path.read_text(encoding="utf-8"))["title"] == "Reescrita noturna — 2026-09-30"
     assert cli.main(["rewrite", "--approve", str(path), "--by", "tester"]) == 0
@@ -296,7 +394,7 @@ def test_autonomous_approve_writes_only_in_paper(tmp_path):
     root = _paper_root(tmp_path)
     prop = _auto(tmp_path)
     assert prop["proposed_criteria"] == NEW and prop["author"] == "claude-night" and prop["status"] == "pending"
-    assert prop["audit"]["percentile"]["n_mistakes"] == 3  # a mesma auditoria por percentil do caminho humano
+    assert prop["audit"]["percentile"]["n_mistakes"] == 6  # a mesma auditoria por percentil do caminho humano
     path = write_proposal(tmp_path / "p", prop, filename="2026-09-30_claude-night.json")
     criteria_path = root / "config" / "criteria.json"
     approvals = tmp_path / "a.jsonl"

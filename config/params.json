@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Parâmetros do bot real (src/jev_trader): defaults → profiles.<PARAMS_PROFILE> (padrão relaxed_paper) → variáveis de ambiente (CONFIDENCE_THRESHOLD, SKIP_THRESHOLD, PROB_MARGIN_MIN, BUY_USDT, SELL_SOL, MAX_BUY_USDT, MAX_SELL_SOL, LOOP_SECONDS, PAPER_COST_BPS), que continuam a sobrepor por compatibilidade. Ficheiro inválido ou perfil desconhecido → valores do artigo. Um perfil com paper_only=true nunca vale com LIVE_TRADING=1 (cai no article).",
+  "note": "Parâmetros do bot real (src/jev_trader): defaults → profiles.<PARAMS_PROFILE> (padrão relaxed_paper) → variáveis de ambiente (CONFIDENCE_THRESHOLD, SKIP_THRESHOLD, PROB_MARGIN_MIN, BUY_USDT, SELL_SOL, MAX_BUY_USDT, MAX_SELL_SOL, LOOP_SECONDS, PAPER_COST_BPS, MAX_EXPOSURE_FRAC), que continuam a sobrepor por compatibilidade. Ficheiro inválido ou perfil desconhecido → valores do artigo. Um perfil com paper_only=true nunca vale com LIVE_TRADING=1 (cai no article). Saídas mecânicas (grupo exits) e teto de exposição (sizing.max_exposure_frac) só valem em paper (src/jev_trader/exits.py); o grupo exits funde-se chave a chave entre defaults e o perfil.",
   "defaults": {
     "gates": {
       "confidence_min": 0.55,
@@ -11,13 +11,20 @@
       "buy_usdt": 1.0,
       "sell_sol": 0.005,
       "max_buy_usdt": 5.0,
-      "max_sell_sol": 0.01
+      "max_sell_sol": 0.01,
+      "max_exposure_frac": null
     },
     "cycle": {
       "loop_seconds": 15.0
     },
     "paper": {
       "paper_cost_bps": 10.0
+    },
+    "exits": {
+      "note": "Desligadas por omissão. tp/sl/trail/trail_arm em fração do custo médio (0.025 = 2,5%); null desliga a regra. sell_frac = fração do SOL do livro vendida numa saída (1 = tudo).",
+      "enabled": false,
+      "reentry_cooldown_min": 30,
+      "sell_frac": 1.0
     }
   },
   "profiles": {
@@ -36,6 +43,26 @@
         "confidence_min": 0.35,
         "skip_min": 0.5,
         "prob_margin_min": 0.2
+      }
+    },
+    "relaxed_exits_paper": {
+      "note": "Livro B do A/B: relaxed_paper + saídas mecânicas do laboratório (TP 2,5%, SL 1,5%, trailing 1% armado a +1%, 30 min sem recomprar depois de uma saída) + exposição em SOL ≤ 50% do livro. Só para paper trading.",
+      "paper_only": true,
+      "gates": {
+        "confidence_min": 0.35,
+        "skip_min": 0.5,
+        "prob_margin_min": 0.2
+      },
+      "sizing": {
+        "max_exposure_frac": 0.5
+      },
+      "exits": {
+        "enabled": true,
+        "tp": 0.025,
+        "sl": 0.015,
+        "trail": 0.01,
+        "trail_arm": 0.01,
+        "reentry_cooldown_min": 30
       }
     }
   }

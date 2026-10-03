@@ -283,6 +283,29 @@ def rsi_signal(rsi: float | None, rsi_prev: float | None, lo: float = 30.0, hi: 
     return "hold"
 
 
+# Tipo de teste (params.json) -> sinal do rules_bot. Os `_full` só mudam a fração de compra (gates), não o sinal.
+RULE_KIND = {"rule_grid": "grid", "rule_rsi": "rsi", "rule_regime": "regime", "rule_donchian": "donch"}
+
+
+def meme_rule_signal(kind: str, held: bool, bull: bool, dsig: str = "hold") -> tuple[str, list[str]]:
+    """Sinal das regras de memecoin -> (sinal, motivos). kind 'regime': segura só com SOL em alta (compra ao entrar
+    no regime, vende ao sair). kind 'donch': compra no rompimento de Donchian para cima com SOL em alta; vende no
+    rompimento para baixo ou quando o regime de SOL acaba ('sol_regime_exit'). Usado pelos originais e pelos forks."""
+    if kind == "regime":
+        if bull and not held:
+            return "buy", []
+        if (not bull) and held:
+            return "sell", []
+        return "hold", []
+    if not bull and held:
+        return "sell", ["sol_regime_exit"]
+    if bull and dsig == "buy" and not held:
+        return "buy", []
+    if dsig == "sell" and held:
+        return "sell", []
+    return "hold", []
+
+
 def load_rule_enabled(overlay: dict, strategy_key: str, cfg_rules: dict) -> bool:
     """Global + per-strategy enable from config and overlay paused flags."""
     if not cfg_rules.get("enabled", True):

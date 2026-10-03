@@ -432,8 +432,11 @@ def validate(eff: dict, meta: dict | None = None) -> list[str]:
 
     runner = meta.get("runner")
     if runner == "rules_bot":
-        if xt.get("enabled") or h is not None or ex.get("mode") == "limit" or rf.get("enabled"):
-            E.append("rules_bot não suporta exits/hours/exec.mode=limit/regime_filter (use um portfólio do lab)")
+        # Forks de regra (rules_bot.RuleForks) suportam exits e regime_filter; os originais de regra não os usam.
+        if h is not None or ex.get("mode") == "limit":
+            E.append("rules_bot não suporta hours/exec.mode=limit")
+        if not meta.get("parent") and (xt.get("enabled") or rf.get("enabled")):
+            E.append("rules_bot: exits/regime_filter só em forks de regra (os originais nunca mudam)")
     elif runner in ("sol_bot", "meme_bot") and ex.get("mode") == "limit":
         E.append(f"{runner}: exec.mode=limit só existe no lab_bot")
     if meta.get("kind") == "ensemble" and en is None:

@@ -35,6 +35,9 @@ def run_night_review(cfg: dict, day: str | None = None) -> dict[str, Any]:
         "cutoff": au["cutoff"],
         "proposed_version": proposed.get("version"),
         "changed": proposed.get("changed"),
+        "band_mode": au.get("band_mode"),
+        "band_by_asset": au.get("band_by_asset"),
+        "lift_words": au.get("lift_words"),
     }
 
 

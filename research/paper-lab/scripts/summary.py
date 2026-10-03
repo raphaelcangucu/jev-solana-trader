@@ -45,11 +45,12 @@ def _restarts_since(t0: float) -> dict[str, int]:
     return out
 
 
-def _real_bot() -> dict | None:
+def _real_bot(log_dir: str | None = None) -> dict | None:
     repo = LAB.parents[1]
     py = os.environ.get("TRADER_PYTHON") or str(repo / ".venv" / "bin" / "python")
+    cmd = [py, "-m", "jev_trader", "score", "--json"] + (["--log-dir", log_dir] if log_dir else [])
     try:
-        r = subprocess.run([py, "-m", "jev_trader", "score", "--json"], cwd=repo, capture_output=True, text=True, timeout=120)
+        r = subprocess.run(cmd, cwd=repo, capture_output=True, text=True, timeout=120)
         return json.loads(r.stdout) if r.returncode == 0 else {"erro": (r.stderr or r.stdout)[-300:]}
     except Exception as ex:  # resumo nunca falha por causa do bot real
         return {"erro": str(ex)[:300]}
@@ -105,7 +106,7 @@ def main() -> int:
     ntr = sum(s.get("trades", 0) for s in win)
     active = sorted([s for s in win if s.get("trades")], key=lambda s: s["trades"], reverse=True)[:a.top]
     L += ["", f"## Últimas {a.hours:g} h", "", f"- Trades: {ntr} em {sum(1 for s in win if s.get('trades'))} portfólios"
-          + (f"; mais ativos: {', '.join(f'{s['name']} ({s['trades']})' for s in active)}" if active else "")]
+          + ("; mais ativos: " + ", ".join(f"{s['name']} ({s['trades']})" for s in active) if active else "")]
     try:
         v = json.loads((ROOT / "data" / "nightly" / "verdicts.json").read_text())["verdicts"]
         cnt: dict[str, int] = {}
@@ -136,17 +137,28 @@ def main() -> int:
             dsk = (f.get("ex_exposure") or 0) - (p.get("ex_exposure") or 0)
             L.append(f"{head} {f['pnl_pct'] - p['pnl_pct']:+.2f} | {dsk:+.2f} | {f.get('trades', 0)}/{p.get('trades', 0)} |")
 
-    # 3) bot real em paper
-    rb = _real_bot()
+    # 3) bot real em paper: livro A (logs/) e, se existir, livro B (logs/paper_b, perfil com saídas), duas linhas cada
     L += ["", "## Bot real (paper, livro da carteira)", ""]
-    if rb and "erro" not in rb:
-        pb, ph, hr, dd, tr = rb["paper_book"], rb["pnl_vs_hold"], rb["hit_rate"], rb["drawdown"], rb["trades"]
-        L += [f"- Livro de papel: {pb['sol']:.6f} SOL + {pb['usdt']:.2f} USDT = US$ {A.fmt(ph.get('paper_value_usd'))} (SOL {rb.get('last_px')})",
-              f"- PnL contra segurar o livro: {ph['usd']:+.2f} US$ ({ph['pct']:+.2f}%)",
-              f"- Hit rate a 15 min: {hr['hits']}/{hr['resolved']}" + (f" ({hr['rate'] * 100:.0f}%)" if hr.get("rate") is not None else ""),
-              f"- Max drawdown: {dd['pct']:.2f}% · trades: {tr['total']} ({tr['buy']} compras / {tr['sell']} vendas)"]
-    else:
-        L.append(f"- indisponível: {(rb or {}).get('erro')}")
+    books = [("A", None)]
+    if (LAB.parents[1] / "logs" / "paper_b" / "paper_book.json").exists():
+        books.append(("B", str(LAB.parents[1] / "logs" / "paper_b")))
+    for label, log_dir in books:
+        rb = _real_bot(log_dir)
+        if rb and "erro" not in rb:
+            pb, ph, hr, dd, tr = rb["paper_book"], rb["pnl_vs_hold"], rb["hit_rate"], rb["drawdown"], rb["trades"]
+            ex = rb.get("exits") or {}
+            br = ex.get("by_reason") or {}
+            expo = ex.get("exposure")
+            rate = f" ({hr['rate'] * 100:.0f}%)" if hr.get("rate") is not None else ""
+            L += [f"- **{label}** ({rb.get('params_profile') or '?'}, desde {rb.get('start_t')}): "
+                  f"{pb['sol']:.6f} SOL + {pb['usdt']:.2f} USDT = US$ {A.fmt(ph.get('paper_value_usd'))}; "
+                  f"contra segurar {A.fmt(ph.get('usd'), 2, True)} US$ ({A.fmt(ph.get('pct'), 2, True)}%)",
+                  f"  hit 15 min {hr['hits']}/{hr['resolved']}{rate} · max DD {A.fmt(dd.get('pct'), 2)}% · "
+                  f"trades {tr['total']} ({tr['buy']}/{tr['sell']}) · saídas {ex.get('total', 0)} "
+                  f"(tp {br.get('tp', 0)}/sl {br.get('sl', 0)}/trail {br.get('trail', 0)}) · "
+                  f"SOL {'—' if expo is None else f'{expo * 100:.0f}%'} do livro"]
+        else:
+            L.append(f"- **{label}** indisponível: {(rb or {}).get('erro')}")
     L.append("")
     text = "\n".join(L)
     out = ROOT / "reports" / "summary_latest.md"; out.parent.mkdir(parents=True, exist_ok=True); out.write_text(text)

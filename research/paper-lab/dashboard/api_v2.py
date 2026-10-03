@@ -578,7 +578,8 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
 
     @r.get("/realbot")
     def realbot(points: int = 360, _: str = A):
-        """Livro de papel do bot real (jev_trader score, calculado em processo; só leitura dos logs)."""
+        """Livro de papel do bot real (jev_trader score, calculado em processo; só leitura dos logs).
+        Com um livro B (logs/paper_b, perfil com saídas), `books` traz A e B com os mesmos campos + `exits`."""
         return INS.real_bot_board(max(60, min(int(points), 2000)))
 
     # ---------- portfolio details
@@ -835,7 +836,8 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
                            ROOT / "params.json"],
         "funding": lambda: [FUND / "data" / "status.json"],
         "health": lambda: [ROOT / "data" / "nightly" / "status.json"] + list((ROOT / "run").glob("*.pid")),
-        "realbot": lambda: [INS.real_bot_root() / "logs" / "decisions.jsonl", INS.real_bot_root() / "logs" / "paper_trades.jsonl"],
+        "realbot": lambda: [d / f for _l, d in INS.real_bot_books(INS.real_bot_root())
+                            for f in ("decisions.jsonl", "paper_trades.jsonl")],
     }
     MIN_GAP = {"sol": 5, "meme": 10, "lab": 15, "params": 0, "funding": 15, "health": 10, "realbot": 30}
 

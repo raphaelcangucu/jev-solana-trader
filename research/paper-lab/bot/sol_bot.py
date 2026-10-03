@@ -167,7 +167,9 @@ def night_review(decisions_log, trades_log, criteria_path, review_path, criteria
     """Revisão noturna (proposta apenas; portão humano). Auditoria por PERCENTIL da confiança
     (bot/confidence_audit.py): corte = P`review.confidence_percentile` das confianças respondidas do von
     no dia revisado, candidatas = chamadas buy/sell, erro = retorno a `review.horizon_s` contra a chamada
-    além de `review.band`. A barra fixa antiga (`review.fixed_bar`, 0,8) é calculada só para comparação.
+    além da banda (`review.band_mode`: "vol" = banda por ativo = k × mediana |retorno a 15 min| em 3 dias, com
+    piso/teto; "fixed" = `review.band`). Palavras das frases escolhidas por lift (erros vs acertos), não por
+    frequência. A barra fixa antiga (`review.fixed_bar`, 0,8) é calculada só para comparação.
     Escreve a proposta em `criteria_v2_path` e o resumo em `review_path`; nunca altera criteria_baseline.json.
     `day` (YYYY-MM-DD, BRT) limita a janela ao dia revisado; sem `day` audita tudo (arranque do v2)."""
     from bot import confidence_audit as CA
@@ -181,10 +183,13 @@ def night_review(decisions_log, trades_log, criteria_path, review_path, criteria
     trades = [t for t in read_jsonl(Path(trades_log)) if t.get("portfolio") in wanted]
     traded_ids = {t.get("decision_id") for t in trades}
     prices_log = Path(prices_log) if prices_log else ROOT / "data" / "prices.jsonl"
-    prices = CA.build_series(logio.iter_rows(prices_log, since_ts=since), asset="SOL") if prices_log.exists() else {}
+    # banda "vol": a série de preços precisa da janela de volatilidade (3 dias) antes do dia revisado
+    px_since = (since - float(rc["band_window_s"])) if (since is not None and rc["band_mode"] == "vol") else since
+    prices = CA.build_series(logio.iter_rows(prices_log, since_ts=px_since), asset="SOL") if prices_log.exists() else {}
+    lp = CA.lift_kwargs(rc)
     kw = dict(prices=prices, trades=trades, horizon_s=rc["horizon_s"], band=rc["band"],
               tolerance_s=rc["tolerance_s"], candidates=rc["candidates"], window=win, top_words=rc["top_words"],
-              tie_rule=rc["tie_rule"])
+              tie_rule=rc["tie_rule"], lift_params=lp, **CA.band_kwargs(rc))
     audits = {}
     for gname, ports in AUDIT_GROUPS.items():
         g = CA.dedupe_calls([d for d in rows if d.get("portfolio") in ports], traded_ids=traded_ids)
@@ -194,7 +199,8 @@ def night_review(decisions_log, trades_log, criteria_path, review_path, criteria
         }
     base = load_criteria(Path(criteria_path))
     main = audits[PROPOSAL_GROUP]["pct"]
-    proposed = CA.propose_criteria(base, main, min_mistakes=int(rc["min_mistakes"]), generated_at=brt_iso())
+    proposed = CA.propose_criteria(base, main, min_mistakes=int(rc["min_mistakes"]), generated_at=brt_iso(),
+                                   lift_params=lp, table_rows=int(rc["top_words"]))
     proposed["audit"].update({
         "day": day, "group": PROPOSAL_GROUP,
         "fixed_bar_compare": CA.summary(audits[PROPOSAL_GROUP]["fixed"]),
@@ -202,6 +208,9 @@ def night_review(decisions_log, trades_log, criteria_path, review_path, criteria
     })
     write_json(Path(criteria_v2_path), proposed)
     title_day = day or brt_now().strftime("%Y-%m-%d")
+    band_txt = (f"banda por ativo = {rc['band_k']:g} × mediana |retorno a {int(rc['horizon_s'])} s| em "
+                f"{rc['band_window_s'] / 86400:g} dias, entre {rc['band_floor'] * 100:.2f}% e {rc['band_cap'] * 100:.2f}%"
+                if rc["band_mode"] == "vol" else f"±{rc['band'] * 100:.2f}% fixa")
     f = lambda x, n=3: "–" if x is None else f"{x:.{n}f}"
     L = [f"# Revisão noturna (critérios v2) — {title_day}", "",
          f"**Gerado (BRT):** {brt_iso()} · **Dia revisado:** {day or 'todo o log disponível'} · paper only", "",
@@ -210,25 +219,45 @@ def night_review(decisions_log, trades_log, criteria_path, review_path, criteria
          f"- Proposta escrita em `{Path(criteria_v2_path).name}` (só proposta).", "",
          "## Auditoria por percentil da confiança", "",
          f"Corte = P{rc['confidence_percentile']:g} das confianças respondidas (sem fail-closed) de cada grupo; candidatas = "
-         f"`{rc['candidates']}`; erro = retorno a {int(rc['horizon_s'])} s contra a chamada além de ±{rc['band']*100:.2f}%. "
+         f"`{rc['candidates']}`; erro = retorno a {int(rc['horizon_s'])} s contra a chamada além da banda ({band_txt}). "
          f"A barra fixa {rc['fixed_bar']} aparece só para comparação. Com muitos empates no corte usa-se `>` (coluna Regra).", "",
-         "| Grupo | Regra | Corte | Respondidas | Confiantes | Resolvidas | Erros (episódios) | Acertos | Hit rate | Palavras dos erros |",
-         "|---|---|---:|---:|---:|---:|---:|---:|---:|---|"]
+         "| Grupo | Regra | Corte | Banda | Respondidas | Confiantes | Resolvidas | Erros (episódios) | Acertos | Hit rate | Palavras com lift (elegíveis) |",
+         "|---|---|---:|---|---:|---:|---:|---:|---:|---:|---|"]
     for g, v in audits.items():
         for a in (v["pct"], v["fixed"]):
-            L.append(f"| {g} | {a['rule']} | {f(a['cutoff'])} | {a['n_answered']} | {a['n_confident']} | {a['n_resolved']} | "
+            bands = ", ".join(f"{k} {b * 100:.3f}%" for k, b in sorted(a["band_by_asset"].items())) or "–"
+            L.append(f"| {g} | {a['rule']} | {f(a['cutoff'])} | {bands} | {a['n_answered']} | {a['n_confident']} | {a['n_resolved']} | "
                      f"{a['n_mistakes']} ({a['mistake_episodes']}) | {a['n_correct']} | {f(a['hit_rate'], 2)} | "
-                     f"{', '.join(f'{w}:{n}' for w, n in a['lose_words']) or '–'} |")
+                     f"{', '.join(a['lift_words']['all']) or '–'} |")
+    bd = main["bands"]
+    if bd:
+        L += ["", "### Banda usada por ativo (grupo principal)", "",
+              "| Ativo | Banda | Origem | Mediana abs. ret. 15 min | Retornos na janela | Limitada |", "|---|---:|---|---:|---:|---|"]
+        for k, b in sorted(bd.items()):
+            med = b.get("median_abs_ret")
+            L.append(f"| {k} | {b['band'] * 100:.3f}% | {b.get('source')} | {'–' if med is None else f'{med * 100:.3f}%'} | "
+                     f"{b.get('n', '–')} | {b.get('clamped') or '–'} |")
+    lp_ = proposed["word_selection"]["params"]
+    L += ["", "### Palavras de estado por lift (grupo principal: erros vs acertos)", "",
+          f"lift = % dos erros com a palavra − % dos acertos com a palavra. Entra na proposta só com lift ≥ {lp_['min_lift']:g}, "
+          f"≥ {lp_['min_count']} erros, ≥ {lp_['min_episodes']} episódios de erro e ≥ {lp_['min_ref']} acertos de referência. "
+          "Palavras de fundo (em quase todos os erros e acertos) ficam com lift ≈ 0.", ""]
+    L += CA.lift_table_md(proposed["word_selection"]["table"]["all"], int(rc["top_words"])) if main["outcomes"] else ["- sem chamadas resolvidas."]
+    for sd in ("buy", "sell"):
+        L.append(f"- elegíveis {sd}: {', '.join(proposed['word_selection']['eligible'][sd]) or '–'}")
     L += ["", "## Proposta", "",
-          ("- Há erros confiantes: frases acrescentadas " + json.dumps(proposed["phrases_added"], ensure_ascii=False))
-          if proposed["changed"] else "- Sem erros confiantes no grupo principal: nenhuma frase nova (proposta = texto base).",
+          ("- Frases acrescentadas " + json.dumps(proposed["phrases_added"], ensure_ascii=False)) if proposed["changed"]
+          else ("- Sem erros confiantes no grupo principal: nenhuma frase nova (proposta = texto base)." if not main["mistakes"]
+                else "- Há erros confiantes, mas nenhuma palavra com lift positivo acima do limiar e suporte suficiente: "
+                     "nenhuma frase nova (proposta = texto base)."),
           "", "```json",
           json.dumps({"action": proposed["action"], "skip_this_cycle": proposed["skip_this_cycle"]}, indent=2),
           "```", ""]
     if main["mistakes"]:
         L += ["## Erros confiantes (grupo principal, até 20)", ""]
         for i, m in enumerate(main["mistakes"][:20], 1):
-            L.append(f"{i}. `{m['ts_brt']}` {m['side']} conf={m['confidence']:.3f} ret={m['ret']*100:+.3f}% estado=`{m['state']}`")
+            L.append(f"{i}. `{m['ts_brt']}` {m['side']} conf={m['confidence']:.3f} ret={m['ret']*100:+.3f}% "
+                     f"(banda {m['band']*100:.3f}%) estado=`{m['state']}`")
         L.append("")
     review_path = Path(review_path)
     review_path.parent.mkdir(parents=True, exist_ok=True)

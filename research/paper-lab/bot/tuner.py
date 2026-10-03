@@ -295,8 +295,10 @@ def _start_capital(asset):
 
 # ---------- rule strategies (1h bars) ----------
 def rule_search(meta, bars_sol, bars_meme, conf=None, eff=None):
-    """Replay rule params on the last 30 days of 1h bars (walk-forward 70/30). Report-only (no rule fork executor).
-    Com `eff` (params efetivos): parâmetros iniciais de rule.*, espaço de busca de tuning.params e fração de compra."""
+    """Replay rule params on the last 30 days of 1h bars (walk-forward 70/30). O nightly cria um fork de regra com
+    `{"rule": best_diff}` (executado pelo rules_bot, classe RuleForks).
+    Com `eff` (params efetivos): parâmetros iniciais de rule.*, espaço de busca de tuning.params, limites de
+    tuning.bounds e fração de compra. O replay não simula exits/regime_filter de forks (só a regra)."""
     from bot.rules_engine import ema_series, rsi_series
     c = dict(TUNE_DEFAULTS)
     tu = (eff or {}).get("tuning") or {}
@@ -317,8 +319,12 @@ def rule_search(meta, bars_sol, bars_meme, conf=None, eff=None):
             if rule and rule.startswith("rule_regime"):
                 sig = "buy" if bull and q == 0 else ("sell" if not bull and q > 0 else "hold")
             elif rule and rule.startswith("rule_donch"):
-                n = prm.get("donchian", 20); hi = max(b["high"] for b in bars_meme[i - n:i]); lo = min(b["low"] for b in bars_meme[i - n:i])
-                sig = "sell" if (q > 0 and (not bull or px < lo)) else ("buy" if bull and q == 0 and px > hi else "hold")
+                n = int(prm.get("donchian", 20))
+                if i < n:  # janela ainda incompleta (Donchian > 30 h no início do histórico): sem sinal
+                    sig = "sell" if (q > 0 and not bull) else "hold"
+                else:
+                    hi = max(b["high"] for b in bars_meme[i - n:i]); lo = min(b["low"] for b in bars_meme[i - n:i])
+                    sig = "sell" if (q > 0 and (not bull or px < lo)) else ("buy" if bull and q == 0 and px > hi else "hold")
             elif rule == "rsi":
                 if rs[i] is not None and rs[i - 1] is not None:
                     sig = "buy" if rs[i - 1] < prm.get("lo", 30) <= rs[i] and q == 0 else ("sell" if rs[i - 1] > prm.get("hi", 70) >= rs[i] and q > 0 else "hold")
@@ -347,12 +353,14 @@ def rule_search(meta, bars_sol, bars_meme, conf=None, eff=None):
     pen = c["trade_penalty_bps"] / 1e4 * C
     sc = lambda p: tuple(r[0] - pen * r[1] for r in (run(p, n0, split), run(p, split, n)))
     cur = sc(base); best = None
+    bounds = tu.get("bounds") or {}
     for k, v in base.items():
         for s in c["steps"]:
-            nv = v * s; nv = int(round(nv)) if isinstance(v, int) else nv
+            nv = _bound(v * s, bounds.get(f"rule.{k}"), isinstance(v, int))
             if nv == v: continue
             p = dict(base); p[k] = nv
             if p.get("ema_fast", 0) >= p.get("ema_slow", 1e9): continue
+            if p.get("lo", 0) >= p.get("hi", 1e9): continue
             t, va = sc(p)
             if va - cur[1] >= c["min_improvement_pct"] / 100 * C and t >= cur[0] and (best is None or va > best[1][1]):
                 best = ({k: nv}, (t, va))

@@ -135,7 +135,17 @@
         "params": [
           "rule.grid_pct",
           "rule.levels"
-        ]
+        ],
+        "bounds": {
+          "rule.grid_pct": [
+            0.005,
+            0.1
+          ],
+          "rule.levels": [
+            1,
+            10
+          ]
+        }
       }
     },
     "rule_rsi": {
@@ -151,7 +161,21 @@
           "rule.rsi_period",
           "rule.lo",
           "rule.hi"
-        ]
+        ],
+        "bounds": {
+          "rule.rsi_period": [
+            5,
+            50
+          ],
+          "rule.lo": [
+            10,
+            45
+          ],
+          "rule.hi": [
+            55,
+            90
+          ]
+        }
       }
     },
     "rule_regime": {
@@ -165,7 +189,17 @@
         "params": [
           "rule.ema_fast",
           "rule.ema_slow"
-        ]
+        ],
+        "bounds": {
+          "rule.ema_fast": [
+            4,
+            50
+          ],
+          "rule.ema_slow": [
+            10,
+            200
+          ]
+        }
       },
       "variants": {
         "full": {
@@ -175,6 +209,14 @@
           },
           "limits": {
             "buy_fraction_usdt_max": 1.0
+          },
+          "tuning": {
+            "bounds": {
+              "gates.buy_fraction_usdt": [
+                0.05,
+                1.0
+              ]
+            }
           }
         }
       }
@@ -192,7 +234,21 @@
           "rule.ema_fast",
           "rule.ema_slow",
           "rule.donchian"
-        ]
+        ],
+        "bounds": {
+          "rule.donchian": [
+            5,
+            120
+          ],
+          "rule.ema_fast": [
+            4,
+            50
+          ],
+          "rule.ema_slow": [
+            10,
+            200
+          ]
+        }
       },
       "variants": {
         "full": {
@@ -202,6 +258,14 @@
           },
           "limits": {
             "buy_fraction_usdt_max": 1.0
+          },
+          "tuning": {
+            "bounds": {
+              "gates.buy_fraction_usdt": [
+                0.05,
+                1.0
+              ]
+            }
           }
         }
       }

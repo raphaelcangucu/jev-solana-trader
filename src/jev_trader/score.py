@@ -1,14 +1,19 @@
 """Placar do livro de papel: os quatro critérios de sucesso do README, calculados a partir dos logs.
 
 Só contas puras sobre listas de registos. A leitura dos ficheiros e a impressão ficam em `__main__.py`.
+
+Livros A/B: `experiment_for_book` troca o início e o preço de referência pelos do `paper_book.json` quando o
+livro começou depois do experimento (livro B começa no seu primeiro ciclo, com o mesmo livro inicial).
+O placar leva também o rótulo do livro, o perfil e as saídas (por motivo), custo médio e exposição.
 """
 
 from __future__ import annotations
 
 import bisect
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 
+from jev_trader.exits import EXIT_REASONS, exposure, replay_position
 from jev_trader.experiment import Experiment
 from jev_trader.records import parse_t
 
@@ -56,6 +61,45 @@ def forward_return(
         return None, None, None
     later = timeline.prices[index]
     return later / px0 - 1.0, later, timeline.stamps[index]
+
+
+def experiment_for_book(experiment: Experiment, book: dict | None) -> Experiment:
+    """Experimento visto pelo livro: se o `paper_book.json` começou depois do experimento, início e referência dele."""
+    if not isinstance(book, dict):
+        return experiment
+    start = parse_t(book.get("start_t"))
+    exp_start = parse_t(experiment.start_t)
+    if start is None or exp_start is None or start <= exp_start:
+        return experiment
+    ref = _positive(book.get("start_px"))
+    return replace(
+        experiment,
+        start_t=str(book["start_t"]),
+        ref_sol_usd=ref if ref is not None else experiment.ref_sol_usd,
+        ref_source=f"px_in no início do livro {book.get('book') or '?'}" if ref is not None else experiment.ref_source,
+    )
+
+
+def exit_stats(trades: list[dict], book: dict | None, experiment: Experiment, last_px: float | None) -> dict:
+    """Saídas por motivo, custo médio, pico e exposição. Livro sem estado de posição → reconstruído dos trades."""
+    by_reason = {reason: 0 for reason in EXIT_REASONS}
+    for trade in trades:
+        if trade.get("side") == "sell" and trade.get("reason") in by_reason:
+            by_reason[trade["reason"]] += 1
+    book = book if isinstance(book, dict) else {}
+    if "avg_cost" in book:
+        avg, peak, last_exit = _positive(book.get("avg_cost")), _positive(book.get("peak_px")), book.get("last_exit_t")
+    else:
+        state = replay_position(trades, start_sol=experiment.book_sol, start_cost=experiment.ref_sol_usd)
+        avg, peak, last_exit = state["avg_cost"], state["peak_px"], state["last_exit_t"]
+    return {
+        "total": sum(by_reason.values()),
+        "by_reason": by_reason,
+        "avg_cost": None if avg is None else round(avg, 8),
+        "peak_px": None if peak is None else round(peak, 8),
+        "ret_from_avg": round(last_px / avg - 1, 8) if avg and last_px else None,
+        "last_exit_t": last_exit,
+    }
 
 
 def select_run(rows: list[dict], experiment: Experiment, since: datetime | None = None) -> list[dict]:
@@ -162,8 +206,13 @@ def scoreboard(
     experiment: Experiment,
     *,
     since: datetime | None = None,
+    book: dict | None = None,
 ) -> dict:
-    """Os quatro números. PnL é sempre desde o início do run; `since` limita hit rate, drawdown e trades."""
+    """Os quatro números. PnL é sempre desde o início do run (ou do livro); `since` limita hit rate, drawdown e trades.
+
+    `book` é o `paper_book.json` (opcional): dá o rótulo, o início de um livro B e o estado da posição.
+    """
+    experiment = experiment_for_book(experiment, book)
     run_decisions = select_run(decisions, experiment)
     run_trades = select_run(paper_trades, experiment)
     window_decisions = select_run(decisions, experiment, since)
@@ -179,7 +228,13 @@ def scoreboard(
 
     buys = sum(1 for trade in window_trades if trade.get("side") == "buy")
     sells = sum(1 for trade in window_trades if trade.get("side") == "sell")
+    label = (book or {}).get("book") if isinstance(book, dict) else None
+    profile = next((row.get("params_profile") for row in reversed(run_decisions) if row.get("params_profile")), None)
+    exits = exit_stats(window_trades, book, experiment, last_px)
+    exits["exposure"] = _round_or_none(exposure(sol, usdt, last_px), 6)
     return {
+        "book": label or "A",
+        "params_profile": profile,
         "run_id": experiment.run_id,
         "start_t": experiment.start_t,
         "since": since.isoformat() if since else None,
@@ -193,6 +248,7 @@ def scoreboard(
         "hit_rate": hit_rate(window_trades, timeline),
         "drawdown": max_drawdown(equity_series(window_decisions)),
         "trades": {"total": len(window_trades), "buy": buys, "sell": sells},
+        "exits": exits,
     }
 
 
@@ -228,8 +284,23 @@ def render_table(board: dict) -> str:
         ("3. Max drawdown", f"{_fmt(dd['usd'], 6)} USD ({_fmt(dd['pct'], 4)}%) em {dd['points']} pontos"),
         ("4. Trades de papel", f"{trades['total']} ({trades['buy']} compras, {trades['sell']} vendas)"),
     ]
+    exits = board.get("exits")
+    if exits:
+        reasons = exits["by_reason"]
+        expo = exits.get("exposure")
+        rows += [
+            ("Saídas mecânicas", f"{exits['total']} (tp {reasons['tp']}, sl {reasons['sl']}, trail {reasons['trail']})"),
+            (
+                "Custo médio / exposição",
+                f"{_fmt(exits.get('avg_cost'), 4)} USD/SOL / "
+                + ("—" if expo is None else f"{expo * 100:.1f}% em SOL"),
+            ),
+        ]
     width = max(len(label) for label, _ in rows)
-    lines = ["Placar do livro de papel", ""]
+    title = f"Placar do livro de papel {board.get('book') or 'A'}"
+    if board.get("params_profile"):
+        title += f" (perfil {board['params_profile']})"
+    lines = [title, ""]
     lines += [f"{label.ljust(width)}  {value}" for label, value in rows]
     return "\n".join(lines)
 
@@ -293,6 +364,10 @@ def _number(value: object) -> float | None:
 def _positive(value: object) -> float | None:
     number = _number(value)
     return number if number is not None and number > 0 else None
+
+
+def _round_or_none(value: float | None, digits: int) -> float | None:
+    return None if value is None else round(value, digits)
 
 
 def _fmt(value: float | None, digits: int) -> str:

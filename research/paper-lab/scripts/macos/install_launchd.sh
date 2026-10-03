@@ -4,15 +4,21 @@
 #   bash scripts/macos/install_launchd.sh --status    # estado dos quatro agentes
 #   bash scripts/macos/install_launchd.sh --uninstall # pára e remove os plists (não apaga dados)
 #   bash scripts/macos/install_launchd.sh --install-night | --uninstall-night | --kick-night   # só a revisão noturna
+#   bash scripts/macos/install_launchd.sh --install-trader-b | --uninstall-trader-b   # só o livro B do bot real (opcional)
 # Agentes: com.jev.paperlab (supervisor do lab), com.jev.trader-paper (bot real, dry-run), com.jev.caffeinate,
 # com.jev.night-claude (revisão noturna autónoma com o Claude Code, todos os dias à hora de config.json
 # claude_night.run_at, padrão 01:30 local; sem RunAtLoad nem KeepAlive).
+# Opcional (5.º, não entra no install normal): com.jev.trader-paper-exits, o livro B do A/B do bot real — o mesmo
+# trader_service.sh (dry-run forçado, LIVE_TRADING=0) com LOG_DIR=<repo>/logs/paper_b, PARAMS_PROFILE=relaxed_exits_paper
+# e PAPER_BOOK=B. --status e --uninstall cobrem-no.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 AGENTS="$HOME/Library/LaunchAgents"
 DOMAIN="gui/$(id -u)"
 LOGS="$PAPER_LAB_ROOT/logs"
 LABELS=(com.jev.paperlab com.jev.trader-paper com.jev.caffeinate com.jev.night-claude)
+TRADER_B=com.jev.trader-paper-exits
+ALL_LABELS=("${LABELS[@]}" "$TRADER_B")
 # bash 3.2 do macOS: sem arrays associativos.
 script_for() {
   case "$1" in
@@ -20,7 +26,18 @@ script_for() {
     com.jev.trader-paper) echo "$LAB/scripts/macos/trader_service.sh" ;;
     com.jev.caffeinate) echo "$LAB/scripts/macos/caffeinate_service.sh" ;;
     com.jev.night-claude) echo "$LAB/scripts/macos/night_claude.sh" ;;
+    com.jev.trader-paper-exits) echo "$LAB/scripts/macos/trader_service.sh" ;;
   esac
+}
+
+# Variáveis extra do plist: só o livro B tem (pasta de logs própria, perfil com saídas, rótulo B).
+extra_env() {
+  if [[ "$1" == "$TRADER_B" ]]; then
+    printf '    <key>LOG_DIR</key><string>%s</string>\n' "$REPO/logs/paper_b"
+    printf '    <key>PARAMS_PROFILE</key><string>relaxed_exits_paper</string>\n'
+    printf '    <key>PAPER_BOOK</key><string>B</string>\n'
+    printf '    <key>LIVE_TRADING</key><string>0</string>\n'
+  fi
 }
 
 # Hora e minuto de claude_night.run_at (config.json), padrão 01:30.
@@ -68,6 +85,7 @@ plist() {
     <key>JEV_ALTS_ROOT</key><string>$JEV_ALTS_ROOT</string>
     <key>RUN_UNTIL_BRT</key><string>$RUN_UNTIL_BRT</string>
     <key>LAB_PYTHON</key><string>$LAB_PYTHON</string>
+$(extra_env "$label")
   </dict>
 $(schedule "$label")
   <key>ProcessType</key><string>Standard</string>
@@ -80,7 +98,7 @@ EOF
 
 case "${1:-install}" in
   --uninstall)
-    for l in "${LABELS[@]}"; do
+    for l in "${ALL_LABELS[@]}"; do
       launchctl bootout "$DOMAIN/$l" 2>/dev/null && echo "parado $l" || echo "$l não estava carregado"
       rm -f "$AGENTS/$l.plist"
     done
@@ -88,7 +106,7 @@ case "${1:-install}" in
     bash "$LAB/scripts/stop.sh" || true
     ;;
   --status)
-    for l in "${LABELS[@]}"; do
+    for l in "${ALL_LABELS[@]}"; do
       if launchctl print "$DOMAIN/$l" >/dev/null 2>&1; then
         launchctl print "$DOMAIN/$l" | awk -v l="$l" '/^\tstate =|^\tpid =|last exit code/ {gsub(/^\t+/,""); printf "%s: %s\n", l, $0}'
       else
@@ -96,10 +114,12 @@ case "${1:-install}" in
       fi
     done
     ;;
-  install|--install|--install-night)
+  install|--install|--install-night|--install-trader-b)
     # --install-night: só o agente da revisão noturna (não reinicia o lab nem o bot real que já correm).
+    # --install-trader-b: só o livro B do bot real (não toca no livro A nem no lab).
     TARGETS=("${LABELS[@]}")
     if [[ "${1:-install}" == "--install-night" ]]; then TARGETS=(com.jev.night-claude); fi
+    if [[ "${1:-install}" == "--install-trader-b" ]]; then TARGETS=("$TRADER_B"); mkdir -p "$REPO/logs/paper_b"; fi
     mkdir -p "$AGENTS" "$LOGS"
     for l in "${TARGETS[@]}"; do
       chmod +x "$(script_for "$l")"
@@ -115,9 +135,13 @@ case "${1:-install}" in
     launchctl bootout "$DOMAIN/com.jev.night-claude" 2>/dev/null && echo "parado com.jev.night-claude" || echo "com.jev.night-claude não estava carregado"
     rm -f "$AGENTS/com.jev.night-claude.plist"
     ;;
+  --uninstall-trader-b)
+    launchctl bootout "$DOMAIN/$TRADER_B" 2>/dev/null && echo "parado $TRADER_B" || echo "$TRADER_B não estava carregado"
+    rm -f "$AGENTS/$TRADER_B.plist"
+    ;;
   --kick-night)
     # Corre a revisão noturna agora (primeira corrida supervisionada); log em logs/claude_night_<dia>.log.
     launchctl kickstart "$DOMAIN/com.jev.night-claude" && echo "com.jev.night-claude lançado; log: $LOGS/claude_night_*.log"
     ;;
-  *) echo "uso: $0 [--install|--install-night|--status|--uninstall|--uninstall-night|--kick-night]" >&2; exit 2 ;;
+  *) echo "uso: $0 [--install|--install-night|--install-trader-b|--status|--uninstall|--uninstall-night|--uninstall-trader-b|--kick-night]" >&2; exit 2 ;;
 esac

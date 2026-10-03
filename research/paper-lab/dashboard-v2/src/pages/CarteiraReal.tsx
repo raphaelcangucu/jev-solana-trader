@@ -1,7 +1,8 @@
 // O bot real em papel: o livro que espelha a carteira (~US$ 52), contra simplesmente segurar o livro inicial.
+// Com um livro B (logs/paper_b: o mesmo bot com saídas TP/SL/trailing e exposição ≤ 50%), A e B lado a lado no topo.
 import { lazy, Suspense, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
+import { api, type RealBot } from '@/lib/api'
 import { usePollInterval } from '@/lib/live'
 import { frac, isoTime, num, pct, price, signedPct, signedUsd, usd } from '@/lib/format'
 import { Delta, ErrorNote, Loading, Note, SectionHead, Stat } from '@/components/ui'
@@ -11,6 +12,39 @@ const TimeChart = lazy(() => import('@/components/charts/TimeChart'))
 const REASON: Record<string, string> = {
   low_confidence: 'confiança baixa', high_skip: 'incerteza alta', insufficient_usdt: 'sem USDT para comprar', insufficient_sol: 'sem SOL para vender',
   cooldown: 'pausa entre trades', max_trades_per_hour: 'limite de trades por hora', low_margin: 'margem baixa', market_closed: 'mercado indisponível',
+  low_prob_margin: 'margem baixa', skip: 'incerteza alta', fail_closed: 'sem resposta do modelo', reentry_cooldown: 'pausa depois de uma saída',
+  max_exposure: 'teto de exposição',
+}
+const EXIT: Record<string, string> = { tp: 'take profit', sl: 'stop loss', trail: 'trailing stop' }
+
+// Campos do placar por livro (A/B) que o tipo RealBot de lib/api ainda não descreve.
+type Exits = { total: number; by_reason: Record<string, number>; avg_cost: number | null; ret_from_avg: number | null; exposure: number | null; last_exit_t: string | null }
+type Book = RealBot & { book?: string; params_profile?: string | null; log_dir?: string; exits?: Exits }
+type Board = Book & { books?: Book[] }
+
+function BookCard({ B }: { B: Book }) {
+  const hold = B.pnl_vs_hold, hr = B.hit_rate, tr = B.trades, ex = B.exits, comp = B.composition
+  const exits = ex && ex.total ? Object.entries(ex.by_reason).filter(([, n]) => n > 0).map(([k, n]) => `${n} ${EXIT[k] ?? k}`).join(', ') : 'nenhuma'
+  return (
+    <div className="min-w-0 rounded-lg border border-rule px-4 py-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+        <h3 className="t-title text-[19px]">Livro {B.book ?? 'A'}</h3>
+        <span className="text-[12.5px] text-ink-3 t-tab">{B.params_profile ?? '—'}; desde {isoTime(B.start_t, true)}</span>
+      </div>
+      <p className="mt-2 flex flex-wrap items-baseline gap-x-3">
+        <Delta v={hold?.usd} className="t-display text-[30px]">{signedUsd(hold?.usd)}</Delta>
+        <Delta v={hold?.pct} arrowOn={false} className="t-num text-[16px]">{signedPct(hold?.pct, 2)}</Delta>
+      </p>
+      <p className="text-[12.5px] text-ink-3 t-tab">contra segurar o livro inicial; vale {usd(hold?.paper_value_usd)}</p>
+      {comp && <div className="mt-3"><Composition sol={comp.sol_usd} usdt={comp.usdt_usd} /></div>}
+      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3">
+        <Stat label={`Acerto ${hr?.horizon_min ?? 15} min`} sub={`${hr?.hits ?? 0} de ${hr?.resolved ?? 0}`}>{hr?.rate == null ? '—' : pct(hr.rate * 100, 0)}</Stat>
+        <Stat label="Compras / vendas" sub={`maior queda ${pct(B.drawdown?.pct, 1)}`}>{tr?.buy ?? 0} / {tr?.sell ?? 0}</Stat>
+        <Stat label="Saídas" sub={exits}>{num(ex?.total ?? 0, 0)}</Stat>
+        <Stat label="Custo médio" sub={ex?.ret_from_avg == null ? 'sem posição' : `${signedPct(ex.ret_from_avg * 100, 2)} até agora`}>{ex?.avg_cost == null ? '—' : `US$ ${price(ex.avg_cost)}`}</Stat>
+      </dl>
+    </div>
+  )
 }
 const ACTION: Record<string, string> = { buy: 'compra', sell: 'venda', hold: 'espera' }
 
@@ -34,7 +68,7 @@ function Composition({ sol, usdt }: { sol: number; usdt: number }) {
 export default function CarteiraReal() {
   const poll = usePollInterval(30_000)
   const q = useQuery({ queryKey: ['realbot'], queryFn: api.realbot, refetchInterval: poll || 60_000 })
-  const R = q.data
+  const R = q.data as Board | undefined
   const series = useMemo(() => {
     const rows = R?.series?.rows ?? []
     return [
@@ -52,7 +86,7 @@ export default function CarteiraReal() {
       <section className="sheet rounded-xl px-4 py-5 sm:px-7 sm:py-6" aria-labelledby="rb-title">
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
           <div>
-            <h1 id="rb-title" className="t-title text-[26px]">Carteira real, em papel</h1>
+            <h1 id="rb-title" className="t-title text-[26px]">Carteira real, em papel{(R.books?.length ?? 0) > 1 ? ' (livro A)' : ''}</h1>
             <p className="mt-1 max-w-[620px] text-[13.5px] text-ink-2">O bot de verdade decidindo com o von, mas executando só num livro de papel que começou igual à carteira. Nada é enviado à rede.</p>
           </div>
           <p className="text-[12.5px] text-ink-3 t-tab">desde {isoTime(R.start_t, true)}; última decisão {isoTime(R.last_t)}</p>
@@ -82,6 +116,15 @@ export default function CarteiraReal() {
           <Stat label="Decisões" sub="uma a cada ~17 s">{num(R.n_decisions, 0)}</Stat>
         </dl>
       </section>
+
+      {(R.books?.length ?? 0) > 1 && (
+        <section className="sheet rounded-xl p-4 sm:p-6" aria-labelledby="rb-ab">
+          <SectionHead id="rb-ab" title="A × B">O mesmo bot e o mesmo von; o B junta saídas mecânicas (take profit, stop loss, trailing) e não passa de metade do livro em SOL. Cada livro conta desde o seu início, sempre contra segurar o mesmo livro inicial.</SectionHead>
+          <div className="grid gap-4 md:grid-cols-2">
+            {R.books!.map(b => <BookCard key={b.book ?? b.log_dir} B={b} />)}
+          </div>
+        </section>
+      )}
 
       <section className="sheet rounded-xl p-4 sm:p-6" aria-label="Valor do livro contra segurar">
         <SectionHead title="Valor no tempo">A linha fina é o mesmo livro inicial parado; a distância entre as duas é o que as decisões renderam.</SectionHead>

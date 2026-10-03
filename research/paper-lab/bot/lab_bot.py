@@ -488,8 +488,8 @@ class Lab:
         paused_all = bool((overlay.get("bots") or {}).get("lab_paused"))
         reg = {k: v for k, v in self.reg.items() if k != "_mtime"}
         for e in self.reg["portfolios"].values():
-            if e.get("status") != "active":
-                continue
+            if e.get("status") != "active" or R.is_rule_fork(e):
+                continue  # forks de regra correm no rules_bot (RuleForks), não aqui
             e = dict(e)
             eff = P.effective(e["name"], meta=e, registry=reg)
             e["params"] = eff

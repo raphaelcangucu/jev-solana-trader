@@ -189,7 +189,7 @@ def analyse_run(label, run_root: Path, price_roots, variants, kw, mint2sym, base
         trs = trade_rows(tr, mint2sym, "SOL") + trade_rows(mtr, mint2sym, None)
         fam = CA.group_rows(trs, lambda r: ("SOL · " if r["symbol"] == "SOL" else "Memes · ") + trade_family(r["portfolio"] or "?"))
         L += ["### Auditoria de todos os trades (sem corte de confiança)", "",
-              f"Cada trade paper conta como chamada (compra/venda) ao `price_mark`; mesmo critério de erro ({int(kw['horizon_s'])} s, ±{kw['band']*100:.2f}%). "
+              f"Cada trade paper conta como chamada (compra/venda) ao `price_mark`; mesmo critério de erro ({int(kw['horizon_s'])} s, {'banda por ativo' if kw['band_mode'] == 'vol' else '±%.2f%%' % (kw['band'] * 100)}). "
               "Cobre a execução inteira, porque os logs de trades não são rotacionados. Memes agregados por família (`{SYM}`).", "",
               "| Família | Trades (C/V) | Resolvidos | Erros | Acertos | Flat | Hit rate | Erros compra / venda |",
               "|---|---:|---:|---:|---:|---:|---:|---|"]
@@ -211,7 +211,7 @@ def analyse_run(label, run_root: Path, price_roots, variants, kw, mint2sym, base
     props = {}
     if main_key in res_sol:
         L += ["### Proposta resultante vs `criteria_v2.json` atual", "",
-              f"Reescrita determinística (`propose_criteria`) a partir do grupo `{main_key}`; frases só entram quando há erros confiantes.", "",
+              f"Reescrita determinística (`propose_criteria`) a partir do grupo `{main_key}`; frases só entram quando há erros confiantes com palavras de lift positivo (erros vs acertos).", "",
               "| Variante | Erros confiantes | Frases acrescentadas | Igual ao `criteria_v2.json` atual? |", "|---|---:|---|---|"]
         for name, a in res_sol[main_key].items():
             p = CA.propose_criteria(base_crit, a, generated_at="compare")
@@ -319,7 +319,8 @@ def ressalvas(root, res, cfg):
                  "(≥30 RT e ≥21 dias). Serve para escolher a regra da revisão, não para avaliar modelos.")
     L.append("- Autocorrelação: decisões a cada 15 s repetem o mesmo estado; dezenas de \"erros\" podem ser um único episódio de poucos minutos "
              "(coluna/menção \"episódios\": erros separados por > 5 min). Contar episódios, não linhas, antes de tirar conclusões.")
-    L.append("- Horizonte único (15 min) e banda fixa (0,10%) para SOL e memes; memes são mais voláteis, a banda devia ser por ativo.")
+    L.append("- Horizonte único (15 min) e banda fixa (0,10%) para SOL e memes (padrão `--band-mode fixed`); memes são mais voláteis: "
+             "`--band-mode vol` usa a banda por ativo da revisão noturna.")
     pj = [r for r in res["dec"] + res["mdec"] if str(r.get("model") or "").startswith("poorjev")]
     if pj:
         fc = sum(1 for r in pj if not CA.is_answered(r))
@@ -338,6 +339,9 @@ def main(argv=None) -> int:
     ap.add_argument("--fixed-bar", type=float, default=0.8)
     ap.add_argument("--horizon", type=float, default=900)
     ap.add_argument("--band", type=float, default=0.001)
+    ap.add_argument("--band-mode", choices=("fixed", "vol"), default="fixed",
+                    help="fixed = --band para todos (padrão deste script, compara com relatórios antigos); vol = banda por ativo "
+                         "(config.json:review band_k/band_window_s/band_floor/band_cap; --band é o recurso)")
     ap.add_argument("--tolerance", type=float, default=300)
     ap.add_argument("--extra-run", action="append", default=[], help="pasta de execução arquivada (relativa à raiz), ex.: archive/run_52usd_2026-09-24")
     a = ap.parse_args(argv)
@@ -347,7 +351,8 @@ def main(argv=None) -> int:
     variants = {"barra fixa 0,8": {"fixed_bar": a.fixed_bar}}
     for p in [float(x) for x in a.percentiles.split(",") if x.strip()]:
         variants[f"P{p:g}"] = {"percentile_p": p}
-    kw = {"horizon_s": a.horizon, "band": a.band, "tolerance_s": a.tolerance, "candidates": "chosen", "tie_rule": rc["tie_rule"]}
+    kw = {"horizon_s": a.horizon, "band": a.band, "tolerance_s": a.tolerance, "candidates": "chosen", "tie_rule": rc["tie_rule"],
+          "lift_params": CA.lift_kwargs(rc), **CA.band_kwargs(dict(rc, band_mode=a.band_mode))}
     mint2sym = {t["mint"]: t["symbol"] for t in (json.loads((root / "memecoins.json").read_text()).get("tokens") or [])}
     base_crit = json.loads((root / "criteria_baseline.json").read_text())
     cur_v2 = json.loads((root / "criteria_v2.json").read_text())
@@ -363,7 +368,10 @@ def main(argv=None) -> int:
          "sem auditoria. A variante `acted` (só ordens) aparece à parte.",
          f"- **Erro:** compra com retorno a {int(a.horizon)} s < −{a.band*100:.2f}%, venda com retorno > +{a.band*100:.2f}%; acerto = movimento além da banda "
          f"no sentido da chamada; flat = dentro da banda. Preço futuro: primeiro ponto da série do ativo (`data/prices.jsonl`, "
-         f"`data/meme/prices/*.jsonl`, completadas pelos preços das decisões) em [t+{int(a.horizon)} s, t+{int(a.horizon + a.tolerance)} s]; sem ponto → não resolvida.",
+         f"`data/meme/prices/*.jsonl`, completadas pelos preços das decisões) em [t+{int(a.horizon)} s, t+{int(a.horizon + a.tolerance)} s]; sem ponto → não resolvida."
+         + (f" Com `--band-mode vol` a banda é por ativo: {rc['band_k']:g} × mediana do |retorno| na janela de "
+            f"{rc['band_window_s'] / 86400:g} dias até ao fim da janela auditada, entre {rc['band_floor'] * 100:.2f}% e "
+            f"{rc['band_cap'] * 100:.2f}% (a fixa é o recurso)." if a.band_mode == "vol" else ""),
          "- **Dedupe:** baseline e relaxed (e as variantes de cada modelo) partilham uma chamada por ciclo; as linhas iguais são fundidas "
          "(mesmo modelo, estado, confiança, escolha e preço em ≤ 5 s) para não contar a mesma chamada duas vezes.", ""]
     exp = cfg.get("experiment") or {}

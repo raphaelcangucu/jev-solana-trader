@@ -85,6 +85,7 @@ Portões, tamanhos, ciclo e custo do paper vêm de `config/params.json`: `defaul
 | --- | --- | --- |
 | `relaxed_paper` (padrão) | confiança ≥ 0.35 **e** margem de probabilidade ≥ 0.20, skip < 0.5 — o portão `relaxed` do laboratório | só paper (`paper_only: true`) |
 | `article` | confiança ≥ 0.55, skip < 0.55 — o artigo | paper ou ao vivo |
+| `relaxed_exits_paper` | o portão de `relaxed_paper` + saídas mecânicas (TP 2,5%, SL 1,5%, trailing 1% armado a +1%, 30 min sem recomprar depois de uma saída) + SOL ≤ 50% do livro | só paper; livro B do A/B (ver abaixo) |
 
 - `PARAMS_PROFILE` escolhe o perfil (padrão `relaxed_paper`); `PARAMS_PATH` o ficheiro (padrão `config/params.json`).
 - As variáveis antigas continuam a sobrepor o perfil, por compatibilidade: `CONFIDENCE_THRESHOLD`, `SKIP_THRESHOLD`,
@@ -112,6 +113,58 @@ Em dry-run, quando os portões mandam executar (`buy` ou `sell` com confiança s
 - Cada fill entra em `logs/paper_trades.jsonl` com `t`, `run_id`, `decision_t`, lado, confiança, `px_in`, `fill_px`, quantidades de entrada e saída, `cost_bps` e o livro depois do fill.
 - A decisão ganha `paper`, `paper_fill`, `paper_reason`, `paper_sol`, `paper_usdt` e `run_id`. Todos os ciclos em dry-run gravam o livro de papel, mesmo sem trade; é dele que sai a série de valor marcado a mercado.
 - Ao vivo (`LIVE_TRADING=1` sem `--dry-run`) não há livro de papel: `paper` é `false` e o swap segue o caminho de sempre.
+
+### Saídas mecânicas e teto de exposição (só paper)
+
+O bot só tinha portões de entrada: em paper fez 135 compras e 0 vendas e ficou 100% em SOL. O laboratório mostra que a
+vantagem está nas saídas mecânicas e no teto de exposição; o bot real segue as mesmas regras (`src/jev_trader/exits.py`,
+espelho de `research/paper-lab/bot/lab_bot.py` `check_exits`/`_track` e `bot/params.py` `cap_buy`), configuradas no
+perfil: `sizing.max_exposure_frac` (null = sem teto; env `MAX_EXPOSURE_FRAC`) e o grupo `exits` (`enabled`, `tp`, `sl`,
+`trail`, `trail_arm`, `reentry_cooldown_min`, `sell_frac`; fundido chave a chave entre `defaults` e o perfil).
+
+- **Posição** = todo o SOL do livro de papel (piso 0), incluindo o SOL com que o livro começou, que entra com custo igual ao
+  preço de início do livro (`ref_sol_usd` no livro A, o primeiro `px_in` num livro B) — como o `start_price` do lab.
+- **Custo médio**: cada compra faz `(sol × custo + usdt pago) / (sol + sol recebido)`, com o custo do fill incluído. Uma venda
+  do portão (parcial) não mexe no custo; com a posição em pó (≤ 1e-6 SOL) custo e pico apagam-se. **Pico**: máximo do
+  `px_in` desde a entrada, atualizado a cada ciclo.
+- **Regras**, por esta ordem, com `r = px_in / custo médio − 1`: `tp` se `r ≥ tp`; `sl` se `r ≤ −sl`; `trail` se o pico já
+  passou `custo × (1 + trail_arm)` e `px_in ≤ pico × (1 − trail)` (`trail_arm` ausente = `trail`). Uma regra a null fica
+  desligada. Sem saída se a posição vale menos de 1 US$.
+- **Execução**: a cada ciclo em dry-run com preço, as saídas são avaliadas **antes** do portão (mesmo que o von falhe) e,
+  se disparam, vendem `sell_frac` (1 = tudo) do SOL do livro ao `px_in` com o mesmo custo em bps, sem o teto
+  `MAX_SELL_SOL`. O trade entra em `paper_trades.jsonl` com `side: sell`, `reason: tp|sl|trail`, `avg_cost`, `peak_px` e
+  `ret_from_avg`; os fills do portão levam `reason: gate`. O que sobrar (`sell_frac < 1`) recomeça com custo e pico no
+  preço da saída.
+- **Recompra**: depois de uma saída, compras do portão ficam bloqueadas `reentry_cooldown_min` minutos (`paper_reason:
+  reentry_cooldown`). Vendas do portão continuam.
+- **Teto de exposição**: uma compra nunca leva SOL / livro acima de `max_exposure_frac`; encolhe até caber e, sem espaço para
+  0.01 USDT, não há fill (`paper_reason: max_exposure`). O trade encolhido leva `exposure_capped: true`.
+- A decisão ganha `book`, `exit_reason`, `paper_avg_cost`, `paper_exposure` e, ao vivo, `exits_warning`.
+- O livro guarda `book`, `start_t`, `start_px`, `avg_cost`, `peak_px`, `last_exit_t`, `n_exits` e `position_note`. Um
+  `paper_book.json` antigo sem estes campos é migrado no primeiro ciclo: o custo médio é reconstruído de
+  `paper_trades.jsonl` (SOL inicial ao `ref_sol_usd`) ou, sem histórico nem referência, fica no `px_in` do ciclo; a nota
+  diz qual.
+- **Ao vivo não há saídas automáticas nem teto** (por agora): se o perfil os tiver e não for dry-run, o ciclo segue só com os
+  portões e a decisão leva `exits_warning`. Os perfis com saídas são `paper_only`, por isso nem chegam a valer com
+  `LIVE_TRADING=1`.
+
+### Dois livros de papel (A/B)
+
+`LOG_DIR` separa logs e livro; `PAPER_BOOK` (padrão `A`) dá o rótulo gravado no livro, nas decisões e nos trades. O livro A
+é o de sempre (`logs/`, perfil `relaxed_paper`, início = `config/experiment.json`). O livro B corre ao lado com o mesmo von:
+
+```bash
+LOG_DIR=logs/paper_b PARAMS_PROFILE=relaxed_exits_paper PAPER_BOOK=B python -m jev_trader --dry-run
+python -m jev_trader score --log-dir logs/paper_b      # ou LOG_DIR=logs/paper_b python -m jev_trader score
+```
+
+O B começa do mesmo livro inicial do experimento, mas o seu início é o primeiro ciclo: `start_t` e `start_px` ficam no
+`logs/paper_b/paper_book.json`, e o placar usa-os (PnL contra o início ao `start_px`; contra segurar, o mesmo livro inicial
+ao último preço). Um livro com rótulo diferente de `PAPER_BOOK` é recusado (protege contra um `LOG_DIR` trocado). No macOS,
+o agente opcional `com.jev.trader-paper-exits` corre o B (`research/paper-lab/scripts/macos/install_launchd.sh
+--install-trader-b`; `--status`, `--uninstall` e `--uninstall-trader-b` cobrem-no), sempre com `--dry-run` e
+`LIVE_TRADING=0`. O placar mostra também as saídas por motivo, o custo médio e a exposição; o dashboard (Carteira real) e o
+resumo do lab mostram A e B lado a lado.
 
 ```bash
 python -m venv .venv
@@ -170,6 +223,9 @@ python -m jev_trader score --since 2026-09-30T12:00:00-03:00
 
 `--since` limita os números 2, 3 e 4 a uma janela. O PnL (1) é sempre desde o início do run.
 
+`--log-dir DIR` (ou `LOG_DIR`) escolhe o livro: `logs/` é o A, `logs/paper_b` o B, que conta desde o seu `start_t`. O
+placar acrescenta o rótulo do livro, o perfil, as saídas por motivo (`tp`/`sl`/`trail`), o custo médio e a exposição.
+
 ## Reescrita noturna
 
 O artigo prevê um passe noturno que relê os casos confiantes que deram errado e reescreve os critérios. A barra fixa do artigo (confiança > 0.8) não serve para o von: as confianças dele concentram-se em ~0.2–0.45 e nunca passam 0.8. O corte aqui é um **percentil** das confianças observadas.
@@ -185,9 +241,9 @@ python -m jev_trader rewrite --propose --percentile 90 --fixed 0.8 --band 0.001
 1. Lê `logs/decisions.jsonl` do run e fica com as decisões em que o von respondeu (fonte diferente de `fail-closed`, `model_action` presente).
 2. Corte = percentil P (90 por omissão) dessas confianças, pelo método **nearest-rank**: com as n confianças ordenadas, o valor na posição ⌈P/100 × n⌉. O corte é sempre uma confiança observada.
 3. Confiante = confiança ≥ corte e ação final `buy` ou `sell`, isto é, passou os portões. Em paper trading não há swap real, por isso as decisões de dry-run contam. Com o perfil `article` (confiança ≥ 0.55) e o von em ~0.2–0.45, nenhuma decisão passa os portões e a auditoria sai vazia (por isso o padrão em paper é `relaxed_paper`); a auditoria regista quantas escolhas `buy`/`sell` acima do corte foram bloqueadas.
-4. Erro: compra seguida de retorno abaixo de −banda, ou venda seguida de retorno acima de +banda (banda 0.001 = 0.1%), com o `px_in` da decisão entre +15 e +20 minutos, a mesma regra do hit rate.
+4. Erro: compra seguida de retorno abaixo de −banda, ou venda seguida de retorno acima de +banda, com o `px_in` da decisão entre +15 e +20 minutos, a mesma regra do hit rate. Acerto = movimento além da banda a favor; dentro da banda = flat. A banda, por omissão (`band_mode="vol"` em `rewrite.build_proposal`), acompanha a volatilidade do SOL: 0,5 × mediana do |retorno a 15 min| na série `px_in` do próprio log, nos 3 dias que acabam na última decisão revista, limitada a [0,05%, 1,5%]; com menos de 30 retornos usa a banda fixa `--band` (0.001 = 0.1%). Com `band_mode="fixed"` é sempre `--band`. A proposta regista a banda usada em `audit.band` e o detalhe em `audit.band_detail` (mediana, nº de retornos, piso/teto).
 5. A mesma conta com a barra fixa (`--fixed`, 0.8) entra na proposta em `audit.fixed`, só para comparação. O texto proposto sai de `audit.percentile`.
-6. Reescrita determinística: para cada lado, as palavras de estado que aparecem em pelo menos metade dos erros disparam frases fixas (por exemplo `thin` numa compra errada acrescenta “only when depth is deep not thin” ao critério de compra). Sem erros, a proposta é igual aos critérios atuais e vem com `"changed": false`. Frase já presente não se repete.
+6. Reescrita determinística por **lift**, não por frequência: para cada lado, cada palavra de estado tem % nos erros, % nos acertos e lift = diferença (`audit.percentile.word_lift`, com log-odds suavizado só informativo). Só dispara frase fixa a palavra com lift ≥ 0,2, presente em ≥ 3 erros e em ≥ 2 episódios de erro (separados por mais de 5 min), com ≥ 3 acertos de referência nesse lado (`audit.percentile.lift_words`); por exemplo `thin` numa compra errada acrescenta “only when depth is deep not thin” ao critério de compra. Palavras de fundo (calm/deep/quiet…, presentes em todos os erros e acertos) ficam com lift 0 e nunca disparam nada. Sem erros, ou sem palavra elegível, a proposta é igual aos critérios atuais e vem com `"changed": false`. Frase já presente não se repete.
 7. Escreve `logs/rewrite_proposals/AAAA-MM-DD.json` (dia revisto, ou o dia BRT corrente sem `--date`) com critérios atuais, propostos, auditoria e `"status": "pending"`. Uma proposta já aprovada ou rejeitada nesse dia não é sobrescrita.
 
 O portão humano:

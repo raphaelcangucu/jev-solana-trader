@@ -26,6 +26,40 @@ HARD = {"buy_fraction_usdt": (0.05, 0.5), "max_trades_per_hour": (1, 8), "cooldo
         "min_confidence": (0.0, 0.99), "min_prob_margin": (0.0, 0.9), "max_skip_noul": (0.05, 0.95)}
 
 
+# Forks de regras (executados pelo rules_bot, classe RuleForks): o diff só pode mudar a regra do próprio tipo, a fração
+# de compra, as saídas e o filtro de regime. Cooldown/trades/h, exec, hours, limits, tuning e critérios ficam de fora.
+RULE_KEYS = {"rule_grid": ("grid_pct", "levels"), "rule_rsi": ("rsi_period", "lo", "hi"),
+             "rule_regime": ("ema_fast", "ema_slow"), "rule_donchian": ("donchian", "ema_fast", "ema_slow")}
+RULE_FORK_GROUPS = {"gates": ("buy_fraction_usdt",),
+                    "exits": ("enabled", "tp", "sl", "trail", "trail_arm", "reentry_cooldown_min"),
+                    "regime_filter": ("enabled", "require_bull_for_buy", "block_if_unknown")}
+
+
+def is_rule_fork(e) -> bool:
+    """Entrada do registry que o rules_bot executa (fork de um original de regra ou de outro fork de regra)."""
+    return bool(e) and bool(e.get("parent")) and e.get("kind") == "rule"
+
+
+def check_rule_diff(test_type, diff) -> list[str]:
+    """Erros de um diff de fork de regra (antes do resolver, que valida os valores)."""
+    if test_type not in RULE_KEYS:
+        return [f"tipo de regra desconhecido {test_type!r}"]
+    if not isinstance(diff, dict) or not diff:
+        return ["fork de regra precisa de um diff não vazio"]
+    allowed = dict(RULE_FORK_GROUPS, rule=RULE_KEYS[test_type])
+    errs = []
+    for g, v in diff.items():
+        if g not in allowed:
+            errs.append(f"grupo '{g}' não permitido num fork de regra (permitidos: {', '.join(sorted(allowed))})")
+        elif not isinstance(v, dict) or not v:
+            errs.append(f"{g}: tem de ser um objeto não vazio")
+        else:
+            for k in v:
+                if k not in allowed[g]:
+                    errs.append(f"{g}.{k} não permitido em {test_type} (permitidos: {', '.join(allowed[g])})")
+    return errs
+
+
 def port_path(name):
     return LAB / "portfolios" / f"{name}.json"
 
@@ -220,21 +254,31 @@ def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_overr
     from bot import lab_criteria as LC
     params_diff = dict(params_diff or {})
     orig = originals()
+    keys = ("asset", "cls", "kind", "source", "profile", "model", "test_type")
     with locked() as reg:
         if parent in reg["portfolios"]:
             pe = reg["portfolios"][parent]; lineage = pe["lineage"]
             pstate = json.loads(port_path(parent).read_text()) if not dry_run or port_path(parent).exists() else {}
-            base = {k: pe.get(k) for k in ("asset", "cls", "kind", "source", "profile", "model", "test_type")}
+            src = pe
         elif parent in orig:
             m = orig[parent]; lineage = parent
-            if m["kind"] != "gated":
-                raise ValueError(f"fork of rule original {parent} not supported by lab executor yet")
             pstate = json.loads(Path(m["file"]).read_text()) if not dry_run or Path(m["file"]).exists() else {}
-            base = {k: m.get(k) for k in ("asset", "cls", "kind", "source", "profile", "model", "test_type")}
-            if not dry_run:
-                reg["lineages"].setdefault(parent, {"root": parent, "lead": None, "members": [parent]})
+            src = m
         else:
             raise KeyError(parent)
+        base = {k: src.get(k) for k in keys}
+        if base["kind"] == "rule":
+            # Fork de regra: corre no rules_bot (RuleForks) com o mesmo sinal da linhagem e os parâmetros do fork.
+            base.update(rule=src.get("rule"), variant=src.get("variant"), runner="rules_bot")
+            if criteria is not None:
+                return None, "criterios: forks de regra não têm critérios de texto"
+            errs = check_rule_diff(base["test_type"], params_diff)
+            if errs:
+                return None, "diff_nao_suportado: " + "; ".join(errs[:5])
+        elif base["kind"] not in ("gated", "ensemble"):
+            raise ValueError(f"fork de {parent} (kind={base['kind']}) não suportado")
+        if parent in orig and not dry_run:
+            reg["lineages"].setdefault(parent, {"root": parent, "lead": None, "members": [parent]})
         caps = dict({"per_lineage_days": 7, "total": 40}, **(caps_override or {}))
         reg["caps"] = caps
         forks_all = [e for e in reg["portfolios"].values() if e.get("parent")]
@@ -264,6 +308,11 @@ def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_overr
                        token=float(pstate.get("token") or 0))
         if pstate.get("entry_price"):
             st["entry_price"] = pstate["entry_price"]
+        if base["kind"] == "rule":
+            # a grade continua de onde o pai está (ref/níveis abertos correspondem à posição herdada)
+            st["rule_state"] = dict(pstate.get("rule_state") or {})
+            if pstate.get("sizing"):
+                st["sizing"] = pstate["sizing"]
         st["strategy"] = f"fork:{name}"; st["fork_of"] = parent
         write_json(port_path(name), st)
         e = dict(base, name=name, status="active", created_brt=st["started_brt"], strategy=st["strategy"], lineage=lineage,
@@ -287,6 +336,9 @@ DIFF_WORDS = {
     "exec.mode": "execução", "exec.offset_bps": "distância da limite (bps)", "exec.ttl_min": "validade da limite (min)",
     "ensemble.pct_threshold": "percentil mínimo", "ensemble.min_agree": "modelos de acordo", "hours": "horas BRT",
     "regime_filter.enabled": "filtro de regime",
+    "rule.grid_pct": "passo da grade", "rule.levels": "níveis da grade", "rule.rsi_period": "período do RSI",
+    "rule.lo": "RSI de compra", "rule.hi": "RSI de venda", "rule.ema_fast": "EMA rápida (regime SOL)",
+    "rule.ema_slow": "EMA lenta (regime SOL)", "rule.donchian": "janela de Donchian (h)",
 }
 
 

@@ -4,6 +4,11 @@ Portões e tamanhos: `defaults` → `profiles.<PARAMS_PROFILE>` (padrão `relaxe
 (env `PARAMS_PATH`), e por cima as variáveis de ambiente antigas (`CONFIDENCE_THRESHOLD`, `SKIP_THRESHOLD`, ...),
 por compatibilidade. Ficheiro inválido ou perfil desconhecido → valores do artigo (fail-safe). Um perfil
 `paper_only` nunca vale com `LIVE_TRADING=1`: cai no `article`.
+
+Saídas e exposição (só paper, ver `exits.py`): `sizing.max_exposure_frac` (null = sem teto; env `MAX_EXPOSURE_FRAC`)
+e o grupo `exits` (`enabled`, `tp`, `sl`, `trail`, `trail_arm`, `reentry_cooldown_min`, `sell_frac`), fundido
+chave a chave entre `defaults` e o perfil. Livro de papel: `LOG_DIR` separa logs e livro; `PAPER_BOOK` (padrão `A`)
+dá o rótulo do livro para o placar e o dashboard distinguirem um A/B.
 """
 
 from __future__ import annotations
@@ -13,6 +18,8 @@ import math
 import os
 from dataclasses import dataclass
 from pathlib import Path
+
+from jev_trader.exits import ExitParams
 
 EXPERIMENT_WALLET = "GNJv4FcMb4j1A6NFiVaaHkGVTZ5p5A7ea9GsFgccS75r"
 WSOL_MINT = "So11111111111111111111111111111111111111112"
@@ -43,13 +50,19 @@ ARTICLE_PARAMS = {
     "max_sell_sol": 0.01,
     "loop_seconds": 15.0,
     "paper_cost_bps": 10.0,
+    # Sem teto de exposição e sem saídas mecânicas: o artigo só tem portões de entrada.
+    "max_exposure_frac": None,
+    "exits": {"enabled": False, "reentry_cooldown_min": 30.0, "sell_frac": 1.0},
 }
 PARAM_GROUPS = {
     "gates": ("confidence_min", "skip_min", "prob_margin_min"),
-    "sizing": ("buy_usdt", "sell_sol", "max_buy_usdt", "max_sell_sol"),
+    "sizing": ("buy_usdt", "sell_sol", "max_buy_usdt", "max_sell_sol", "max_exposure_frac"),
     "cycle": ("loop_seconds",),
     "paper": ("paper_cost_bps",),
+    "exits": ("enabled", "tp", "sl", "trail", "trail_arm", "reentry_cooldown_min", "sell_frac"),
 }
+# Chaves que aceitam null (= desligado).
+_NULLABLE = {"max_exposure_frac", "exits.tp", "exits.sl", "exits.trail", "exits.trail_arm"}
 PARAM_ENV = {
     "confidence_min": "CONFIDENCE_THRESHOLD",
     "skip_min": "SKIP_THRESHOLD",
@@ -60,6 +73,7 @@ PARAM_ENV = {
     "max_sell_sol": "MAX_SELL_SOL",
     "loop_seconds": "LOOP_SECONDS",
     "paper_cost_bps": "PAPER_COST_BPS",
+    "max_exposure_frac": "MAX_EXPOSURE_FRAC",
 }
 DEFAULT_PROFILE = "relaxed_paper"
 _RANGES = {
@@ -72,6 +86,13 @@ _RANGES = {
     "max_sell_sol": (0.0, 1e6),
     "loop_seconds": (1.0, 86400.0),
     "paper_cost_bps": (0.0, 1000.0),
+    "max_exposure_frac": (0.01, 1.0),
+    "exits.tp": (0.0001, 1.0),
+    "exits.sl": (0.0001, 1.0),
+    "exits.trail": (0.0001, 1.0),
+    "exits.trail_arm": (0.0, 1.0),
+    "exits.reentry_cooldown_min": (0.0, 10080.0),
+    "exits.sell_frac": (0.01, 1.0),
 }
 
 
@@ -93,21 +114,32 @@ def _flatten(layer: object, where: str, errors: list[str]) -> dict:
             if key not in keys:
                 errors.append(f"{where}.{group}: chave desconhecida '{key}'")
                 continue
+            name = f"exits.{key}" if group == "exits" else key
+            target = out.setdefault("exits", {}) if group == "exits" else out
+            if name == "exits.enabled":
+                if not isinstance(value, bool):
+                    errors.append(f"{where}.{group}.{key}: tem de ser true ou false")
+                    continue
+                target[key] = value
+                continue
+            if value is None and name in _NULLABLE:
+                target[key] = None
+                continue
             if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)):
                 errors.append(f"{where}.{group}.{key}: tem de ser número")
                 continue
-            lo, hi = _RANGES[key]
+            lo, hi = _RANGES[name]
             if not lo <= float(value) <= hi:
                 errors.append(f"{where}.{group}.{key}: {value} fora de [{lo}, {hi}]")
                 continue
-            out[key] = float(value)
+            target[key] = float(value)
     return out
 
 
 def load_params(path: Path, profile: str, *, live: bool = False) -> tuple[dict, str, list[str]]:
     """(valores, perfil usado, erros) de `config/params.json`. Nunca levanta: erro → valores do artigo."""
     errors: list[str] = []
-    values = dict(ARTICLE_PARAMS)
+    values = _article_values()
     try:
         doc = json.loads(Path(path).read_text(encoding="utf-8"))
     except FileNotFoundError:
@@ -126,12 +158,22 @@ def load_params(path: Path, profile: str, *, live: bool = False) -> tuple[dict, 
         used = "article"
     layer_errors: list[str] = []
     merged = _flatten(doc.get("defaults") or {}, "defaults", layer_errors)
+    exits = {**values["exits"], **merged.pop("exits", {})}
     if used in profiles:
-        merged.update(_flatten(profiles[used], f"profiles.{used}", layer_errors))
+        layer = _flatten(profiles[used], f"profiles.{used}", layer_errors)
+        exits.update(layer.pop("exits", {}))
+        merged.update(layer)
     if layer_errors:
         return values, "article", errors + layer_errors + ["params inválidos: valores do artigo"]
     values.update(merged)
+    values["exits"] = exits
     return values, used, errors
+
+
+def _article_values() -> dict:
+    values = dict(ARTICLE_PARAMS)
+    values["exits"] = dict(ARTICLE_PARAMS["exits"])
+    return values
 
 
 def _float(name: str, default: float) -> float:
@@ -139,6 +181,19 @@ def _float(name: str, default: float) -> float:
     if not raw:
         return default
     return float(raw)
+
+
+def _exposure_frac(value: float | None) -> float | None:
+    """Teto de exposição válido em (0, 1]; outro valor (ex.: env fora do intervalo) → sem teto."""
+    if value is None or not math.isfinite(value) or not 0 < value <= 1:
+        return None
+    return value
+
+
+def _book_label(raw: str) -> str:
+    """Rótulo do livro de papel (env `PAPER_BOOK`): letras, dígitos, `_` e `-`, até 16; vazio → `A`."""
+    label = "".join(ch for ch in raw.strip() if ch.isalnum() or ch in "_-")[:16]
+    return label or "A"
 
 
 def _path_or_none(name: str) -> str | None:
@@ -175,6 +230,11 @@ class Config:
     prob_margin_min: float = 0.0
     params_profile: str = "article"
     params_errors: tuple[str, ...] = ()
+    # Só paper (ver exits.py). Ao vivo são ignorados e o registo da decisão leva `exits_warning`.
+    max_exposure_frac: float | None = None
+    exits: ExitParams = ExitParams()
+    # Rótulo do livro de papel (A/B), gravado no livro, nas decisões e nos trades de papel.
+    paper_book_label: str = "A"
 
     @property
     def decisions_path(self) -> Path:
@@ -239,4 +299,7 @@ def load_config(dotenv: Path | None = None) -> Config:
         prob_margin_min=p["prob_margin_min"],
         params_profile=profile,
         params_errors=tuple(params_errors),
+        max_exposure_frac=_exposure_frac(p["max_exposure_frac"]),
+        exits=ExitParams.from_dict(params["exits"]),
+        paper_book_label=_book_label(os.environ.get("PAPER_BOOK", "")),
     )

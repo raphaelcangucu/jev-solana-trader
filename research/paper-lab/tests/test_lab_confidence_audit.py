@@ -100,20 +100,118 @@ def test_dedupe_merges_shared_call_and_acted_join():
         CA.audit([b], candidates="bogus")
 
 
+BAD = "thin bot_war fading violent night red wide soft late mid loud held"   # estado dos erros
+GOOD = "deep quiet flat calm night gray tight soft late mid quiet held"       # estado dos acertos (fundo em comum)
+
+
+def _lift_rows(bad_state=BAD, good_state=GOOD, bad_at=(0, 40, 80, 120), good_at=(20, 60, 100, 140, 160)):
+    """Compras confiantes (0.40): erros em `bad_at` (episódios separados por 10 min) e acertos em `good_at`;
+    ruído de confiança baixa (0.23, hold) à volta. Preço 15 min depois: −1% nos erros, +1% nos acertos."""
+    rows = [dec(i, "hold", 0.23, 100.0) for i in range(0, 200) if i not in set(bad_at) | set(good_at)]
+    rows += [dec(i, "buy", 0.40, 100.0, state=bad_state) for i in bad_at]
+    rows += [dec(i, "buy", 0.40, 100.0, state=good_state) for i in good_at]
+    pts = [(i * 15 + 900, 99.0) for i in bad_at] + [(i * 15 + 900, 101.0) for i in good_at]
+    return rows, series(sorted(pts))
+
+
 def test_propose_criteria_only_appends_on_mistakes():
     base = copy.deepcopy(BASE)
     clean = CA.audit([dec(0, "buy", 0.38, 100.0)], prices=series([(900, 101.0)]), percentile_p=50)
     p = CA.propose_criteria(base, clean, generated_at="t")
     assert not p["changed"] and p["action"] == BASE["action"] and p["skip_this_cycle"] == BASE["skip_this_cycle"]
-    bad = CA.audit(_decisions(), prices=series([(18 * 15 + 900, 99.0), (19 * 15 + 900, 100.5)]), percentile_p=90)
+    rows, px = _lift_rows()
+    bad = CA.audit(rows, prices=px, fixed_bar=0.3)
+    assert bad["n_mistakes"] == 4 and bad["n_correct"] == 5 and bad["mistake_episodes"] == 4
     q = CA.propose_criteria(base, bad, generated_at="t")
     assert q["changed"]
     assert "deep not thin" in q["action"]["criteria"]["buy"]
     assert "never while the move is fading or dumping" in q["action"]["criteria"]["buy"]
     assert "violent" in q["skip_this_cycle"]["instructions"]
+    # palavras empatadas em lift 1,0: ordem alfabética; as de fundo (deep/quiet/calm/night/late) não entram
+    assert "be wary when the tape reads bot_war, fading, loud" in q["action"]["criteria"]["buy"]
     assert base == BASE  # nunca altera o texto base
-    assert q["audit"]["n_mistakes"] == 2 and "mistakes" not in q["audit"]
+    assert q["audit"]["n_mistakes"] == 4 and "mistakes" not in q["audit"]
+    assert q["word_selection"]["eligible"]["buy"] == ["bot_war", "fading", "loud", "red", "thin", "violent", "wide"]
     assert CA.propose_criteria(base, bad, min_mistakes=5, generated_at="t")["changed"] is False
+
+
+def test_word_lift_gives_baseline_words_zero_lift():
+    rows, px = _lift_rows()
+    a = CA.audit(rows, prices=px, fixed_bar=0.3)
+    t = {r["word"]: r for r in CA.word_lift(a["outcomes"])}
+    for w in ("quiet", "night", "soft", "late"):  # em 100% dos erros e dos acertos
+        assert t[w]["err_share"] in (1.0, 0.0) and t[w]["lift"] <= 0 and not t[w]["eligible"]
+    assert t["night"]["lift"] == 0.0 and t["late"]["lift"] == 0.0
+    assert t["thin"]["lift"] == 1.0 and t["thin"]["eligible"] and t["thin"]["episodes"] == 4
+    assert t["tight"]["lift"] == -1.0 and t["tight"]["log_odds"] < 0
+    assert "mid" not in t and "held" not in t  # NON_MARKET_WORDS fora
+    assert a["word_lift"][0]["lift"] == 1.0 and "thin" in a["lift_words"]["buy"]
+    md = CA.lift_table_md(a["word_lift"], 3)
+    assert md[0].startswith("| Palavra | % erros | % acertos | lift") and len(md) == 5
+    # suporte: 2 erros só, ou tudo num episódio, ou sem acertos de referência → nada elegível
+    few, pxf = _lift_rows(bad_at=(0, 40))
+    assert CA.audit(few, prices=pxf, fixed_bar=0.3)["lift_words"]["all"] == []
+    one, px1 = _lift_rows(bad_at=(0, 1, 2, 3))
+    assert CA.audit(one, prices=px1, fixed_bar=0.3)["lift_words"]["all"] == []
+    noref, pxn = _lift_rows(good_at=(160, 180))
+    assert CA.audit(noref, prices=pxn, fixed_bar=0.3)["lift_words"]["all"] == []
+
+
+def test_propose_unchanged_without_positive_lift():
+    rows, px = _lift_rows(bad_state=GOOD)  # erros e acertos no mesmo estado
+    a = CA.audit(rows, prices=px, fixed_bar=0.3)
+    assert a["n_mistakes"] == 4 and a["n_correct"] == 5
+    assert all(r["lift"] == 0 for r in CA.word_lift(a["outcomes"]))
+    p = CA.propose_criteria(copy.deepcopy(BASE), a, generated_at="t")
+    assert p["changed"] is False and p["phrases_added"] == {}
+    assert p["action"] == BASE["action"] and p["skip_this_cycle"] == BASE["skip_this_cycle"]
+
+
+def _osc(asset, amp, n=600, step=15.0, t_off=0.0):
+    """Série que alterna 100 e 100×(1+amp) a cada 900 s: |retorno a 15 min| ≈ amp em todos os pontos."""
+    ts = [T0 + t_off + i * step for i in range(n)]
+    return {asset: (ts, [100.0 * (1 + amp) if int((t - T0) // 900) % 2 else 100.0 for t in ts])}
+
+
+def test_vol_band_per_asset_floor_cap_and_fallback():
+    end = T0 + 599 * 15
+    sol = CA.vol_band(_osc("SOL", 0.002)["SOL"], end)
+    assert sol["source"] == "vol" and sol["n"] > 100 and sol["clamped"] is None
+    assert sol["median_abs_ret"] == pytest.approx(0.002, rel=0.01) and sol["band"] == pytest.approx(0.001, rel=0.01)
+    meme = CA.vol_band(_osc("WIF", 0.02)["WIF"], end)
+    assert meme["band"] == pytest.approx(0.01, rel=0.01)  # 0,5 × 2%
+    assert CA.vol_band(_osc("X", 0.1)["X"], end)["band"] == 0.015                  # teto
+    assert CA.vol_band(_osc("X", 0.0)["X"], end)["clamped"] == "floor"            # piso 0,05%
+    short = CA.vol_band(_osc("X", 0.02, n=40)["X"], T0 + 39 * 15)
+    assert short["source"] == "fallback_fixed" and short["band"] == 0.001
+    assert CA.vol_band(None, end, fallback=0.002)["band"] == 0.002
+    # janela para trás: pontos depois de t_end não contam
+    assert CA.vol_band(_osc("SOL", 0.002)["SOL"], T0 + 100 * 15)["n"] < sol["n"]
+
+
+def test_audit_vol_band_per_asset():
+    """Uma memecoin com ruído de ±2% não conta −0,5% como erro em modo vol; o SOL (±0,2%) conta."""
+    prices = {**_osc("SOL", 0.002), **_osc("WIF", 0.02)}
+    t_dec = 400 * 15  # ponto em fase "100" (int(6000/900)=6, par); +900 s → fase ímpar
+    rows = [dec(400, "buy", 0.4, 100.0 * 1.002 / 0.997, symbol="SOL"),       # SOL: −0,3% vs banda ~0,1% → erro
+            dec(401, "buy", 0.4, 100.0 * 1.02 / 0.995, symbol="WIF", ts=T0 + t_dec + 1)]  # WIF: −0,5% vs ~1% → flat
+    rows += [dec(i, "hold", 0.2, 100.0) for i in range(10)]
+    kw = dict(prices=prices, fixed_bar=0.3, window=(T0, T0 + 599 * 15 + 1))
+    fixed = CA.audit(rows, **kw)
+    vol = CA.audit(rows, band_mode="vol", **kw)
+    assert fixed["band_mode"] == "fixed" and fixed["band_by_asset"] == {"SOL": 0.001, "WIF": 0.001}
+    assert fixed["n_mistakes"] == 2
+    assert vol["band_by_asset"]["SOL"] == pytest.approx(0.001, rel=0.02)
+    assert vol["band_by_asset"]["WIF"] == pytest.approx(0.01, rel=0.02)
+    assert vol["bands"]["WIF"]["source"] == "vol" and vol["bands"]["WIF"]["n"] > 100
+    assert vol["n_mistakes"] == 1 and vol["mistakes"][0]["asset"] == "SOL" and vol["n_flat"] == 1
+    assert {o["asset"]: o["band"] for o in vol["outcomes"]}["WIF"] == vol["band_by_asset"]["WIF"]
+    assert CA.summary(vol)["band_by_asset"] == vol["band_by_asset"]
+    assert CA.audit(rows, bands={"WIF": 0.0001}, **kw)["band_by_asset"]["WIF"] == 0.0001  # banda dada
+    with pytest.raises(ValueError):
+        CA.audit(rows, band_mode="nope", **kw)
+    rc = CA.review_cfg({})
+    assert rc["band_mode"] == "vol" and CA.band_kwargs(rc)["band_k"] == 0.5 and CA.lift_kwargs(rc)["min_episodes"] == 2
 
 
 def test_night_review_uses_day_and_writes_proposal_only(tmp_path):
@@ -128,7 +226,7 @@ def test_night_review_uses_day_and_writes_proposal_only(tmp_path):
     (logs / "decisions.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
     (logs / "trades.jsonl").write_text("")
     prices = tmp_path / "prices.jsonl"
-    prices.write_text("".join(json.dumps({"ts": T0 + t, "price_usd": 99.0}) + "\n" for t in range(900, 2000, 15)))
+    prices.write_text("".join(json.dumps({"ts": T0 + t, "price_usd": 99.0}) + "\n" for t in range(900, 4000, 15)))
     crit = tmp_path / "criteria_baseline.json"; crit.write_text(json.dumps(BASE))
     before = crit.read_text()
     out_md, out_json = tmp_path / "rev.md", tmp_path / "prop.json"
@@ -143,6 +241,11 @@ def test_night_review_uses_day_and_writes_proposal_only(tmp_path):
     assert saved["audit"]["mistake_episodes"] == 1  # 4 ciclos seguidos = 1 episódio
     assert CA.episodes([0, 15, 30, 1000, 1015]) == 2 and CA.episodes([]) == 0
     assert saved["audit"]["fixed_bar_compare"]["n_confident"] == 0
-    assert p["changed"] and saved["changed"]
-    # todos os confiantes erraram no mesmo estado: sem palavra "distintiva", usa as palavras de mercado dos erros
-    assert saved["phrases_added"] == {"buy": ["be wary when the tape reads calm, deep, flat"]}
+    # todos os confiantes erraram no mesmo estado, num só episódio e sem acertos de referência: nenhuma palavra
+    # tem lift com suporte, por isso a proposta é o texto base (antes saía "calm, deep, flat" por frequência)
+    assert not p["changed"] and not saved["changed"] and saved["phrases_added"] == {}
+    assert saved["word_selection"]["method"] == "lift" and saved["word_selection"]["eligible"]["buy"] == []
+    assert saved["audit"]["band_mode"] == "vol" and saved["audit"]["bands"]["SOL"]["source"] == "vol"
+    assert saved["audit"]["band_by_asset"]["SOL"] == 0.0005  # série parada → piso
+    assert "Banda usada por ativo" in md and "Palavras de estado por lift" in md and "| Palavra | % erros |" in md
+    assert "nenhuma palavra com lift positivo" in md

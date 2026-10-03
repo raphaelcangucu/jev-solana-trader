@@ -11,6 +11,7 @@ import json
 import os
 import sys
 import time
+from dataclasses import replace
 from datetime import date as Date
 from pathlib import Path
 
@@ -64,8 +65,14 @@ def score_main(argv: list[str]) -> int:
         "--since",
         help="ISO 8601; limita hit rate, drawdown e contagem de trades. Sem fuso, BRT. O PnL é sempre desde o início.",
     )
+    parser.add_argument(
+        "--log-dir",
+        help="Pasta dos logs e do livro de papel (padrão: env LOG_DIR ou logs). Ex.: logs/paper_b para o livro B.",
+    )
     args = parser.parse_args(argv)
     cfg = load_config()
+    if args.log_dir:
+        cfg = replace(cfg, log_dir=Path(args.log_dir))
     since = None
     if args.since:
         since = parse_t(args.since)
@@ -82,12 +89,22 @@ def score_main(argv: list[str]) -> int:
         read_jsonl(cfg.paper_trades_path),
         experiment,
         since=since,
+        book=_read_book(cfg.paper_book_path),
     )
     if args.json:
         print(json.dumps(board, ensure_ascii=False, indent=2))
     else:
         print(render_table(board))
     return 0
+
+
+def _read_book(path: Path) -> dict | None:
+    """`paper_book.json` como dicionário; ausente ou ilegível → None (o placar usa o experimento)."""
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
 
 
 def rewrite_main(argv: list[str]) -> int:

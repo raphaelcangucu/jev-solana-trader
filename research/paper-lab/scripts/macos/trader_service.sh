@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Serviço launchd do bot real em paper: `python -m jev_trader --dry-run` em ciclo contínuo até RUN_UNTIL_BRT.
 # --dry-run é obrigatório aqui: o processo nunca abre a chave nem envia swap, mesmo com LIVE_TRADING=1 no ambiente.
+# Livro B do A/B (agente com.jev.trader-paper-exits): o plist define LOG_DIR, PARAMS_PROFILE e PAPER_BOOK, que este
+# script respeita (não os toca); sem eles é o livro A de sempre (logs/ do repositório, perfil padrão do bot).
 set -uo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 left="$(seconds_left)"
@@ -10,6 +12,7 @@ if [[ "$left" -le 0 ]]; then
 fi
 cd "$REPO"
 export LIVE_TRADING=0
+echo "$(date -Iseconds) trader paper: livro ${PAPER_BOOK:-A}, LOG_DIR=${LOG_DIR:-logs}, PARAMS_PROFILE=${PARAMS_PROFILE:-padrão}"
 # O von do laboratório serve o bot real também.
 export VON_BASE_URL="${VON_BASE_URL:-http://127.0.0.1:8765}"
 # alarm: ao chegar a RUN_UNTIL_BRT o processo recebe SIGALRM; o launchd relança, este script vê o fim e sai com 0.

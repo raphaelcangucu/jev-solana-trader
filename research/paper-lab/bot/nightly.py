@@ -90,6 +90,24 @@ def tuning_parent(lineage, reg, cat):
     return lead if lead and lead in cat and cat[lead].get("status") == "active" else lineage
 
 
+def rule_tune(lin, base, m, reg, book, run_date, dry, caps):
+    """Secção 4: replay walk-forward da regra (tuner.rule_search) na base do tuning (original ou lead fork) e, se houver
+    candidato, um fork de regra real (`{"rule": best_diff}`, executado pelo rules_bot) com os mesmos caps do tuner.
+    -> (linha do relatório, nota de cap | None)."""
+    eff, _prov, perr = params_for(base, m, reg)
+    if perr:
+        return f"- {lin}: params inválidos na base {base}: {'; '.join(perr[:3])}", None
+    r = T.rule_search(m, book.sol, book.memes.get(m["asset"]) if m["asset"] != "SOL" else book.sol, eff=eff)
+    if r["status"] != "candidate":
+        return f"- {lin}: {r['status']} (base {base}; atual train/val {r['current']})", None
+    diff = {"rule": r["best_diff"]}
+    why_txt = (f"nightly {run_date}: replay de regra 1h val {r['best'][1]:+.3f} vs {r['current'][1]:+.3f} "
+               f"(train {r['best'][0]:+.3f} vs {r['current'][0]:+.3f}), {r.get('bars')} barras")
+    fname, why = R.create_fork(base, diff, why_txt, dry_run=dry, caps_override=caps)
+    line = f"- {lin}: candidato {json.dumps(diff)} (base {base}; atual train/val {r['current']}) → fork `{fname}` ({why})"
+    return line, (f"{lin}: {why}" if fname is None else None)
+
+
 def run(day=None, dry=False):
     t_start = time.time(); cfg = load_cfg(); tc = tcfg()
     now = time.time(); run_date = datetime.now(BRT).strftime("%Y-%m-%d")
@@ -130,7 +148,7 @@ def run(day=None, dry=False):
         if elig:
             try:
                 if m.get("kind") == "rule":
-                    res = "elegível; replay de regra na seção 4 (fork de regra: executor não implementado — só relatório)"
+                    res = "elegível; replay de regra na seção 4 (candidato → fork de regra no rules_bot)"
                     tuning_log.append((lin, base, "rule", None))
                 else:
                     t1 = now; t0 = max(m["start_ts"], now - tc["history_days"] * 86400)
@@ -168,10 +186,13 @@ def run(day=None, dry=False):
             from bot.rules_engine import CandleBook
             book = CandleBook(); book.warm_up()
             for lin, base, _, _ in rule_lins:
-                m = cat[base]
-                r = T.rule_search(m, book.sol, book.memes.get(m["asset"]) if m["asset"] != "SOL" else book.sol,
-                                  eff=params_for(base, m, reg)[0])
-                L.append(f"- {lin}: {r['status']} {json.dumps(r.get('best_diff'))} (atual train/val {r['current']}) — relatório apenas")
+                try:
+                    line, note = rule_tune(lin, base, cat[base], reg, book, run_date, dry, tc["caps"])
+                except Exception as ex:
+                    line, note = f"- {lin}: erro no replay/fork de regra: {ex}", None
+                L.append(line)
+                if note:
+                    cap_notes.append(note)
         except Exception as ex:
             L.append(f"- erro no replay de regras: {ex}")
     else:

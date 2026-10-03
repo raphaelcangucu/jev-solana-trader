@@ -62,7 +62,8 @@ Grupos de parâmetros (chave desconhecida = erro de validação, para erros de d
 | `limits` | `buy_fraction_usdt_max` (0,5), `max_trades_per_hour_max` (8), `max_exposure_frac_max` (1,0), `leverage` (`never`) | validação |
 
 O tamanho (fração da compra, mínimos, teto de exposição) vive em `gates`; não há um grupo `sizing` separado no lab.
-O `rules_bot` recusa `exits`, `hours`, `exec.mode=limit` e `regime_filter` (erro de validação): para isso, use um portfólio do lab.
+O `rules_bot` recusa `hours` e `exec.mode=limit` (erro de validação); `exits` e `regime_filter` só valem nos **forks de
+regra** (ver "Forks de regras" abaixo), nunca nos originais de regra.
 
 ### Exemplos
 
@@ -127,8 +128,47 @@ O espaço de busca do tuner noturno vem de `tuning` nos parâmetros efetivos do 
 `bounds` (`[mín, máx]` por caminho), `max_rel_change` (±20% por noite por omissão), `steps`, `train_frac`,
 `min_improvement_pct`, `trade_penalty_bps`. Um caminho só entra se a secção estiver ativa (`exits.enabled`, `exec.mode=limit`,
 `gates.margin_gate`, `ensemble`). Por omissão reproduz a busca antiga: os 5 portões (+ margem no relaxed), as saídas no H1, o
-limite no H3, e no H2 só cooldown/trades/h/tamanho + `ensemble.pct_threshold`; regras: `rule.*` (replay só relatório). O diff
-proposto é validado pelo resolver antes de o fork nascer (`params_invalidos: ...` na revisão se não passar).
+limite no H3, e no H2 só cooldown/trades/h/tamanho + `ensemble.pct_threshold`; regras: `rule.*` (replay walk-forward em
+barras de 1 h, `tuner.rule_search`, dentro de `tuning.bounds`; um candidato vira um fork de regra real, com os mesmos caps
+7 dias/40). O diff proposto é validado pelo resolver antes de o fork nascer (`params_invalidos: ...` na revisão se não passar).
+
+### Forks de regras (grid, RSI, regime, Donchian e variantes `_full`)
+
+Os originais de regra (`grid_sol_2pct`, `rsi_sol_1h`, `{SYM}_rule_regime[_full]`, `{SYM}_rule_donch_regime[_full]`) podem
+ter forks, como os portfólios com portões. `lab_registry.create_fork` aceita como pai um original de regra ou um fork de
+regra; a entrada no registry fica com `kind: "rule"`, `runner: "rules_bot"`, `test_type`, `rule` e `variant` do pai.
+
+- **Diff permitido** (`lab_registry.RULE_KEYS` / `RULE_FORK_GROUPS`; outro grupo → `diff_nao_suportado: ...`):
+  `rule.*` do próprio tipo (grid: `grid_pct`, `levels`; RSI: `rsi_period`, `lo`, `hi`; regime: `ema_fast`, `ema_slow`;
+  Donchian: `donchian`, `ema_fast`, `ema_slow`), `gates.buy_fraction_usdt`, `exits.*` e `regime_filter.*`. Sem
+  cooldown/trades/h, `exec`, `hours`, `limits`, `tuning` nem critérios de texto. Os valores passam pelo resolver
+  (`ema_fast < ema_slow`, `lo < hi`, fração ≤ `limits.buy_fraction_usdt_max`: 0,5, ou 1,0 nos `_full`).
+- **Limites de tuning** (`types.rule_*.tuning.bounds`, usados pelo tuner e pelo `night_cli fork`): `rule.grid_pct`
+  [0,005; 0,1], `rule.levels` [1; 10], `rule.rsi_period` [5; 50], `rule.lo` [10; 45], `rule.hi` [55; 90],
+  `rule.ema_fast` [4; 50], `rule.ema_slow` [10; 200], `rule.donchian` [5; 120] h, `gates.buy_fraction_usdt` [0,05; 0,5]
+  (`variants.full`: [0,05; 1,0]).
+- **Execução** (`bot/rules_bot.py`, classe `RuleForks`): no mesmo ciclo do `rules_bot`, depois dos originais e isolada
+  deles (um erro nos forks nunca afeta os originais), com o mesmo `CandleBook` e os mesmos sinais
+  (`grid_signal`, `rsi_signal`, `rules_engine.meme_rule_signal` — este também usado pelos originais, sem mudança de
+  comportamento) e os mesmos portões (cooldown, trades/h, mínimos, teto de exposição), mas com os parâmetros efetivos
+  do fork (pai sem overlay → diff → `portfolios.<fork>` → overlay do fork). Recarrega o registry por mtime (forks novos
+  entram sem reiniciar). Só age em barras de 1 h fechadas depois do arranque do `rules_bot` e da criação do fork, uma
+  vez por barra.
+- **Extras só dos forks:** `exits` (TP/SL/trailing verificados a cada ciclo no preço de marcação, níveis do ativo em
+  `assets.<sol|meme>.exits` se o diff só ligar `enabled`; depois de uma saída a compra fica bloqueada
+  `reentry_cooldown_min`; numa grade, a saída zera os níveis e recentra a referência) e `regime_filter` (compras só com
+  SOL EMA 12 > 26; útil na grade e no RSI). O replay do tuner não simula estes extras (só a regra).
+- **Estado e logs** (como os forks do `lab_bot`, para `analytics.catalog`, vereditos, `summary.py` e dashboard):
+  `data/lab/portfolios/<fork>.json` (criado com os saldos atuais do pai; a grade herda `rule_state`),
+  `data/lab/equity/<fork>.jsonl`, trades em `logs/trades.jsonl` / `logs/meme_trades.jsonl` (`strategy: fork:<nome>`),
+  decisões em `logs/lab_decisions.jsonl` (`model: rule`, `params_rule`, `indicators`). Resumo em
+  `data/rules/status.json` → `rule_forks`. O `lab_bot` ignora estas entradas.
+- **Fail-closed:** parâmetros inválidos (qualquer erro do resolver, por exemplo um `portfolios.<fork>` mal escrito),
+  estado em falta ou erro interno → hold, com motivo `params_invalidos` (ou `error`) e uma linha no log do `rules_bot`.
+- **Quem cria:** o tuner noturno (secção 4: candidato do replay → `create_fork(base, {"rule": ...})`, base = original
+  ou lead fork) e `scripts/night_cli.py fork --parent <regra> --diff '{"rule": {"donchian": 40}}' ...` (mesmos limites
+  da noite). Exemplo de hipótese: Donchian 40 h ou `exits` nos `*_rule_donch_regime_full`, que compram rompimentos
+  noturnos sincronizados e chegaram a perder 5–12% num dia.
 
 ### Equivalência com o comportamento anterior
 
@@ -195,8 +235,10 @@ A regra antiga (conf > 0,8 e `approx_pnl` negativo em vendas) nunca disparava co
 
 - corte = **P90** (`confidence_percentile`) das confianças respondidas (sem fail-closed) do dia revisado; com muitos empates no corte usa-se `>`;
 - candidatas = chamadas buy/sell do modelo (`candidates: chosen`; `acted` = só as que viraram ordem); baseline e relaxed contam como uma chamada;
-- erro = retorno a `horizon_s` (900 s) contra a chamada além de `band` (0,10%), com o preço de `data/prices.jsonl`; sem preço até +5 min → não resolvida;
-- a proposta só acrescenta frases quando há erros confiantes; a barra fixa (`fixed_bar` 0,8) é calculada só para comparação; o título usa o dia revisado.
+- erro = retorno a `horizon_s` (900 s) contra a chamada além da banda, com o preço de `data/prices.jsonl` (memes: `data/meme/prices/`); sem preço até +5 min → não resolvida;
+- banda (`band_mode`): `vol` (padrão) = banda **por ativo** = `band_k` (0,5) × mediana do |retorno a 15 min| desse ativo nos últimos `band_window_s` (3 dias) até ao fim do dia revisado, na mesma série de preços, entre `band_floor` (0,05%) e `band_cap` (1,5%); com menos de `band_min_n` (30) retornos recua para `band` (0,10%). `fixed` = `band` para todos (modo antigo; é também o padrão da função `audit`). As memecoins mexem 2–3× mais do que o SOL, e com 0,10% fixa quase todo o ruído delas contava como erro. A banda usada vai em `bands`/`band_by_asset` (e em cada resultado) e numa tabela da revisão;
+- palavras das frases por **lift** (`word_lift`): % dos erros com a palavra − % dos acertos com a palavra; só entram palavras com lift ≥ `lift_min` (0,2), ≥ `lift_min_count` (3) erros, ≥ `lift_min_episodes` (2) episódios de erro e ≥ `lift_min_ref` (3) acertos de referência. Palavras de fundo (calm/deep/quiet… em quase todos os erros e acertos) ficam com lift ≈ 0. A revisão mostra a tabela (% erros / % acertos / lift / log-odds / episódios);
+- a proposta só acrescenta frases quando há erros confiantes **e** palavras elegíveis (senão `changed: false`); a barra fixa (`fixed_bar` 0,8) é calculada só para comparação; o título usa o dia revisado.
 - Continua **só proposta** (`reviews/criteria_v2_proposed_<data>.json` + `data/nightly/v2_review_tmp.md`); nada altera os critérios em uso.
 - `bot/review.py` (variante antiga) está deprecado e delega em `sol_bot.night_review`.
 
@@ -220,7 +262,7 @@ mais um resumo de uma linha do resto, e reescreve critérios (reflexão ao estil
 | Comando | Faz |
 | --- | --- |
 | `context [--hours 24]` | contexto compacto (≤ ~6k tokens): dia N/30, mercado, famílias e notáveis (PnL, ex. B&H, habilidade, timing+p, exposição, C/V, MDD), forks com margem contra o pai, erros confiantes por família (adjetivos dos erros vs dos acertos, episódios), critérios em uso, limites, parâmetros ajustáveis por tipo, placar do bot real |
-| `fork --parent N --diff JSON --reason T [--dry-run]` | fork de parâmetros por `lab_registry.create_fork` (resolver valida; o pai nunca muda). Diff só em `gates`/`exec`/`exits`/`hours`/`ensemble`/`regime_filter`, dentro de `tuning.bounds` do tipo (e do clamp do lab) |
+| `fork --parent N --diff JSON --reason T [--dry-run]` | fork de parâmetros por `lab_registry.create_fork` (resolver valida; o pai nunca muda). Diff só em `gates`/`exec`/`exits`/`hours`/`ensemble`/`regime_filter`, dentro de `tuning.bounds` do tipo (e do clamp do lab). Pai de regra (grid/RSI/regime/Donchian e forks deles): só `rule.*` do tipo, `gates.buy_fraction_usdt`, `exits.*`, `regime_filter.*` — o fork corre no `rules_bot` (ver "Forks de regras") |
 | `criteria-fork --parent N --criteria-file F --reason T [--dry-run]` | fork cuja diferença é o texto dos critérios (esquema `criteria_*.json`, sem dígitos, ≤ 300/400/1600 caracteres). Guardado em `data/lab/criteria/<fork>.json` e referenciado em `params_diff.criteria = {file, sha256}`. Pais: portfólios com portões de von/laya/poorjev (SOL e memes) |
 | `realbot-criteria --criteria-file F --reason T` | proposta pela auditoria por percentil de `jev_trader.rewrite` com aprovação autónoma (`approve(..., autonomous=True)`, aprovador `claude-night`), **recusada sem escrever nada** se `LIVE_TRADING=1` (ambiente ou `.env`), `config/experiment.json` sem `"mode": "paper"` ou perfil de parâmetros ativo sem `paper_only` |
 | `journal --file F` | copia o diário (markdown em `run/`) para `reviews/claude_night_<data BRT>.md` (nunca sobrescreve: `_2`, `_3`) |

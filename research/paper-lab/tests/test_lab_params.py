@@ -187,8 +187,10 @@ def test_create_fork_validates_diff(tmp_path, monkeypatch):
     assert name is None and why.startswith("params_invalidos") and "buy_fraction_usdt" in why
     name, why = R.create_fork("relaxed", {"gatez": {"x": 1}}, "teste", dry_run=True)
     assert name is None and "gatez" in why
-    with pytest.raises(ValueError):
-        R.create_fork("grid_sol_2pct", {"rule": {"grid_pct": 0.03}}, "teste", dry_run=True)
+    # forks de regra (executor: rules_bot.RuleForks) — ver test_lab_rule_forks.py
+    assert R.create_fork("grid_sol_2pct", {"rule": {"grid_pct": 0.03}}, "teste", dry_run=True) == ("grid_sol_2pct__fork1", "dry_run")
+    name, why = R.create_fork("grid_sol_2pct", {"gates": {"cooldown_seconds": 60}}, "teste", dry_run=True)
+    assert name is None and why.startswith("diff_nao_suportado")
 
 
 # ------------------------------------------------------------ validação e limites

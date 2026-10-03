@@ -22,6 +22,17 @@ Definições (ver também `research/paper-lab/README.md`, secção "Revisão not
 - **Erro**: compra seguida de retorno a `horizon_s` abaixo de −`band`; venda seguida de retorno acima de +`band`.
   **Acerto**: movimento além da banda no sentido da chamada. Dentro da banda: `flat`.
   Preço futuro = primeiro ponto da série do mesmo ativo em [t+horizon, t+horizon+tolerance]; sem ponto → não resolvida.
+- **Banda** (`band_mode`): `"fixed"` = a mesma `band` (0,10%) para todos os ativos (modo antigo, padrão da função);
+  `"vol"` (padrão da config) = banda POR ATIVO = `band_k` × mediana do |retorno a horizon_s| desse ativo na janela
+  `band_window_s` (3 dias) que acaba no fim da janela auditada, na mesma série de preços da auditoria, limitada a
+  [`band_floor`, `band_cap`]. Menos de `band_min_n` retornos → recua para a banda fixa (`source: "fallback_fixed"`).
+  As memecoins mexem muito mais do que o SOL: com banda fixa quase todo o ruído delas virava "erro".
+  A banda usada vai em `bands`/`band_by_asset` e em cada resultado (`band`).
+- **Palavras por lift** (`word_lift`): para cada palavra de estado, % dos erros com ela, % dos acertos com ela e
+  lift = diferença (mais log-odds suavizado, só informativo). Uma palavra só entra nas frases da proposta com
+  lift >= `lift_min` (> 0), >= `lift_min_count` erros, presente em >= `lift_min_episodes` episódios de erro e com
+  >= `lift_min_ref` acertos de referência. Palavras de fundo (calm/deep/quiet… em 100% dos erros E dos acertos)
+  ficam com lift 0 e nunca entram. Sem palavra elegível → proposta inalterada (`changed: False`).
 """
 from __future__ import annotations
 import bisect
@@ -42,7 +53,23 @@ DEFAULTS = {
     "min_mistakes": 1,
     "top_words": 8,
     "tie_rule": "auto",
+    # banda por ativo (ver docstring do módulo)
+    "band_mode": "vol",
+    "band_k": 0.5,
+    "band_window_s": 3 * 86400,
+    "band_floor": 0.0005,
+    "band_cap": 0.015,
+    "band_min_n": 30,
+    # seleção de palavras por lift
+    "lift_min": 0.2,
+    "lift_min_count": 3,
+    "lift_min_episodes": 2,
+    "lift_min_ref": 3,
 }
+BAND_MODES = ("fixed", "vol")
+BAND_DEFAULTS = {"band_mode": "fixed", "band_k": 0.5, "band_window_s": 3 * 86400, "band_floor": 0.0005,
+                 "band_cap": 0.015, "band_min_n": 30}  # padrão da FUNÇÃO audit (compatível); a config usa "vol"
+LIFT_DEFAULTS = {"min_lift": 0.2, "min_count": 3, "min_episodes": 2, "min_ref": 3}
 DIRECTIONAL = ("buy", "sell")
 # Palavras que não descrevem o mercado (posição/humor/fase fixa) não viram frases de critério.
 NON_MARKET_WORDS = {"mid", "held", "sold", "bare", "buoyed", "stung", "neutral"}
@@ -52,6 +79,17 @@ def review_cfg(cfg: dict | None) -> dict:
     out = dict(DEFAULTS)
     out.update(((cfg or {}).get("review") or {}))
     return out
+
+
+def band_kwargs(rc: dict) -> dict:
+    """Argumentos de banda de `audit` a partir de `review_cfg(cfg)`."""
+    return {k: rc[k] for k in BAND_DEFAULTS}
+
+
+def lift_kwargs(rc: dict) -> dict:
+    """Parâmetros de `word_lift` a partir de `review_cfg(cfg)`."""
+    return {"min_lift": float(rc["lift_min"]), "min_count": int(rc["lift_min_count"]),
+            "min_episodes": int(rc["lift_min_episodes"]), "min_ref": int(rc["lift_min_ref"])}
 
 
 def _conf(row) -> float | None:
@@ -141,6 +179,34 @@ def forward_price(series: tuple[list, list] | None, ts: float, horizon_s: float,
     return None
 
 
+def vol_band(series: tuple[list, list] | None, t_end: float, *, horizon_s: float = 900, tolerance_s: float = 300,
+             window_s: float = 3 * 86400, k: float = 0.5, floor: float = 0.0005, cap: float = 0.015,
+             min_n: int = 30, fallback: float = 0.001) -> dict:
+    """Banda de um ativo = k × mediana de |retorno a horizon_s| na janela [t_end − window_s, t_end] da série,
+    limitada a [floor, cap]. Só usa retornos cujo preço futuro também está <= t_end (janela para trás).
+    Menos de `min_n` retornos → `fallback` (banda fixa). Devolve o detalhe (para relatório)."""
+    rets: list[float] = []
+    if series:
+        tl, pl = series
+        t_end = float(t_end)
+        lo = bisect.bisect_left(tl, t_end - float(window_s))
+        hi = bisect.bisect_right(tl, t_end - float(horizon_s))
+        for i in range(lo, hi):
+            fwd = forward_price(series, tl[i], horizon_s, tolerance_s)
+            if fwd is None or fwd[0] > t_end or pl[i] <= 0:
+                continue
+            rets.append(abs(fwd[1] / pl[i] - 1.0))
+    info = {"k": k, "floor": floor, "cap": cap, "window_s": window_s, "n": len(rets), "t_end": t_end}
+    if len(rets) < int(min_n):
+        return {"band": float(fallback), "source": "fallback_fixed", "median_abs_ret": percentile(rets, 50),
+                "clamped": None, **info}
+    med = percentile(rets, 50)
+    raw = float(k) * med
+    band = min(float(cap), max(float(floor), raw))
+    clamped = "floor" if raw < floor else ("cap" if raw > cap else None)
+    return {"band": band, "source": "vol", "median_abs_ret": med, "clamped": clamped, **info}
+
+
 def classify(side: str, ret: float, band: float) -> str:
     if side == "buy":
         return "mistake" if ret < -band else ("correct" if ret > band else "flat")
@@ -196,14 +262,80 @@ def _words(row) -> list[str]:
     return [w for w in str(row.get("state") or "").split() if w]
 
 
+def word_lift(outcomes: Iterable[dict], *, side: str | None = None, min_lift: float = 0.2, min_count: int = 3,
+              min_episodes: int = 2, min_ref: int = 3, exclude: set | frozenset = frozenset(NON_MARKET_WORDS),
+              gap_s: float = 300.0, alpha: float = 0.5) -> list[dict]:
+    """Tabela de palavras de estado (erros vs acertos), ordenada por lift desc.
+
+    err_share = erros com a palavra / erros; ok_share = acertos com a palavra / acertos; lift = err_share − ok_share;
+    log_odds = log-odds suavizado (alpha) dos erros contra os acertos (informativo). `eligible` = pode virar frase:
+    lift > 0 e >= min_lift, n_err >= min_count, episódios de erro com a palavra >= min_episodes e acertos >= min_ref.
+    Sem acertos de referência suficientes o lift não diz nada (fica None ou não elegível). `flat` não conta."""
+    outs = [o for o in outcomes if side is None or o.get("side") == side]
+    mis = [o for o in outs if o.get("outcome") == "mistake"]
+    ok = [o for o in outs if o.get("outcome") == "correct"]
+    n_m, n_o = len(mis), len(ok)
+    cm, co = Counter(), Counter()
+    ts_by: dict[str, list] = {}
+    for o in mis:
+        ws = set(str(o.get("state") or "").split()) - set(exclude)
+        cm.update(ws)
+        for w in ws:
+            ts_by.setdefault(w, []).append(float(o.get("ts") or 0))
+    for o in ok:
+        co.update(set(str(o.get("state") or "").split()) - set(exclude))
+    rows = []
+    for w in set(cm) | set(co):
+        es = cm[w] / n_m if n_m else None
+        os_ = co[w] / n_o if n_o else None
+        lift = (es - os_) if (es is not None and os_ is not None) else None
+        lo = None
+        if n_m and n_o:
+            lo = (math.log((cm[w] + alpha) / (n_m - cm[w] + alpha)) - math.log((co[w] + alpha) / (n_o - co[w] + alpha)))
+        ep = episodes(ts_by.get(w, []), gap_s)
+        elig = (lift is not None and lift > 0 and lift >= float(min_lift) and n_o >= int(min_ref)
+                and cm[w] >= int(min_count) and ep >= int(min_episodes))
+        rows.append({"word": w, "n_err": cm[w], "n_ok": co[w],
+                     "err_share": None if es is None else round(es, 4), "ok_share": None if os_ is None else round(os_, 4),
+                     "lift": None if lift is None else round(lift, 4), "log_odds": None if lo is None else round(lo, 3),
+                     "episodes": ep, "eligible": elig})
+    rows.sort(key=lambda r: (-(r["lift"] if r["lift"] is not None else -9.0), -(r["log_odds"] or 0.0), -r["n_err"], r["word"]))
+    return rows
+
+
+def lift_words(rows: list[dict], k: int | None = None) -> list[str]:
+    """Palavras elegíveis (lift positivo acima do limiar e com suporte), por ordem de lift."""
+    ws = [r["word"] for r in rows if r.get("eligible")]
+    return ws if k is None else ws[:k]
+
+
+def lift_table_md(rows: list[dict], n: int = 8) -> list[str]:
+    """Tabela markdown legível: palavra | % erros | % acertos | lift | log-odds | nº erros/acertos | episódios | usa?"""
+    pc = lambda x: "–" if x is None else f"{x * 100:.0f}%"
+    nb = lambda x, d=2: "–" if x is None else f"{x:+.{d}f}"
+    L = ["| Palavra | % erros | % acertos | lift | log-odds | erros / acertos | episódios (erros) | Entra na proposta? |",
+         "|---|---:|---:|---:|---:|---:|---:|---|"]
+    for r in rows[:n]:
+        L.append(f"| {r['word']} | {pc(r['err_share'])} | {pc(r['ok_share'])} | {nb(r['lift'])} | {nb(r['log_odds'])} | "
+                 f"{r['n_err']} / {r['n_ok']} | {r['episodes']} | {'sim' if r['eligible'] else 'não'} |")
+    return L
+
+
 def audit(decisions: Iterable[dict], *, prices: dict | None = None, trades: Iterable[dict] | None = None,
           percentile_p: float = 90, fixed_bar: float | None = None, horizon_s: float = 900, band: float = 0.001,
           tolerance_s: float = 300, candidates: str = "chosen", window: tuple | None = None,
-          top_words: int = 8, tie_rule: str = "auto") -> dict[str, Any]:
+          top_words: int = 8, tie_rule: str = "auto", band_mode: str = "fixed", band_k: float = 0.5,
+          band_window_s: float = 3 * 86400, band_floor: float = 0.0005, band_cap: float = 0.015, band_min_n: int = 30,
+          bands: dict | None = None, lift_params: dict | None = None) -> dict[str, Any]:
     """Auditoria de um grupo (um modelo/portfólio). `prices` = {ativo: (ts, preços)}; sem série para o ativo
-    usa os preços das próprias decisões. `fixed_bar` definido → corte fixo `conf > fixed_bar` (modo antigo)."""
+    usa os preços das próprias decisões. `fixed_bar` definido → corte fixo `conf > fixed_bar` (modo antigo).
+    `band_mode="vol"` → banda por ativo (`vol_band`) com fim da janela de volatilidade = fim de `window` (ou o último
+    ts auditado); `bands` = {ativo: banda ou detalhe de vol_band} já calculadas (sobrepõe-se). `lift_params` =
+    parâmetros de `word_lift` (padrão LIFT_DEFAULTS)."""
     if candidates not in ("chosen", "acted"):
         raise ValueError("candidates must be 'chosen' or 'acted'")
+    if band_mode not in BAND_MODES:
+        raise ValueError("band_mode must be 'fixed' or 'vol'")
     rows = [r for r in decisions if r.get("ts") is not None]
     if window:
         a, b = window
@@ -230,6 +362,24 @@ def audit(decisions: Iterable[dict], *, prices: dict | None = None, trades: Iter
                 rule = f"conf >= P{percentile_p:g}"; passes = lambda c: c >= cutoff
     series = dict(build_series(rows))
     series.update(prices or {})
+    t_end = (window[1] if window and window[1] is not None
+             else (max(float(r["ts"]) for r in rows) if rows else 0.0))
+    band_cache: dict[str, dict] = {}
+
+    def band_for(asset: str) -> float:
+        if asset not in band_cache:
+            given = (bands or {}).get(asset)
+            if isinstance(given, dict):
+                band_cache[asset] = dict(given)
+            elif given is not None:
+                band_cache[asset] = {"band": float(given), "source": "given"}
+            elif band_mode == "vol":
+                band_cache[asset] = vol_band(series.get(asset), t_end, horizon_s=horizon_s, tolerance_s=tolerance_s,
+                                             window_s=band_window_s, k=band_k, floor=band_floor, cap=band_cap,
+                                             min_n=band_min_n, fallback=band)
+            else:
+                band_cache[asset] = {"band": float(band), "source": "fixed"}
+        return band_cache[asset]["band"]
 
     if candidates == "chosen":
         cand = [(r, r["chosen_action"]) for r in answered if r.get("chosen_action") in DIRECTIONAL]
@@ -254,7 +404,8 @@ def audit(decisions: Iterable[dict], *, prices: dict | None = None, trades: Iter
             by_side[side]["unresolved"] += 1
             continue
         ret = fwd[1] / p0 - 1.0
-        out = classify(side, ret, band)
+        b = band_for(asset_of(r))
+        out = classify(side, ret, b)
         by_side[side]["resolved"] += 1
         by_side[side][out] += 1
         ws = set(_words(r))
@@ -262,7 +413,7 @@ def audit(decisions: Iterable[dict], *, prices: dict | None = None, trades: Iter
         item = {"ts": float(r["ts"]), "ts_brt": r.get("ts_brt") or datetime.fromtimestamp(float(r["ts"]), BRT).isoformat(),
                 "portfolio": r.get("portfolio"), "portfolios": r.get("_portfolios"), "model": r.get("model"),
                 "asset": asset_of(r), "side": side, "confidence": _conf(r), "state": r.get("state"),
-                "price": p0, "fwd_price": fwd[1], "fwd_ts": fwd[0], "ret": ret, "outcome": out,
+                "price": p0, "fwd_price": fwd[1], "fwd_ts": fwd[0], "ret": ret, "band": b, "outcome": out,
                 "decision_id": r.get("decision_id"), "acted": is_acted(r, traded_ids)}
         outcomes.append(item)
         if out == "mistake":
@@ -273,9 +424,12 @@ def audit(decisions: Iterable[dict], *, prices: dict | None = None, trades: Iter
         tot.update(c)
     resolved = tot["resolved"]
     ts_all = [float(r["ts"]) for r in rows]
+    lp = {**LIFT_DEFAULTS, **(lift_params or {})}
+    lifts = {s or "all": word_lift(outcomes, side=s, **lp) for s in (None, "buy", "sell")}
     return {
         "rule": rule, "cutoff": cutoff, "percentile": None if fixed_bar is not None else percentile_p,
         "fixed_bar": fixed_bar, "candidates": candidates, "horizon_s": horizon_s, "band": band,
+        "band_mode": band_mode, "bands": band_cache, "band_by_asset": {k: v["band"] for k, v in band_cache.items()},
         "window": (min(ts_all), max(ts_all)) if ts_all else None,
         "n_rows": len(rows), "n_answered": len(answered), "n_unanswered": len(rows) - len(answered),
         "conf_p50": percentile(confs, 50), "conf_max": max(confs) if confs else None,
@@ -290,6 +444,9 @@ def audit(decisions: Iterable[dict], *, prices: dict | None = None, trades: Iter
         "by_side": {s: dict(c) for s, c in by_side.items()},
         "lose_words": sorted(lose.items(), key=lambda x: (-x[1], x[0]))[:top_words],  # desempate alfabético (determinístico)
         "word_stats": {w: [word_mist[w], word_total[w]] for w in word_total},
+        "lift_params": lp,
+        "word_lift": lifts["all"][:top_words],  # tabela legível (% erros / % acertos / lift)
+        "lift_words": {k: lift_words(v) for k, v in lifts.items()},  # elegíveis para frases
         "mistakes": [o for o in outcomes if o["outcome"] == "mistake"],
         "outcomes": outcomes,
     }
@@ -307,10 +464,10 @@ def episodes(ts_list, gap_s: float = 300.0) -> int:
 
 def summary(a: dict) -> dict:
     """Versão compacta (sem listas longas) para JSON de proposta e relatórios."""
-    keys = ("rule", "cutoff", "percentile", "fixed_bar", "candidates", "horizon_s", "band", "n_rows", "n_answered",
-            "n_candidates", "n_confident", "confident_share",
+    keys = ("rule", "cutoff", "percentile", "fixed_bar", "candidates", "horizon_s", "band", "band_mode", "bands",
+            "band_by_asset", "n_rows", "n_answered", "n_candidates", "n_confident", "confident_share",
             "n_confident_acted", "n_resolved", "n_unresolved", "n_mistakes", "mistake_episodes", "n_correct", "n_flat", "hit_rate",
-            "mistake_rate", "by_side", "lose_words")
+            "mistake_rate", "by_side", "lose_words", "word_lift", "lift_words", "lift_params")
     return {k: a.get(k) for k in keys}
 
 
@@ -341,34 +498,35 @@ def _top_market_words(mistakes: list, side: str, k: int = 3) -> list[str]:
 
 
 def propose_criteria(base: dict, a: dict, *, min_mistakes: int = 1, generated_at: str | None = None,
-                     source: str = "night_review_percentile_audit") -> dict:
+                     source: str = "night_review_percentile_audit", lift_params: dict | None = None,
+                     table_rows: int = 8) -> dict:
     """Reescrita determinística a partir da auditoria. Só acrescenta frases quando há erros confiantes
-    (>= min_mistakes); sem erros a proposta é o texto base inalterado (`changed: False`).
-    Nunca escreve ficheiros (portão humano fica com o chamador)."""
+    (>= min_mistakes) E palavras de estado com lift positivo acima do limiar (`word_lift`, com suporte mínimo);
+    as palavras de fundo (presentes em quase todos os erros e acertos) nunca contam. Sem palavra elegível a
+    proposta é o texto base inalterado (`changed: False`). Nunca escreve ficheiros (portão humano fica com o chamador).
+    `lift_params` = parâmetros de `word_lift` (padrão: os da auditoria, senão LIFT_DEFAULTS)."""
     mistakes = a.get("mistakes") or []
-    lose = Counter()
-    by_side_words = {s: Counter() for s in DIRECTIONAL}
-    for m in mistakes:
-        ws = str(m.get("state") or "").split()
-        lose.update(ws); by_side_words[m["side"]].update(ws)
+    lp = {**LIFT_DEFAULTS, **(a.get("lift_params") or {}), **(lift_params or {})}
+    outs = a.get("outcomes") or []
+    tables = {s or "all": word_lift(outs, side=s, **lp) for s in (None, "buy", "sell")}
+    elig = {k: lift_words(v) for k, v in tables.items()}
+    any_w = set(elig["all"]) | set(elig["buy"]) | set(elig["sell"])
     extra = {"buy": [], "sell": [], "hold": [], "skip": []}
     if len(mistakes) >= min_mistakes:
-        if lose.get("thin", 0) + lose.get("bot_war", 0) >= 1:
+        if any_w & {"thin", "bot_war"}:
             extra["buy"].append("and the book is deep not thin")
             extra["skip"].append("especially when the book is thin or fees feel hostile")
-        if lose.get("violent", 0) or lose.get("whipping", 0):
+        if any_w & {"violent", "whipping"}:
             extra["hold"].append("when the tape is violent or whipping")
             extra["skip"].append("when volatility is violent")
-        if by_side_words["buy"].get("fading", 0) or by_side_words["buy"].get("dumping", 0):
+        if set(elig["buy"]) & {"fading", "dumping"}:
             extra["buy"].append("never while the move is fading or dumping")
-        if by_side_words["sell"].get("pumping", 0) or by_side_words["sell"].get("lifting", 0):
+        if set(elig["sell"]) & {"pumping", "lifting"}:
             extra["sell"].append("not while the move is still lifting or pumping")
         for side in DIRECTIONAL:
             n_side = sum(1 for m in mistakes if m["side"] == side)
-            if n_side >= min_mistakes:
-                words = distinctive_words(a, side) or _top_market_words(mistakes, side)
-                if words:
-                    extra[side].append("be wary when the tape reads " + ", ".join(words))
+            if n_side >= min_mistakes and elig[side]:
+                extra[side].append("be wary when the tape reads " + ", ".join(elig[side][:3]))
     changed = any(extra.values())
     act = base["action"]
     crit = dict(act["criteria"])
@@ -377,16 +535,22 @@ def propose_criteria(base: dict, a: dict, *, min_mistakes: int = 1, generated_at
             crit[k] = crit[k] + "; " + "; ".join(extra[k])
     skip = base["skip_this_cycle"]["instructions"] + ("; " + "; ".join(extra["skip"]) if extra["skip"] else "")
     instr = act["instructions"] + ("; be stricter after overnight audit of confident mistakes" if changed else "")
+    band_txt = (f"band per asset = k*median|ret| ({a.get('band_by_asset')})" if a.get("band_mode") == "vol"
+                else f"band {a.get('band')}")
     return {
         "version": "v2",
         "source": source,
         "parent": base.get("version", "baseline"),
         "generated_at_brt": generated_at or datetime.now(BRT).isoformat(),
         "method": (f"Deterministic rewrite from a percentile confidence audit ({a.get('rule')}, candidates="
-                   f"{a.get('candidates')}, horizon {a.get('horizon_s')}s, band {a.get('band')}). Phrases are appended "
-                   "only when there are confident mistakes. Baseline untouched (human gate)."),
+                   f"{a.get('candidates')}, horizon {a.get('horizon_s')}s, {band_txt}). State words are selected by lift "
+                   f"(share in mistakes minus share in correct calls >= {lp['min_lift']}, >= {lp['min_count']} mistakes, "
+                   f">= {lp['min_episodes']} episodes, >= {lp['min_ref']} correct calls); phrases are appended only when "
+                   "there are confident mistakes with such words. Baseline untouched (human gate)."),
         "changed": changed,
         "phrases_added": {k: v for k, v in extra.items() if v},
+        "word_selection": {"method": "lift", "params": lp, "eligible": elig,
+                           "table": {k: v[:table_rows] for k, v in tables.items()}},
         "action": {"instructions": instr, "criteria": crit},
         "skip_this_cycle": {"instructions": skip},
         "audit": summary(a),

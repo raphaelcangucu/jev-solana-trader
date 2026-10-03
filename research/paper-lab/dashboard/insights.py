@@ -274,9 +274,16 @@ def _downsample(xs: list, n: int) -> list:
     return [xs[round(i * step)] for i in range(n)]
 
 
-def build_real_board(decisions: list[dict], trades: list[dict], experiment, S, parse_t, points: int = 360) -> dict:
-    """Placar + série papel × segurar + decisões/trades recentes. Pura (recebe as listas)."""
-    board = S.scoreboard(decisions, trades, experiment)
+def build_real_board(decisions: list[dict], trades: list[dict], experiment, S, parse_t, points: int = 360,
+                     book: dict | None = None) -> dict:
+    """Placar + série papel × segurar + decisões/trades recentes. Pura (recebe as listas).
+
+    `book` é o paper_book.json do livro (A/B): o livro B começa no seu primeiro ciclo (S.experiment_for_book)."""
+    if book is not None and hasattr(S, "experiment_for_book"):
+        board = S.scoreboard(decisions, trades, experiment, book=book)
+        experiment = S.experiment_for_book(experiment, book)
+    else:
+        board = S.scoreboard(decisions, trades, experiment)
     hr = dict(board.get("hit_rate") or {})
     detail = hr.pop("detail", None) or []
     board["hit_rate"] = hr
@@ -294,12 +301,12 @@ def build_real_board(decisions: list[dict], trades: list[dict], experiment, S, p
     board["recent_decisions"] = [
         {"t": d.get("t"), "action": d.get("action"), "model_action": d.get("model_action"), "conf": _f(d.get("conf")),
          "skip": _f(d.get("skip")), "reason": d.get("reason"), "px": _f(d.get("px_in")), "paper_fill": bool(d.get("paper_fill")),
-         "source": d.get("source")}
+         "source": d.get("source"), "paper_reason": d.get("paper_reason"), "exit_reason": d.get("exit_reason")}
         for d in run_dec[-30:][::-1]]
     board["recent_trades"] = [
         {"t": t.get("t"), "side": t.get("side"), "conf": _f(t.get("conf")), "px": _f(t.get("px_in")),
          "fill_px": _f(t.get("fill_px")), "in_ui": _f(t.get("in_amount_ui")), "out_ui": _f(t.get("out_amount_ui")),
-         "fill_mode": t.get("fill_mode")}
+         "fill_mode": t.get("fill_mode"), "reason": t.get("reason")}
         for t in run_tr[-20:][::-1]]
     px = _f(board.get("last_px"))
     pb = board.get("paper_book") or {}
@@ -315,25 +322,66 @@ def build_real_board(decisions: list[dict], trades: list[dict], experiment, S, p
 _rb_cache: dict[str, Any] = {"key": None, "val": None}
 
 
+def real_bot_books(root: Path) -> list[tuple[str, Path]]:
+    """Livros de papel do bot real: A em logs/, e cada logs/paper_<x>/ com logs (B = logs/paper_b, perfil com saídas).
+    O rótulo vem do paper_book.json (campo book) ou do nome da pasta."""
+    books = [("A", root / "logs")]
+    for d in sorted((root / "logs").glob("paper_*")):
+        if not d.is_dir() or not ((d / "decisions.jsonl").exists() or (d / "paper_book.json").exists()):
+            continue
+        label = d.name[len("paper_"):].upper() or d.name
+        try:
+            label = str(json.loads((d / "paper_book.json").read_text()).get("book") or label)
+        except Exception:
+            pass
+        books.append((label, d))
+    return books
+
+
+def _read_book(p: Path) -> dict | None:
+    try:
+        data = json.loads(p.read_text())
+    except Exception:
+        return None
+    return data if isinstance(data, dict) else None
+
+
 def real_bot_board(points: int = 360) -> dict:
+    """Livro A no topo (compatível com a página antiga) e, se houver livro B (logs/paper_b), `books` com A e B."""
     root = real_bot_root()
-    dec_p, tr_p, exp_p = root / "logs" / "decisions.jsonl", root / "logs" / "paper_trades.jsonl", root / "config" / "experiment.json"
+    exp_p = root / "config" / "experiment.json"
+    books = real_bot_books(root)
+    dec_p = root / "logs" / "decisions.jsonl"
     if not exp_p.exists() and not dec_p.exists():
         return {"available": False, "reason": "sem logs do bot real nesta máquina"}
-    key = []
-    for p in (dec_p, tr_p, exp_p):
-        try:
-            st = p.stat(); key.append((st.st_size, st.st_mtime_ns))
-        except FileNotFoundError:
-            key.append(None)
+    key: list = []
+    for _label, d in books:
+        for p in (d / "decisions.jsonl", d / "paper_trades.jsonl", d / "paper_book.json"):
+            try:
+                st = p.stat(); key.append((str(p), st.st_size, st.st_mtime_ns))
+            except FileNotFoundError:
+                key.append((str(p), None))
+    try:
+        st = exp_p.stat(); key.append((st.st_size, st.st_mtime_ns))
+    except FileNotFoundError:
+        key.append(None)
     key.append(points)
     if _rb_cache["key"] == key:
         return _rb_cache["val"]
     try:
         S, load_experiment, parse_t = _import_score()
         exp = load_experiment(exp_p)
-        out = build_real_board(_jsonl(dec_p), _jsonl(tr_p), exp, S, parse_t, points=points)
-        out["available"] = True
+        boards = []
+        for label, d in books:
+            b = build_real_board(_jsonl(d / "decisions.jsonl"), _jsonl(d / "paper_trades.jsonl"), exp, S, parse_t,
+                                 points=points, book=_read_book(d / "paper_book.json") or {"book": label})
+            b["book"] = label
+            b["log_dir"] = str(d.relative_to(root)) if d.is_relative_to(root) else str(d)
+            b["available"] = True
+            boards.append(b)
+        out = dict(boards[0])
+        if len(boards) > 1:
+            out["books"] = boards
     except Exception as ex:
         out = {"available": False, "reason": f"placar indisponível: {ex!r}"[:300]}
     _rb_cache.update(key=key, val=out)
