@@ -167,13 +167,24 @@ def log_param_change(portfolio: str, field: str, old, new, who="dashboard"):
     return row
 
 
+def _pid_running(pid: int) -> bool:
+    """Portável (Linux e macOS): sinal 0 só testa a existência do processo."""
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
 def pid_alive(name: str) -> dict:
     pf = ROOT / "run" / f"{name}.pid"
     if not pf.exists():
         return {"name": name, "running": False, "pid": None}
     try:
         pid = int(pf.read_text().strip())
-        running = (ROOT / "run").exists() and (Path(f"/proc/{pid}").exists())
+        running = (ROOT / "run").exists() and (_pid_running(pid))
         return {"name": name, "running": running, "pid": pid}
     except Exception:
         return {"name": name, "running": False, "pid": None}

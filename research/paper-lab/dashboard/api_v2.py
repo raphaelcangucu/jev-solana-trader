@@ -125,10 +125,21 @@ def downsample(rows: list, n: int) -> list:
     return out
 
 
+def _pid_running(pid: int) -> bool:
+    """Portável (Linux e macOS): sinal 0 só testa a existência do processo."""
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
 def pid_info(pidfile: Path, name: str) -> dict:
     try:
         pid = int(pidfile.read_text().strip())
-        return {"name": name, "pid": pid, "running": Path(f"/proc/{pid}").exists()}
+        return {"name": name, "pid": pid, "running": _pid_running(pid)}
     except Exception:
         return {"name": name, "pid": None, "running": False}
 
