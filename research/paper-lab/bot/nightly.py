@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # código do lab (
 from bot.paths import ROOT, LAB_DIR  # noqa: E402
 from bot.lib import BRT, brt_iso, load_cfg, write_json, append_jsonl
 from bot import analytics as A, lab_registry as R, tuner as T
+from bot import params as P
 
 STATUS = ROOT / "data" / "nightly" / "status.json"
 VERDICTS = ROOT / "data" / "nightly" / "verdicts.json"
@@ -56,8 +57,32 @@ def compute_verdicts(cat=None, tb=None):
     return out
 
 
+def params_for(name, m=None, reg=None):
+    """Parâmetros efetivos SEM overlay (base do tuning e dos forks), proveniência e erros (bot/params.py)."""
+    entry = m if (m and m.get("origin") == "lab") else None
+    eff, prov, errs, _meta = P.explain(name, meta=entry, use_overlay=False, registry=reg)
+    return eff, prov, errs
+
+
 def gates_for_meta(m, cfg):
-    return dict(cfg["gates_relaxed"] if m.get("profile") == "relaxed" else cfg["gates"])
+    """Compatibilidade: portões efetivos do portfólio (params.json, sem overlay)."""
+    return params_for(m["name"], m)[0]["gates"]
+
+
+def fork_params_lines(e, reg):
+    """Linhas do relatório com o diff do fork, o valor efetivo e a camada de onde vem (proveniência)."""
+    eff, prov, errs = params_for(e["name"], dict(e, origin="lab"), reg)
+    _peff, _pprov, _ = params_for(e["parent"], None, reg) if e.get("parent") else ({}, {}, [])
+    out = []
+    for path, layer in sorted(prov.items()):
+        if layer.startswith("fork:") or layer.startswith("portfolios.") or layer == "overlay":
+            sect, _, key = path.partition(".")
+            val = (eff.get(sect) or {}).get(key) if isinstance(eff.get(sect), dict) else eff.get(sect)
+            pv = (_peff.get(sect) or {}).get(key) if isinstance(_peff.get(sect), dict) else _peff.get(sect)
+            out.append(f"`{path}` = {json.dumps(val)} (pai: {json.dumps(pv)}; camada `{layer}`)")
+    if errs:
+        out.append("**params inválidos (fail-closed no bot):** " + "; ".join(errs[:5]))
+    return out
 
 
 def tuning_parent(lineage, reg, cat):
@@ -84,11 +109,13 @@ def run(day=None, dry=False):
         v = verd[n]; L.append(f"| {n} | {v.get('status')} | **{v['verdict']}** | {(v.get('progress') or {}).get('text','')} | {v.get('reason','')} |")
     # 2) day + cumulative stats
     tbl_day, day_rows = A.stats_table(cat, tb, a, b)
-    L += ["", f"## 2. Estatísticas do dia {day}", "", tbl_day]
+    L += ["", f"## 2. Estatísticas do dia {day}", "", A.STATS_LEGEND, "", tbl_day]
     # 3) eligibility + tuning
     el = tc["eligibility"]; L += ["", "## 3. Elegibilidade e tuning", "",
           f"Elegível se ≥{el['min_closed_rt']} round trips fechados OU (≥{el['min_days']} dias e ≥{el['min_trades']} trades). "
-          f"Busca limitada (±20% por parâmetro por noite, limites duros: buy_fraction ≤0,5, trades/h ≤8, sem alavancagem), walk-forward 70/30, penalidade por trade, melhoria mínima exigida.", "",
+          "Espaço de busca por tipo de teste em params.json (`tuning`: parâmetros, limites, passo máximo relativo; padrão ±20% por noite), "
+          "limites de segurança do resolver (buy_fraction ≤0,5 e trades/h ≤8 salvo `limits`, sem alavancagem), walk-forward 70/30, penalidade por trade, melhoria mínima exigida. "
+          "O diff de cada fork é validado pelo resolver antes de criar.", "",
           "| Linhagem | Base do tuning | Tipo | RT fechados | Trades | Dias | Elegível | Resultado |", "|---|---|---|---|---|---|---|---|"]
     lineages = {}
     for n, m in cat.items():
@@ -117,16 +144,18 @@ def run(day=None, dry=False):
                     else:
                         data = {"dec": T._decisions(cls, [m["source"]], t0, t1), "px": T._prices(m["asset"], t0, t1)}
                     st = m["state"]; start = (float(st.get("start_sol") or st.get("start_token") or 0), float(st["start_usdt"]))
-                    entry = dict(m, params=m.get("params") or {"gates": dict(m.get("gates") or {})})
+                    eff, _prov, perr = params_for(base, m, reg)
+                    if perr:
+                        raise ValueError("params inválidos: " + "; ".join(perr[:3]))
                     c_bps, n_c = T.cost_bps(cls, now)
-                    r = T.search(entry, gates_for_meta(m, cfg), t0, t1, start, c_bps, data)
+                    r = T.search(m, eff, t0, t1, start, c_bps, data)
                     if r["status"] == "candidate":
                         fname, why = R.create_fork(base, r["best_diff"], f"nightly {run_date}: val {r['best']['val']:+.3f} vs {r['current']['val']:+.3f} (train {r['best']['train']:+.3f} vs {r['current']['train']:+.3f}), custo {c_bps:.1f} bps", dry_run=dry, caps_override=tc["caps"])
                         if fname is None:
                             cap_notes.append(f"{lin}: {why}")
                         res = f"candidato {json.dumps(r['best_diff'])} → fork `{fname}` ({why})"
                     else:
-                        res = f"{r['status']} (custo {c_bps:.1f} bps, {r.get('n_candidates',0)} candidatos)"
+                        res = f"{r['status']} (custo {c_bps:.1f} bps, {r.get('n_candidates',0)} candidatos; espaço {', '.join(r.get('space') or []) or '–'})"
                     tuning_log.append((lin, base, m.get("kind"), r))
             except Exception as ex:
                 res = f"erro no tuning: {ex}"
@@ -140,7 +169,8 @@ def run(day=None, dry=False):
             book = CandleBook(); book.warm_up()
             for lin, base, _, _ in rule_lins:
                 m = cat[base]
-                r = T.rule_search(m, book.sol, book.memes.get(m["asset"]) if m["asset"] != "SOL" else book.sol)
+                r = T.rule_search(m, book.sol, book.memes.get(m["asset"]) if m["asset"] != "SOL" else book.sol,
+                                  eff=params_for(base, m, reg)[0])
                 L.append(f"- {lin}: {r['status']} {json.dumps(r.get('best_diff'))} (atual train/val {r['current']}) — relatório apenas")
         except Exception as ex:
             L.append(f"- erro no replay de regras: {ex}")
@@ -185,6 +215,11 @@ def run(day=None, dry=False):
         if not dry:
             R.label(e["name"], lab_txt, f"margem {margin:+.2f}pp, à frente {ahead:.0%} de {len(daily)} dias")
         L.append(f"- {e['name']} (pai {e['parent']}): {cc['days']:.1f} d, {cc['trades']} trades, margem {margin:+.2f}pp, à frente {ahead:.0%} de {len(daily)} dias → **{lab_txt}** (continua rodando)")
+        try:
+            for ln in fork_params_lines(e, reg):
+                L.append(f"  - {ln}")
+        except Exception as ex:
+            L.append(f"  - params: erro ao resolver ({ex})")
     # 6) v2 criteria audit (proposal only; original v2 keeps its criteria)
     L += ["", "## 6. Revisão de critérios v2 (von) — só proposta", ""]
     try:
@@ -215,10 +250,23 @@ def run(day=None, dry=False):
     L += ["", "## 7. Qualidade de fills", "",
           f"- Dia: {fq_day['mark_fallbacks']}/{fq_day['market_fills']} fills a mercado caíram no fallback de mark ({A.fmt((fq_day['fallback_rate'] or 0)*100,1)}%); motivos {fq_day['reasons']}; eventos de cotação {fq_day['quote_events']}",
           f"- Acumulado: {fq_all['mark_fallbacks']}/{fq_all['market_fills']} ({A.fmt((fq_all['fallback_rate'] or 0)*100,1)}%)"]
+    # 8) params.json: validação de todos os portfólios (fail-closed nos bots se houver erros)
+    L += ["", "## 8. Parâmetros por tipo de teste (params.json)", ""]
+    try:
+        doc = P.STORE.doc()
+        bad = P.check_all(doc, reg, P.STORE.overlay()) if doc is not None else {}
+        L.append(f"- Ficheiro: `{P.params_path()}`; erros do documento: {P.STORE.doc_errors or 'nenhum'}.")
+        L.append(f"- Portfólios com parâmetros inválidos (com overlay): {len(bad)}" + (":" if bad else "."))
+        for n, errs in sorted(bad.items()):
+            L.append(f"  - {n}: {'; '.join(errs[:3])}")
+        L.append("- Tabela completa e proveniência: `python scripts/params_check.py [--name <portfólio>]`.")
+    except Exception as ex:
+        L.append(f"- erro ao validar params: {ex}")
     L += ["", f"_Tempo de execução: {time.time()-t_start:.1f} s._", ""]
     out = ROOT / "reviews" / (f"dryrun_{run_date}.md" if dry else f"{run_date}.md")
     if not dry and out.exists():
         out = ROOT / "reviews" / f"{run_date}_nightly.md"
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(L))
     if not dry:
         try:

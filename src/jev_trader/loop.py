@@ -28,6 +28,7 @@ def run_cycle(cfg: Config, *, dry_run: bool) -> dict:
         market_ok=market_ok,
         confidence_min=cfg.confidence_min,
         skip_min=cfg.skip_min,
+        prob_margin_min=getattr(cfg, "prob_margin_min", 0.0),
     )
     submitted = False
     swap_error = None
@@ -66,6 +67,7 @@ def run_cycle(cfg: Config, *, dry_run: bool) -> dict:
         "model_action": model.choice if model.ok else None,
         "probabilities": {key: _round(value, 6) for key, value in model.probabilities.items()},
         "reason": reason,
+        "params_profile": getattr(cfg, "params_profile", None),
         "source": model.source,
         "dry_run": dry_run,
         "live_trading": cfg.live_trading,

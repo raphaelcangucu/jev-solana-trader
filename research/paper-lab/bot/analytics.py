@@ -116,6 +116,8 @@ def window_stats(meta, trades_by, t_a, t_b):
             out["static_usd"] = float(wl.mean() * ra.sum() * E0)
             out["timing_usd"] = float(((wl - wl.mean()) * ra).sum() * E0)
             out["timing_p"] = placebo_p(wl, ra)
+            # Excesso ajustado à exposição (separa beta de seleção): PnL − exposição média × retorno do ativo.
+            out["ex_exposure"] = pnl - out["static_usd"]
     tr = [t for t in trades_by.get(name, []) if t_a < t["ts"] <= t_b]
     fees = cost = 0.0; modes = {}; sells = wins = 0
     for t in tr:
@@ -151,6 +153,15 @@ def fmt(x, n=2, sign=False):
     return f"{x:+.{n}f}" if sign else f"{x:.{n}f}"
 
 
+STATS_LEGEND = ("**Como ler (beta vs seleção):** *Excesso vs B&H* compara com segurar o livro inicial. "
+                "*Exposição média %* = fração média do valor investida no ativo. "
+                "**Excesso aj. exposição $** = PnL − exposição média × retorno do ativo na janela (×valor inicial): o que sobra "
+                "depois de descontar o beta de estar exposto; perto de zero ou negativo = o ganho veio da exposição, não da seleção. "
+                "*Timing $ (p)* = parte desse excesso explicada por variar a exposição na hora certa, com p de placebo "
+                "(deslocamentos circulares da série de exposição; p baixo = timing melhor que o acaso). O resto do excesso "
+                "ajustado são custos e fills.")
+
+
 def stats_table(cat, trades_by, t_a, t_b, names=None):
     rows = []
     for n in (names or sorted(cat, key=lambda k: (cat[k].get("asset", "SOL") != "SOL", cat[k].get("asset", ""), k))):
@@ -158,14 +169,15 @@ def stats_table(cat, trades_by, t_a, t_b, names=None):
         if s.get("empty"):
             continue
         rows.append((n, s))
-    L = ["| Portfólio | Grupo | Início janela | Valor ini. | Valor fim | PnL $ | PnL % | Excesso vs B&H $ | vs USDT $ | Trades (C/V) | RT ganhos | Taxas $ | Custo vs mark $ | Exposição % | MDD % | Timing $ (p) | Fills |",
-         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+    L = ["| Portfólio | Grupo | Início janela | Valor ini. | Valor fim | PnL $ | PnL % | Excesso vs B&H $ | Exposição média % | **Excesso aj. exposição $** | Timing $ (p) | vs USDT $ | Trades (C/V) | RT ganhos | Taxas $ | Custo vs mark $ | MDD % | Fills |",
+         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for n, s in rows:
         fm = ", ".join(f"{k}:{v}" for k, v in sorted(s["fill_modes"].items())) or "–"
         tp = f"{fmt(s.get('timing_usd'),3,True)} ({fmt(s.get('timing_p'),2)})" if s.get("timing_usd") is not None else "–"
         L.append(f"| {n} | {group_of(n, cat[n])} | {datetime.fromtimestamp(s['from'], BRT).strftime('%m-%d %H:%M')} | {fmt(s['start_value'],3)} | {fmt(s['end_value'],3)} | "
-                 f"{fmt(s['pnl'],3,True)} | {fmt(s['pnl_pct'],2,True)}% | {fmt(s['ex_bh'],3,True)} | {fmt(s['ex_usdt'],3,True)} | {s['trades']} ({s['buys']}/{s['sells']}) | "
-                 f"{s['rt_wins']}/{s['sells']} | {fmt(s['fees'],4)} | {fmt(s['cost_vs_mark'],4)} | {fmt(s.get('exposure_pct'),1)} | {fmt(s['mdd_pct'],2)} | {tp} | {fm} |")
+                 f"{fmt(s['pnl'],3,True)} | {fmt(s['pnl_pct'],2,True)}% | {fmt(s['ex_bh'],3,True)} | {fmt(s.get('exposure_pct'),1)} | "
+                 f"**{fmt(s.get('ex_exposure'),3,True)}** | {tp} | {fmt(s['ex_usdt'],3,True)} | {s['trades']} ({s['buys']}/{s['sells']}) | "
+                 f"{s['rt_wins']}/{s['sells']} | {fmt(s['fees'],4)} | {fmt(s['cost_vs_mark'],4)} | {fmt(s['mdd_pct'],2)} | {fm} |")
     return "\n".join(L), dict(rows)
 
 

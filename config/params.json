@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "note": "Parâmetros do bot real (src/jev_trader): defaults → profiles.<PARAMS_PROFILE> (padrão relaxed_paper) → variáveis de ambiente (CONFIDENCE_THRESHOLD, SKIP_THRESHOLD, PROB_MARGIN_MIN, BUY_USDT, SELL_SOL, MAX_BUY_USDT, MAX_SELL_SOL, LOOP_SECONDS, PAPER_COST_BPS), que continuam a sobrepor por compatibilidade. Ficheiro inválido ou perfil desconhecido → valores do artigo. Um perfil com paper_only=true nunca vale com LIVE_TRADING=1 (cai no article).",
+  "defaults": {
+    "gates": {
+      "confidence_min": 0.55,
+      "skip_min": 0.55,
+      "prob_margin_min": 0.0
+    },
+    "sizing": {
+      "buy_usdt": 1.0,
+      "sell_sol": 0.005,
+      "max_buy_usdt": 5.0,
+      "max_sell_sol": 0.01
+    },
+    "cycle": {
+      "loop_seconds": 15.0
+    },
+    "paper": {
+      "paper_cost_bps": 10.0
+    }
+  },
+  "profiles": {
+    "article": {
+      "note": "Portões do artigo: confiança ≥ 0,55 e skip < 0,55. Com o von (confiança ~0,2–0,45) o livro de papel quase não se mexe.",
+      "gates": {
+        "confidence_min": 0.55,
+        "skip_min": 0.55,
+        "prob_margin_min": 0.0
+      }
+    },
+    "relaxed_paper": {
+      "note": "Portão relaxed do laboratório (research/paper-lab/params.json profiles.relaxed): confiança ≥ 0,35 E margem de probabilidade (escolhida − segunda) ≥ 0,20, skip < 0,5. Só para paper trading.",
+      "paper_only": true,
+      "gates": {
+        "confidence_min": 0.35,
+        "skip_min": 0.5,
+        "prob_margin_min": 0.2
+      }
+    }
+  }
+}

@@ -216,11 +216,13 @@ class CandleBook:
                     new_keys.append(sym)
         return new_keys
 
-    def sol_indicators(self) -> dict:
+    def sol_indicators(self, ema_fast: int = 12, ema_slow: int = 26, rsi_period: int = 14) -> dict:
+        """Indicadores de SOL na última barra fechada. Os períodos vêm de params.json (rule.*); as chaves
+        ema12/ema26 guardam a EMA rápida/lenta pedida (nomes antigos mantidos)."""
         closes = [b["close"] for b in self.sol]
-        ema12 = ema_series(closes, 12)
-        ema26 = ema_series(closes, 26)
-        rsi = rsi_series(closes, 14)
+        ema12 = ema_series(closes, int(ema_fast))
+        ema26 = ema_series(closes, int(ema_slow))
+        rsi = rsi_series(closes, int(rsi_period))
         i = len(closes) - 1
         if i < 0:
             return {"ready": False}
@@ -237,12 +239,13 @@ class CandleBook:
             "n_bars": len(closes),
         }
 
-    def meme_indicators(self, sym: str) -> dict:
+    def meme_indicators(self, sym: str, donchian: int = 20) -> dict:
         bars = self.memes.get(sym) or []
-        if len(bars) < 21:
+        n = int(donchian)
+        if len(bars) < n + 1:
             return {"ready": False, "symbol": sym}
         closes = [b["close"] for b in bars]
-        sig = donchian_break(bars, 20)
+        sig = donchian_break(bars, n)
         return {
             "ready": True, "symbol": sym, "close": closes[-1],
             "bar_ts": bars[-1]["ts"],

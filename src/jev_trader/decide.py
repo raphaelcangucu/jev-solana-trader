@@ -105,6 +105,14 @@ def parse_system_one_payload(payload: object, source: str) -> ModelAnswer:
     )
 
 
+def prob_margin(probabilities: dict[str, float] | None) -> float | None:
+    """Probabilidade da primeira opção menos a da segunda; None sem probabilidades."""
+    values = sorted((float(v) for v in (probabilities or {}).values()), reverse=True)
+    if not values:
+        return None
+    return values[0] - (values[1] if len(values) > 1 else 0.0)
+
+
 def apply_thresholds(
     choice: str,
     confidence: float,
@@ -112,6 +120,8 @@ def apply_thresholds(
     *,
     confidence_min: float,
     skip_min: float,
+    prob_margin_min: float = 0.0,
+    probabilities: dict[str, float] | None = None,
 ) -> Gate:
     if choice not in {"buy", "sell", "hold"}:
         return Gate("hold", "fail_closed", False)
@@ -119,6 +129,11 @@ def apply_thresholds(
         return Gate("hold", "skip", False)
     if confidence < confidence_min:
         return Gate("hold", "low_confidence", False)
+    if prob_margin_min > 0:
+        # Portão de margem (perfil relaxed_paper): só ativo quando configurado; sem probabilidades, fail-closed.
+        margin = prob_margin(probabilities)
+        if margin is None or margin < prob_margin_min:
+            return Gate("hold", "low_prob_margin", False)
     if choice == "hold":
         return Gate("hold", "model_hold", False)
     return Gate(choice, "execute", True)
@@ -130,6 +145,7 @@ def resolve_action(
     market_ok: bool,
     confidence_min: float,
     skip_min: float,
+    prob_margin_min: float = 0.0,
 ) -> Gate:
     if not model.ok:
         return Gate("hold", "fail_closed", False)
@@ -141,6 +157,8 @@ def resolve_action(
         model.skip_noul,
         confidence_min=confidence_min,
         skip_min=skip_min,
+        prob_margin_min=prob_margin_min,
+        probabilities=model.probabilities,
     )
 
 

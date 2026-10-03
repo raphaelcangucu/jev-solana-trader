@@ -20,13 +20,10 @@ LOCK = LAB / "registry.lock"
 PARAM_LOG = ROOT / "logs" / "param_changes.jsonl"
 SYMS = ["BONK", "WIF", "POPCAT", "FARTCOIN", "PNUT", "MEW", "GOAT"]
 
+# Limites duros do executor do lab (clamp final dos portões). Os parâmetros em si (incluindo os limites de busca do
+# tuning por tipo) vivem em params.json — ver bot/params.py.
 HARD = {"buy_fraction_usdt": (0.05, 0.5), "max_trades_per_hour": (1, 8), "cooldown_seconds": (30, 3600),
         "min_confidence": (0.0, 0.99), "min_prob_margin": (0.0, 0.9), "max_skip_noul": (0.05, 0.95)}
-EXITS_SOL = {"tp": 0.025, "sl": 0.015, "trail": 0.010, "trail_arm": 0.010, "reentry_cooldown_min": 30}
-EXITS_MEME = {"tp": 0.06, "sl": 0.04, "trail": 0.03, "trail_arm": 0.03, "reentry_cooldown_min": 30}
-LIMIT = {"mode": "limit", "offset_bps": 10, "ttl_min": 15, "fee_bps": 10}
-HOURS = [5, 10, 11, 12, 18]
-ENS = {"min_agree": 2, "pct_threshold": 0.80, "min_window": 100}
 
 
 def port_path(name):
@@ -58,9 +55,16 @@ def locked():
             write_json(REG, d)
             fcntl.flock(lf, fcntl.LOCK_UN)
 
-def clamp_gates(g):
+def clamp_gates(g, limits=None):
+    """Clamp final dos portões do lab. `limits` (params efetivos) pode subir os tetos de buy_fraction e trades/h."""
     g = dict(g)
-    for k, (lo, hi) in HARD.items():
+    hard = dict(HARD)
+    if limits:
+        if limits.get("buy_fraction_usdt_max") is not None:
+            hard["buy_fraction_usdt"] = (HARD["buy_fraction_usdt"][0], float(limits["buy_fraction_usdt_max"]))
+        if limits.get("max_trades_per_hour_max") is not None:
+            hard["max_trades_per_hour"] = (1, int(limits["max_trades_per_hour_max"]))
+    for k, (lo, hi) in hard.items():
         if k in g and g[k] is not None:
             v = min(hi, max(lo, float(g[k])))
             g[k] = int(round(v)) if k in ("max_trades_per_hour", "cooldown_seconds") else v
@@ -69,60 +73,79 @@ def clamp_gates(g):
 
 # ---------- originals (bot-run portfolios) ----------
 def originals():
-    """name -> meta for the portfolios run by sol_bot/meme_bot/rules_bot (never modified by tuning)."""
+    """name -> meta for the portfolios run by sol_bot/meme_bot/rules_bot (never modified by tuning).
+    `test_type`/`profile`/`variant` escolhem as camadas de params.json (bot/params.py); `pause_keys` são as chaves de
+    pausa do overlay que valem para o portfólio (o próprio nome + chaves de grupo antigas do dashboard)."""
     o = {}
-    for n, prof, model in [("baseline", "baseline", "von"), ("relaxed", "relaxed", "von"), ("v2", "relaxed", "von"),
+    for n, prof, model in [("baseline", "baseline", "von"), ("relaxed", "relaxed", "von"), ("v2", "v2", "von"),
                            ("laya_baseline", "baseline", "laya"), ("laya_relaxed", "relaxed", "laya"),
                            ("poorjev_baseline", "baseline", "poorjev"), ("poorjev_relaxed", "relaxed", "poorjev"),
                            ("hybrid_von_relaxed_cap2", "relaxed", "von+rules")]:
         o[n] = {"asset": "SOL", "cls": "sol", "kind": "gated", "source": n, "profile": prof, "model": model,
-                "file": str(ROOT / "data" / f"portfolio_{n}.json"), "equity": str(ROOT / "data" / f"equity_{n}.jsonl"),
-                "gates": ({"max_trades_per_hour": 2} if n.startswith("hybrid") else {})}
-    for n in ["grid_sol_2pct", "rsi_sol_1h"]:
-        o[n] = {"asset": "SOL", "cls": "sol", "kind": "rule", "rule": n.split("_")[0], "model": "rule",
+                "test_type": "hybrid" if n.startswith("hybrid") else "model_gated", "runner": "sol_bot",
+                "file": str(ROOT / "data" / f"portfolio_{n}.json"), "equity": str(ROOT / "data" / f"equity_{n}.jsonl")}
+    for n, tt in (("grid_sol_2pct", "rule_grid"), ("rsi_sol_1h", "rule_rsi")):
+        o[n] = {"asset": "SOL", "cls": "sol", "kind": "rule", "rule": n.split("_")[0], "model": "rule", "test_type": tt,
+                "profile": "baseline", "runner": "rules_bot",
                 "file": str(ROOT / "data" / f"portfolio_{n}.json"), "equity": str(ROOT / "data" / f"equity_{n}.jsonl")}
     md = ROOT / "data" / "meme"
     for s in SYMS:
         for prof in ("baseline", "relaxed"):
             n = f"meme_{s}_{prof}"
             o[n] = {"asset": s, "cls": "meme", "kind": "gated", "source": n, "profile": prof, "model": "von",
-                    "file": str(md / "portfolios" / f"{s}_{prof}.json"), "equity": str(md / "equity" / f"{s}_{prof}.jsonl"), "gates": {}}
+                    "test_type": "model_gated", "runner": "meme_bot",
+                    "file": str(md / "portfolios" / f"{s}_{prof}.json"), "equity": str(md / "equity" / f"{s}_{prof}.jsonl")}
             for m in ("laya", "poorjev"):
                 n = f"{s}_{m}_{prof}"
                 o[n] = {"asset": s, "cls": "meme", "kind": "gated", "source": n, "profile": prof, "model": m,
-                        "file": str(md / "portfolios" / f"{n}.json"), "equity": str(md / "equity" / f"{n}.jsonl"), "gates": {}}
+                        "test_type": "model_gated", "runner": "meme_bot",
+                        "file": str(md / "portfolios" / f"{n}.json"), "equity": str(md / "equity" / f"{n}.jsonl")}
         n = f"{s}_hybrid_poorjev_regime"
         o[n] = {"asset": s, "cls": "meme", "kind": "gated", "source": n, "profile": "relaxed", "model": "poorjev+rules",
-                "file": str(md / "portfolios" / f"{n}.json"), "equity": str(md / "equity" / f"{n}.jsonl"), "gates": {}}
+                "test_type": "hybrid", "runner": "meme_bot", "pause_keys": [n, "hybrid_poorjev_regime"],
+                "file": str(md / "portfolios" / f"{n}.json"), "equity": str(md / "equity" / f"{n}.jsonl")}
         for r in ("rule_regime", "rule_donch_regime", "rule_regime_full", "rule_donch_regime_full"):
             n = f"{s}_{r}"
+            full = r.endswith("_full")
+            group = ("meme_rule_regime" if r.startswith("rule_regime") else "meme_rule_donch_regime") + ("_full" if full else "")
             o[n] = {"asset": s, "cls": "meme", "kind": "rule", "rule": r, "model": "rule",
+                    "test_type": "rule_regime" if r.startswith("rule_regime") else "rule_donchian",
+                    "variant": "full" if full else None, "profile": "baseline", "runner": "rules_bot",
+                    "pause_keys": [n, group],
                     "file": str(md / "portfolios" / f"{n}.json"), "equity": str(md / "equity" / f"{n}.jsonl")}
     return o
 
 
 # ---------- hypotheses ----------
 def hypothesis_defs():
+    """Portfólios do lab semeados numa execução nova. Só identidade e fonte; os parâmetros vêm de params.json
+    (tipo `test_type` + portfolios.<nome>)."""
     H = []
     H.append(dict(name="h1_exits_von_relaxed", hyp="H1", asset="SOL", cls="sol", kind="gated", source="relaxed", profile="relaxed",
-                  model="von", params={"exits": EXITS_SOL}, label="H1 Saídas (TP/SL/trailing) — von relaxed SOL"))
+                  model="von", test_type="lab_h1_exits", label="H1 Saídas (TP/SL/trailing) — von relaxed SOL"))
     for s in SYMS:
         H.append(dict(name=f"h1_exits_{s}_poorjev_relaxed", hyp="H1", asset=s, cls="meme", kind="gated", source=f"{s}_poorjev_relaxed",
-                      profile="relaxed", model="poorjev", params={"exits": EXITS_MEME}, label=f"H1 Saídas — poorjev relaxed {s}"))
+                      profile="relaxed", model="poorjev", test_type="lab_h1_exits", label=f"H1 Saídas — poorjev relaxed {s}"))
     H.append(dict(name="h2_ensemble_sol", hyp="H2", asset="SOL", cls="sol", kind="ensemble", profile="baseline", model="ensemble",
-                  params={"ensemble": ENS}, label="H2 Ensemble von/poorjev/laya (percentil) — SOL"))
+                  test_type="lab_h2_ensemble", label="H2 Ensemble von/poorjev/laya (percentil) — SOL"))
     for s in SYMS:
         H.append(dict(name=f"h2_ensemble_{s}", hyp="H2", asset=s, cls="meme", kind="ensemble", profile="baseline", model="ensemble",
-                      params={"ensemble": ENS}, label=f"H2 Ensemble (percentil) — {s}"))
+                      test_type="lab_h2_ensemble", label=f"H2 Ensemble (percentil) — {s}"))
     H.append(dict(name="h3_limit_poorjev_relaxed", hyp="H3", asset="SOL", cls="sol", kind="gated", source="poorjev_relaxed",
-                  profile="relaxed", model="poorjev", params={"exec": LIMIT}, label="H3 Ordem limite — poorjev relaxed SOL"))
+                  profile="relaxed", model="poorjev", test_type="lab_h3_limit", label="H3 Ordem limite — poorjev relaxed SOL"))
     H.append(dict(name="h3_limit_hybrid_von_cap2", hyp="H3", asset="SOL", cls="sol", kind="gated", source="hybrid_von_relaxed_cap2",
-                  profile="relaxed", model="von+rules", params={"exec": LIMIT, "gates": {"max_trades_per_hour": 2}},
-                  label="H3 Ordem limite — hybrid von relaxed cap2"))
+                  profile="relaxed", model="von+rules", test_type="lab_h3_limit", label="H3 Ordem limite — hybrid von relaxed cap2"))
     H.append(dict(name="h4_hours_poorjev_relaxed", hyp="H4", asset="SOL", cls="sol", kind="gated", source="poorjev_relaxed",
-                  profile="relaxed", model="poorjev", params={"hours": HOURS}, label="H4 Filtro de horário — poorjev relaxed SOL"))
+                  profile="relaxed", model="poorjev", test_type="lab_h4_hours", label="H4 Filtro de horário — poorjev relaxed SOL"))
     H.append(dict(name="h4_hours_von_relaxed", hyp="H4", asset="SOL", cls="sol", kind="gated", source="relaxed",
-                  profile="relaxed", model="von", params={"hours": HOURS}, label="H4 Filtro de horário — von relaxed SOL"))
+                  profile="relaxed", model="von", test_type="lab_h4_hours", label="H4 Filtro de horário — von relaxed SOL"))
+    # Passo 3 do HANDOFF (separar beta de seleção): definidos só por parâmetros.
+    H.append(dict(name="h1_exits_hybrid_von_cap2", hyp="H1", asset="SOL", cls="sol", kind="gated", source="hybrid_von_relaxed_cap2",
+                  profile="relaxed", model="von+rules", test_type="lab_h1_exits",
+                  label="H1 Saídas — hybrid von relaxed cap2 (contra a deriva só-compra)"))
+    H.append(dict(name="relaxed_expcap50", hyp="EXP", asset="SOL", cls="sol", kind="gated", source="relaxed",
+                  profile="relaxed", model="von", test_type="model_gated",
+                  label="Exposição SOL ≤ 50% do valor — von relaxed SOL"))
     return H
 
 
@@ -167,40 +190,42 @@ def ensure_hypotheses(cfg):
             reg["lineages"].setdefault(h["name"], {"root": h["name"], "lead": None, "members": [h["name"]]})
             created.append((h["name"], st["started_brt"]))
     if created:
+        from bot import params as P
         note = ROOT / "reports" / "hypotheses_start.md"
+        note.parent.mkdir(parents=True, exist_ok=True)
         txt = note.read_text() if note.exists() else (
             "# Portfólios de hipótese (lab) — horários de início (BRT)\n\n"
             "Paper only. Rodam em `bot/lab_bot.py` reaproveitando as decisões já logadas (sem chamadas extras aos modelos).\n"
-            f"SOL começa com {bal['sol']} SOL + {bal['usdt']} USDT (≈ ${bal.get('total_usd', '?')}); memes com {json.loads((ROOT / 'memecoins.json').read_text()).get('start_usdt_each')} USDT.\n\n"
-            "Parâmetros iniciais:\n"
-            f"- H1 saídas memes: TP +{EXITS_MEME['tp']*100:.0f}%, SL −{EXITS_MEME['sl']*100:.0f}%, trailing {EXITS_MEME['trail']*100:.0f}% (arma após +{EXITS_MEME['trail_arm']*100:.0f}%), reentrada bloqueada {EXITS_MEME['reentry_cooldown_min']} min.\n"
-            f"- H1 saídas SOL (von relaxed): TP +{EXITS_SOL['tp']*100:.1f}%, SL −{EXITS_SOL['sl']*100:.1f}%, trailing {EXITS_SOL['trail']*100:.1f}% (arma após +{EXITS_SOL['trail_arm']*100:.1f}%).\n"
-            f"- H2 ensemble: percentil da confiança de cada modelo na janela móvel própria (SOL 480 decisões ≈ 2 h; memes 200 por modelo, todas as moedas), ≥{ENS['min_agree']} modelos concordando e percentil médio ≥ {ENS['pct_threshold']:.2f}; mínimo {ENS['min_window']} amostras na janela.\n"
-            f"- H3 limite: preço mid ∓ {LIMIT['offset_bps']} bps, validade {LIMIT['ttl_min']} min, preenche só se o mark cruzar o limite (estritamente); taxa assumida {LIMIT['fee_bps']} bps + taxa de rede, sem slippage.\n"
-            f"- H4 horários BRT permitidos: {HOURS} (compras e vendas).\n\n")
+            f"SOL começa com {bal['sol']} SOL + {bal['usdt']} USDT (≈ ${bal.get('total_usd', '?')}); memes com {json.loads((ROOT / 'memecoins.json').read_text()).get('start_usdt_each')} USDT.\n"
+            "Parâmetros: params.json (tipo de teste + portfolios.<nome>); valores efetivos no arranque abaixo.\n\n")
         for n, t in created:
-            txt += f"- **{n}** iniciado {t}\n"
+            try:
+                eff, _prov, errs, _m = P.explain(n, use_overlay=False)
+                txt += f"- **{n}** iniciado {t} · {P.summary(eff)}" + (f" · ERROS: {'; '.join(errs)}" if errs else "") + "\n"
+            except Exception as ex:
+                txt += f"- **{n}** iniciado {t} · params: erro {ex}\n"
         note.write_text(txt)
     return created
 
 
 def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_override=None):
-    """Fork `parent` (original bot portfolio or lab portfolio) with params_diff. Returns fork name."""
+    """Fork `parent` (original bot portfolio or lab portfolio) with params_diff (só o diff vs o pai, validado pelo
+    resolver de params.json antes de criar). Returns (fork name | None, motivo)."""
+    from bot import params as P
     orig = originals()
     with locked() as reg:
         if parent in reg["portfolios"]:
             pe = reg["portfolios"][parent]; lineage = pe["lineage"]
-            pstate = json.loads(port_path(parent).read_text())
-            base = {k: pe.get(k) for k in ("asset", "cls", "kind", "source", "profile", "model")}
-            params = json.loads(json.dumps(pe.get("params") or {}))
+            pstate = json.loads(port_path(parent).read_text()) if not dry_run or port_path(parent).exists() else {}
+            base = {k: pe.get(k) for k in ("asset", "cls", "kind", "source", "profile", "model", "test_type")}
         elif parent in orig:
             m = orig[parent]; lineage = parent
             if m["kind"] != "gated":
                 raise ValueError(f"fork of rule original {parent} not supported by lab executor yet")
-            pstate = json.loads(Path(m["file"]).read_text())
-            base = {k: m.get(k) for k in ("asset", "cls", "kind", "source", "profile", "model")}
-            params = {"gates": dict(m.get("gates") or {})}
-            reg["lineages"].setdefault(parent, {"root": parent, "lead": None, "members": [parent]})
+            pstate = json.loads(Path(m["file"]).read_text()) if not dry_run or Path(m["file"]).exists() else {}
+            base = {k: m.get(k) for k in ("asset", "cls", "kind", "source", "profile", "model", "test_type")}
+            if not dry_run:
+                reg["lineages"].setdefault(parent, {"root": parent, "lead": None, "members": [parent]})
         else:
             raise KeyError(parent)
         caps = dict({"per_lineage_days": 7, "total": 40}, **(caps_override or {}))
@@ -214,8 +239,10 @@ def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_overr
             return None, f"cap_total_{caps['total']}_atingido"
         n = 1 + sum(1 for e in reg["portfolios"].values() if e.get("lineage") == lineage and e.get("parent"))
         name = f"{lineage}__fork{n}"
-        for sect, vals in params_diff.items():
-            params.setdefault(sect, {}).update(vals)
+        meta = dict(base, name=name, parent=parent, params_diff=params_diff, lineage=lineage)
+        _eff, _prov, errs, _m = P.explain(name, meta=meta, use_overlay=False, registry=reg)
+        if errs:
+            return None, "params_invalidos: " + "; ".join(errs[:5])
         if dry_run:
             return name, "dry_run"
         px = _mark(base["asset"])
@@ -226,7 +253,7 @@ def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_overr
         st["strategy"] = f"fork:{name}"; st["fork_of"] = parent
         write_json(port_path(name), st)
         e = dict(base, name=name, status="active", created_brt=st["started_brt"], strategy=st["strategy"], lineage=lineage,
-                 parent=parent, params=params, params_diff=params_diff, reason=reason, is_original=False,
+                 parent=parent, params_diff=params_diff, reason=reason, is_original=False,
                  label=f"Fork {n} de {parent}", start_value=st["benchmark_all_usdt"]["usdt"])
         reg["portfolios"][name] = e
         reg["lineages"].setdefault(lineage, {"root": lineage, "lead": None, "members": [lineage]})["members"].append(name)

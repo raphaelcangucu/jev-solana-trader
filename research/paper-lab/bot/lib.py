@@ -146,8 +146,10 @@ def von_system_one(base_url, state, criteria, timeout=30.0):
     return {"ok":True,"error":None,"chosen_action":str(choice),"probabilities":probs,"confidence":float(conf),"skip_noul":float(skip_noul),"latency_ms":round(lat,2),"fail_closed":False,"raw":raw}
 
 
-def apply_gates(chosen, conf, skip, pdata, gcfg, price_mark=None, probabilities=None, profile="baseline"):
-    """Fail-closed gates. profile=baseline|relaxed."""
+def apply_gates(chosen, conf, skip, pdata, gcfg, price_mark=None, probabilities=None, profile="baseline",
+                margin_gate=None):
+    """Fail-closed gates. profile=baseline|relaxed (rótulo). O portão de margem de probabilidade vale quando
+    `margin_gate` (params.json gates.margin_gate); sem ele, como antes, só no perfil relaxed."""
     now = time.time()
     reasons = []
     final = chosen
@@ -158,7 +160,7 @@ def apply_gates(chosen, conf, skip, pdata, gcfg, price_mark=None, probabilities=
     if conf < min_conf:
         final = "hold"; reasons.append("low_confidence")
 
-    if profile == "relaxed":
+    if (profile == "relaxed") if margin_gate is None else bool(margin_gate):
         margin_need = float(gcfg.get("min_prob_margin", 0.0))
         probs = probabilities or {}
         if probs and margin_need > 0:

@@ -1,5 +1,6 @@
 {
   "paper_only": true,
+  "params_note": "Parametros de trading por portfolio: params.json (bot/params.py). Os blocos gates, gates_relaxed, fees.extra_slippage_bps, fees.assumed_network_fee_sol, market.slippage_bps e os parametros de rule_strategies.strategies (exceto enabled) ficam aqui so como referencia; os bots leem params.json.",
   "forbid_keypair_paths": [
     "/home/box/solana-trader/keypair.json",
     "/home/box/solana-trader/secret.b58"

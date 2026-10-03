@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # código do lab (
 from bot.paths import ROOT, LAB_DIR  # noqa: E402
 from bot.lib import brt_iso, brt_now, load_cfg, apply_gates, append_jsonl, write_json, BRT
 from bot import lab_registry as R
+from bot import params as P
 import bot.sol_bot as SB
 import bot.meme_bot as MB
 
@@ -109,17 +110,12 @@ def qty(p):
     return float(p["sol"]) if p["asset_mode"] == "sol" else float(p.get("token") or 0)
 
 
-def gates_for(entry, cfg, overlay):
-    base = dict(cfg["gates_relaxed"] if entry.get("profile") == "relaxed" else cfg["gates"])
-    base.setdefault("min_prob_margin", 0.0)
-    for k, v in (entry.get("params", {}).get("gates") or {}).items():
-        base[k] = v
-    ov = (overlay.get("portfolios") or {}).get(entry["name"]) or {}
-    # Only risk-reducing overlay keys from dashboard are honored; nightly never edits originals.
-    for k in ("cooldown_seconds", "max_trades_per_hour", "buy_fraction_usdt"):
-        if ov.get(k) is not None:
-            base[k] = ov[k]
-    return R.clamp_gates(base)
+def gates_for(entry, cfg=None, overlay=None):
+    """Portões efetivos de uma entrada do registry: params.json (tipo, perfil, portfólio; forks = pai + diff) e o
+    overlay do dashboard por cima, com o clamp duro do lab (R.HARD, tetos subidos só por `limits`).
+    `cfg`/`overlay` ficam por compatibilidade; o resolver lê os ficheiros (hot reload por mtime)."""
+    eff = P.effective(entry["name"], meta=entry)
+    return R.clamp_gates(eff["gates"], eff.get("limits"))
 
 
 class Lab:
@@ -208,16 +204,17 @@ class Lab:
         return (lo + 0.5 * eq) / len(w), len(w)
 
     # ---------- trading ----------
-    def market_trade(self, e, side, px, did):
-        p = self.port(e["name"]); g = e["_g"]
+    def market_trade(self, e, side, px, did, g=None):
+        p = self.port(e["name"]); g = g or e["_g"]
         tag = e["strategy"]
         before = qty(p)
+        fees, market = P.fees_market(e["params"], self.cfg)
         if e["asset"] == "SOL":
-            tr = SB.sim_trade(side, p, g, self.cfg["fees"], self.cfg["market"], px, did, TR_SOL, strategy=tag)
+            tr = SB.sim_trade(side, p, g, fees, market, px, did, TR_SOL, strategy=tag)
         else:
             t = TOKENS[e["asset"]]
             sol_usd = mark("SOL", 600) or 0.0
-            tr = MB.sim_trade(side, p, g, self.cfg["fees"], self.cfg["market"], px, did, TR_MEME,
+            tr = MB.sim_trade(side, p, g, fees, market, px, did, TR_MEME,
                               t["mint"], int(t["decimals"]), sol_usd, strategy=tag)
         if tr:
             self._track(p, side, before, tr, px)
@@ -236,8 +233,8 @@ class Lab:
         else:
             p["entry_price"] = None; p["peak_price"] = None
 
-    def place_limit(self, e, side, px, did):
-        p = self.port(e["name"]); ex = e["params"]["exec"]; g = e["_g"]
+    def place_limit(self, e, side, px, did, g=None):
+        p = self.port(e["name"]); ex = e["params"]["exec"]; g = g or e["_g"]
         off = float(ex.get("offset_bps", 10)) / 1e4
         if side == "buy":
             usdt_in = float(p["usdt"]) * float(g["buy_fraction_usdt"])
@@ -260,7 +257,7 @@ class Lab:
         if not o:
             return
         ex = e["params"]["exec"]; fee_bps = float(ex.get("fee_bps", 10)) / 1e4
-        net_sol = float(self.cfg["fees"].get("assumed_network_fee_sol", 5e-6)); net_usdt = net_sol * px
+        net_sol = float(ex.get("network_fee_sol", self.cfg["fees"].get("assumed_network_fee_sol", 5e-6))); net_usdt = net_sol * px
         now = time.time()
         filled = (o["side"] == "buy" and px < o["limit"]) or (o["side"] == "sell" and px > o["limit"])
         if not filled:
@@ -306,7 +303,7 @@ class Lab:
     def check_exits(self, e, px):
         ex = (e.get("params") or {}).get("exits")
         p = self.port(e["name"])
-        if not ex or qty(p) * px < 1.0:
+        if not ex or not ex.get("enabled", True) or qty(p) * px < 1.0:
             return
         entry = float(p.get("entry_price") or p.get("start_price") or px)
         peak = max(float(p.get("peak_price") or entry), px); p["peak_price"] = peak
@@ -346,18 +343,27 @@ class Lab:
             reasons.append("reentry_cooldown")
         if p.get("open_order") and chosen in ("buy", "sell"):
             reasons.append("order_open")
+        if (prm.get("regime_filter") or {}).get("enabled"):
+            chosen, rr = P.regime_block(prm, chosen, P.sol_regime_bull())
+            reasons += rr
         g = apply_gates(chosen, conf, skip, p, e["_g"], px, probabilities=probs,
-                        profile="relaxed" if e.get("profile") == "relaxed" else "baseline")
+                        profile="relaxed" if e.get("profile") == "relaxed" else "baseline",
+                        margin_gate=e["_g"].get("margin_gate"))
         final = g["final_action"] if not reasons else "hold"
         reasons = g["gate_reasons"] + reasons
         traded = False
+        g_trade = e["_g"]
+        if final == "buy":
+            g_trade, why = P.cap_buy(e["_g"], p, px)
+            if why:
+                final = "hold"; reasons.append(why)
         if final in ("buy", "sell"):
             did = (src or {}).get("decision_id") or str(uuid.uuid4())
             if (prm.get("exec") or {}).get("mode") == "limit":
-                o = self.place_limit(e, final, px, did)
+                o = self.place_limit(e, final, px, did, g=g_trade)
                 reasons.append("limit_placed" if o else "limit_none")
             else:
-                traded = bool(self.market_trade(e, final, px, did))
+                traded = bool(self.market_trade(e, final, px, did, g=g_trade))
                 if not traded:
                     reasons.append("sim_none")
         self.log_dec(e, src, chosen, conf, final, reasons, traded, px, extra)
@@ -365,28 +371,29 @@ class Lab:
 
     # ---------- main processing ----------
     def active(self, overlay):
+        """Entradas ativas com os parâmetros efetivos (params.json + overlay; forks = pai + diff) em e["params"]."""
         out = []
         paused_all = bool((overlay.get("bots") or {}).get("lab_paused"))
+        reg = {k: v for k, v in self.reg.items() if k != "_mtime"}
         for e in self.reg["portfolios"].values():
             if e.get("status") != "active":
                 continue
             e = dict(e)
-            e["_paused"] = paused_all or bool(((overlay.get("portfolios") or {}).get(e["name"]) or {}).get("paused"))
-            e["_g"] = gates_for(e, self.cfg, overlay)
+            eff = P.effective(e["name"], meta=e, registry=reg)
+            e["params"] = eff
+            e["_paused"] = paused_all or bool(eff.get("paused"))
+            e["_g"] = R.clamp_gates(eff["gates"], eff.get("limits"))
             if e["kind"] == "ensemble":
-                e["_g"]["min_confidence"] = float(e["params"]["ensemble"].get("pct_threshold", 0.8))
+                e["_g"]["min_confidence"] = float((eff.get("ensemble") or {}).get("pct_threshold", 0.8))
                 e["_g"]["max_skip_noul"] = 1.01
+                e["_g"]["margin_gate"] = False
             out.append(e)
         return out
 
     def cycle(self):
         if R.mtime() != self.reg.get("_mtime"):
             self.reg = R.load()
-        overlay = {}
-        pop = ROOT / "data" / "params_overlay.json"
-        if pop.exists():
-            try: overlay = json.loads(pop.read_text())
-            except Exception: overlay = {}
+        overlay = P.STORE.overlay()
         act = self.active(overlay)
         by_source = {}
         for e in act:
@@ -464,7 +471,16 @@ class Lab:
 def main():
     signal.signal(signal.SIGTERM, _sig); signal.signal(signal.SIGINT, _sig)
     STATUS.parent.mkdir(parents=True, exist_ok=True)
-    created = R.ensure_hypotheses(load_cfg())
+    # Num arranque do zero os bots sol/meme ainda não gravaram preços: esperar em vez de cair e ser relançado.
+    while not STOP:
+        try:
+            created = R.ensure_hypotheses(load_cfg())
+            break
+        except FileNotFoundError as ex:
+            print(f"lab_bot à espera de preços: {ex.filename}", flush=True)
+            time.sleep(15)
+    else:
+        return
     lab = Lab()
     print(f"lab_bot start pid={os.getpid()} at={brt_iso()} created={created} active={sum(1 for e in lab.reg['portfolios'].values() if e.get('status')=='active')}", flush=True)
     started = time.time()

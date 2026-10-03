@@ -1,0 +1,12 @@
+# Artefactos de execução do lab (o run local escreve aqui quando PAPER_LAB_ROOT = esta pasta)
+dashboard/.auth
+dashboard/url.txt
+cloudflared
+run/
+logs/
+data/**/*.jsonl
+data/prices.jsonl
+funding/run/
+funding/logs/
+funding/data/*.jsonl
+funding/cache/

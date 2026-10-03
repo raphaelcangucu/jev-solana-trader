@@ -1,7 +1,11 @@
 """Nightly tuner: bounded walk-forward replay of recorded decisions/prices with the live cost model.
-Candidates only become FORKS (originals are never modified). Paper only."""
+Candidates only become FORKS (originals are never modified). Paper only.
+
+Espaço de busca por tipo de teste: params.json `tuning` (params, bounds, max_rel_change, steps, ...) dos parâmetros
+efetivos do portfólio base (bot/params.py). Um caminho só entra se a secção estiver ativa (exits.enabled,
+exec.mode=limit, gates.margin_gate, ensemble presente)."""
 from __future__ import annotations
-import json, math
+import copy, json, math
 from collections import deque
 from datetime import datetime
 from pathlib import Path
@@ -67,8 +71,11 @@ class Sim:
         self.entry = px0 if q > 0 else None; self.peak = self.entry
         self.last = None; self.stamps = []; self.reentry = 0; self.order = None; self.trades = 0
     def eq(self, px): return self.usdt + self.q * px
-    def buy(self, px, frac, ts, eff=None, fee_bps=None):
+    def buy(self, px, frac, ts, eff=None, fee_bps=None, cap=None):
         n = self.usdt * frac
+        if cap is not None:  # gates.max_exposure_frac: a compra não passa o teto de exposição
+            pos = self.q * px
+            n = min(n, float(cap) * (self.usdt + pos) - pos)
         if n < 1.0: return False
         price = eff if eff else px * (1 + self.c)
         fee = n * (fee_bps / 1e4) if fee_bps else 0.0
@@ -90,7 +97,7 @@ class Sim:
 def _gate(sim, chosen, conf, probs, skip, g, profile, ts, px):
     if chosen not in ("buy", "sell"): return "hold"
     if conf < g["min_confidence"]: return "hold"
-    if profile == "relaxed" and probs and g.get("min_prob_margin", 0) > 0:
+    if g.get("margin_gate", profile == "relaxed") and probs and g.get("min_prob_margin", 0) > 0:
         v = sorted((float(x) for x in probs.values()), reverse=True)
         if v[0] - (v[1] if len(v) > 1 else 0) < g["min_prob_margin"]: return "hold"
     if skip >= g["max_skip_noul"]: return "hold"
@@ -107,13 +114,13 @@ def _step_price(sim, ts, px, params):
         o = sim.order
         if (o["side"] == "buy" and px < o["limit"]) or (o["side"] == "sell" and px > o["limit"]):
             if o["side"] == "buy":
-                sim.buy(px, o["frac"], ts, eff=o["limit"], fee_bps=lim.get("fee_bps", 10))
+                sim.buy(px, o["frac"], ts, eff=o["limit"], fee_bps=lim.get("fee_bps", 10), cap=o.get("cap"))
             else:
                 sim.sell(px, ts, eff=o["limit"], fee_bps=lim.get("fee_bps", 10))
             sim.order = None
         elif ts >= o["exp"]:
             sim.order = None
-    if ex and sim.q * px >= 1.0 and sim.entry:
+    if ex and ex.get("enabled", True) and sim.q * px >= 1.0 and sim.entry:
         sim.peak = max(sim.peak or px, px); r = px / sim.entry - 1
         if r >= ex["tp"] or r <= -ex["sl"] or (sim.peak / sim.entry - 1 >= ex.get("trail_arm", ex["trail"]) and px <= sim.peak * (1 - ex["trail"])):
             sim.sell(px, ts); sim.reentry = ts + 60 * ex.get("reentry_cooldown_min", 30)
@@ -129,16 +136,18 @@ def _exec(sim, side, px, ts, g, params):
         if sim.order: return
         off = lim.get("offset_bps", 10) / 1e4
         sim.order = {"side": side, "limit": px * (1 - off) if side == "buy" else px * (1 + off),
-                     "frac": g["buy_fraction_usdt"], "exp": ts + 60 * lim.get("ttl_min", 15)}
+                     "frac": g["buy_fraction_usdt"], "exp": ts + 60 * lim.get("ttl_min", 15),
+                     "cap": g.get("max_exposure_frac")}
     elif side == "buy":
-        sim.buy(px, g["buy_fraction_usdt"], ts)
+        sim.buy(px, g["buy_fraction_usdt"], ts, cap=g.get("max_exposure_frac"))
     else:
         sim.sell(px, ts)
 
 
-def replay(entry, params, t0, t1, start, c_bps, cfg_gates, data):
-    """entry: kind gated|ensemble. start: (q, usdt). data: dict with 'dec' rows and 'px' list."""
-    g = dict(cfg_gates); g.update(params.get("gates") or {}); g = R.clamp_gates(g)
+def replay(entry, params, t0, t1, start, c_bps, cfg_gates=None, data=None):
+    """entry: kind gated|ensemble. params: parâmetros efetivos (bot/params.py). start: (q, usdt).
+    data: dict with 'dec' rows and 'px' list. `cfg_gates` (antigo) só preenche portões em falta."""
+    g = dict(cfg_gates or {}); g.update(params.get("gates") or {}); g = R.clamp_gates(g, params.get("limits"))
     px_list = [x for x in data["px"] if t0 <= x[0] <= t1]
     if len(px_list) < 10:
         return None
@@ -172,6 +181,7 @@ def replay(entry, params, t0, t1, start, c_bps, cfg_gates, data):
                 if len(votes[sd]) >= ens.get("min_agree", 2):
                     comb = sum(pc[k] for k in votes[sd]) / len(votes[sd])
                     gg = dict(g); gg["min_confidence"] = ens.get("pct_threshold", 0.8); gg["max_skip_noul"] = 1.01
+                    gg["margin_gate"] = False
                     side = _gate(sim, sd, comb, None, 0.0, gg, "baseline", ts, px)
                     if side != "hold": _exec(sim, side, px, ts, g, params)
             w.append(float(d["confidence"]))
@@ -179,35 +189,59 @@ def replay(entry, params, t0, t1, start, c_bps, cfg_gates, data):
     return {"start": start_eq, "end": end, "pnl": end - start_eq, "trades": sim.trades}
 
 
-def _flat(params):
-    out = {}
-    for sect in ("gates", "exits", "exec", "ensemble"):
-        for k, v in (params.get(sect) or {}).items():
-            if isinstance(v, (int, float)) and not isinstance(v, bool) and k not in ("mode", "min_window", "min_agree"):
-                out[(sect, k)] = v
+def _active(eff, sect, k):
+    if sect == "exits":
+        return bool((eff.get("exits") or {}).get("enabled"))
+    if sect == "exec" and k in ("offset_bps", "ttl_min", "fee_bps"):
+        return (eff.get("exec") or {}).get("mode") == "limit"
+    if sect == "gates" and k == "min_prob_margin":
+        return bool((eff.get("gates") or {}).get("margin_gate"))
+    if sect == "ensemble":
+        return bool(eff.get("ensemble"))
+    return True
+
+
+def search_space(eff):
+    """[(secção, chave)] que o tuner pode mexer neste portfólio: params.json tuning.params filtrado por secções
+    ativas e valores numéricos."""
+    tu = eff.get("tuning") or {}
+    if not tu.get("enabled", True):
+        return []
+    out = []
+    for path in tu.get("params") or []:
+        sect, _, k = str(path).partition(".")
+        v = (eff.get(sect) or {}).get(k) if isinstance(eff.get(sect), dict) else None
+        if not k or isinstance(v, bool) or not isinstance(v, (int, float)) or not _active(eff, sect, k):
+            continue
+        out.append((sect, k))
     return out
 
 
-def tunable(entry, cfg_gates):
-    p = json.loads(json.dumps(entry.get("params") or {}))
-    g = dict(cfg_gates); g.update(p.get("gates") or {})
-    keys = ["min_confidence", "max_skip_noul", "cooldown_seconds", "max_trades_per_hour", "buy_fraction_usdt"]
-    if entry.get("profile") == "relaxed":
-        keys.append("min_prob_margin")
-    if entry["kind"] == "ensemble":
-        keys = ["cooldown_seconds", "max_trades_per_hour", "buy_fraction_usdt"]
-    p["gates"] = {k: g[k] for k in keys if k in g}
-    return p
+def _bound(v, b, integer):
+    if b:
+        v = min(b[1], max(b[0], v))
+    return int(round(v)) if integer else v
 
 
-def search(entry, cfg_gates, t0, t1, start, c_bps, data, conf=None):
-    c = dict(TUNE_DEFAULTS); c.update(conf or {})
-    base = tunable(entry, cfg_gates)
+def search(entry, eff, t0, t1, start, c_bps, data, conf=None):
+    """Walk-forward 70/30 de um parâmetro de cada vez (± max_rel_change), combinando os que melhoram nos dois
+    lados. `eff` = parâmetros efetivos do portfólio base (sem overlay). best_diff = diff do fork."""
+    tu = eff.get("tuning") or {}
+    c = dict(TUNE_DEFAULTS)
+    c.update({k: tu[k] for k in ("steps", "max_rel_change", "train_frac", "min_improvement_pct", "trade_penalty_bps") if k in tu})
+    c.update(conf or {})
+    if not tu.get("enabled", True):
+        return {"status": "tuning_desligado"}
+    base = copy.deepcopy(eff)
+    space = search_space(base)
+    if not space:
+        return {"status": "sem_espaco_de_busca"}
+    bounds = tu.get("bounds") or {}
     split = t0 + c["train_frac"] * (t1 - t0)
     pen = c["trade_penalty_bps"] / 1e4
     def score(params):
-        tr = replay(entry, params, t0, split, start, c_bps, cfg_gates, data)
-        va = replay(entry, params, split, t1, start, c_bps, cfg_gates, data)
+        tr = replay(entry, params, t0, split, start, c_bps, None, data)
+        va = replay(entry, params, split, t1, start, c_bps, None, data)
         if not tr or not va:
             return None
         f = lambda r: r["pnl"] - pen * r["start"] * r["trades"]
@@ -216,17 +250,17 @@ def search(entry, cfg_gates, t0, t1, start, c_bps, data, conf=None):
     if cur is None:
         return {"status": "no_data"}
     results = []
-    flat = _flat(base)
-    for (sect, k), v in flat.items():
+    for sect, k in space:
+        v = base[sect][k]
+        integer = isinstance(v, int) and not isinstance(v, bool)
         for s in c["steps"]:
             nv = v * s
             if abs(nv / v - 1) > c["max_rel_change"] + 1e-9 if v else True:
                 continue
-            if isinstance(v, int) and not isinstance(v, bool):
-                nv = int(round(nv))
-                if nv == v: continue
-            cand = json.loads(json.dumps(base)); cand[sect][k] = nv
-            if sect == "gates": cand["gates"] = R.clamp_gates(cand["gates"])
+            nv = _bound(nv, bounds.get(f"{sect}.{k}"), integer)
+            if nv == v: continue
+            cand = copy.deepcopy(base); cand[sect][k] = nv
+            if sect == "gates": cand["gates"] = R.clamp_gates(cand["gates"], cand.get("limits"))
             if cand[sect][k] == v: continue
             sc = score(cand)
             if sc: results.append(({sect: {k: cand[sect][k]}}, sc))
@@ -241,13 +275,13 @@ def search(entry, cfg_gates, t0, t1, start, c_bps, data, conf=None):
             (sect, kv), = d.items(); (k, v), = kv.items()
             if (sect, k) in seen: continue
             seen.add((sect, k)); combo.setdefault(sect, {})[k] = v
-        cp = json.loads(json.dumps(base))
+        cp = copy.deepcopy(base)
         for sect, kv in combo.items(): cp[sect].update(kv)
         sc = score(cp)
         best = (combo, sc) if sc and sc["val"] >= good[0][1]["val"] and sc["train"] >= cur["train"] else good[0]
     return {"status": "candidate" if best else "no_improvement", "current": cur, "n_candidates": len(results),
             "best_diff": best[0] if best else None, "best": best[1] if best else None, "min_improvement": min_imp,
-            "c_bps": c_bps, "split_ts": split}
+            "c_bps": c_bps, "split_ts": split, "space": [f"{a}.{b}" for a, b in space]}
 
 
 def _start_capital(asset):
@@ -260,10 +294,14 @@ def _start_capital(asset):
 
 
 # ---------- rule strategies (1h bars) ----------
-def rule_search(meta, bars_sol, bars_meme, conf=None):
-    """Replay rule params on the last 30 days of 1h bars (walk-forward 70/30). Report-only (no rule fork executor)."""
+def rule_search(meta, bars_sol, bars_meme, conf=None, eff=None):
+    """Replay rule params on the last 30 days of 1h bars (walk-forward 70/30). Report-only (no rule fork executor).
+    Com `eff` (params efetivos): parâmetros iniciais de rule.*, espaço de busca de tuning.params e fração de compra."""
     from bot.rules_engine import ema_series, rsi_series
-    c = dict(TUNE_DEFAULTS); c.update(conf or {})
+    c = dict(TUNE_DEFAULTS)
+    tu = (eff or {}).get("tuning") or {}
+    c.update({k: tu[k] for k in ("steps", "max_rel_change", "min_improvement_pct", "trade_penalty_bps") if k in tu})
+    c.update(conf or {})
     rule = meta.get("rule")
     C = float(c.get("capital") or _start_capital(meta.get("asset")))
     closes_s = [b["close"] for b in bars_sol]; ts_s = [b["ts"] for b in bars_sol]
@@ -289,7 +327,7 @@ def rule_search(meta, bars_sol, bars_meme, conf=None):
                 if buys < prm.get("levels", 4) and px <= ref * (1 - gp * (buys + 1)): sig = "buy"
                 elif buys > 0 and px >= ref * (1 + gp * buys): sig = "sell"
                 elif buys == 0 and abs(px / ref - 1) > 2 * gp: ref = px
-            frac = 1.0 if (rule or "").endswith("_full") else 0.25
+            frac = buy_frac
             if sig == "buy" and usdt > 1:
                 n = usdt * frac; q += n * (1 - cst) / px; usdt -= n; trades += 1; buys += 1
             elif sig == "sell" and q > 0:
@@ -299,6 +337,12 @@ def rule_search(meta, bars_sol, bars_meme, conf=None):
     if rule == "rsi": base = {"rsi_period": 14, "lo": 30, "hi": 70}
     if rule == "grid": base = {"grid_pct": 0.02, "levels": 4}
     if rule and rule.startswith("rule_donch"): base["donchian"] = 20
+    buy_frac = 1.0 if (rule or "").endswith("_full") else 0.25
+    if eff:
+        ru = eff.get("rule") or {}
+        keys = [p.split(".", 1)[1] for p in (tu.get("params") or []) if str(p).startswith("rule.")] if tu.get("enabled", True) else []
+        base = {k: ru[k] for k in keys if isinstance(ru.get(k), (int, float)) and not isinstance(ru.get(k), bool)}
+        buy_frac = float((eff.get("gates") or {}).get("buy_fraction_usdt", buy_frac))
     n = min(len(bars_sol), len(bars_meme) if bars_meme else len(bars_sol)); n0 = max(0, n - 720); split = n0 + int(0.7 * (n - n0))
     pen = c["trade_penalty_bps"] / 1e4 * C
     sc = lambda p: tuple(r[0] - pen * r[1] for r in (run(p, n0, split), run(p, split, n)))

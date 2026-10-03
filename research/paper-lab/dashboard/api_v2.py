@@ -125,10 +125,21 @@ def downsample(rows: list, n: int) -> list:
     return out
 
 
+def _pid_running(pid: int) -> bool:
+    """Portável (Linux e macOS): sinal 0 só testa a existência do processo."""
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
 def pid_info(pidfile: Path, name: str) -> dict:
     try:
         pid = int(pidfile.read_text().strip())
-        return {"name": name, "pid": pid, "running": Path(f"/proc/{pid}").exists()}
+        return {"name": name, "pid": pid, "running": _pid_running(pid)}
     except Exception:
         return {"name": name, "pid": None, "running": False}
 
@@ -704,7 +715,9 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
     def params(_: str = A):
         p = deps["api_params_raw"]()
         bounds = {"min_confidence": [0.0, 1.0], "min_prob_margin": [0.0, 1.0], "max_skip_noul": [0.0, 1.0],
-                  "buy_fraction_usdt": [0.05, 1.0], "cooldown_seconds": [15, None], "max_trades_per_hour": [1, 60]}
+                  "buy_fraction_usdt": [0.05, 0.5], "cooldown_seconds": [15, None], "max_trades_per_hour": [1, 8]}
+        p["bounds_note"] = ("Limites padrão de params.json (defaults.limits); um tipo pode subi-los em `limits` "
+                            "(ex.: rule_*.variants.full compra 100%). O servidor valida com o resolver antes de gravar.")
         try:
             from bot import lab_registry as R  # type: ignore
             tuning = {k: list(v) for k, v in R.HARD.items()}
@@ -714,6 +727,23 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
         p["tuning_bounds"] = tuning
         p["ints"] = ["cooldown_seconds", "max_trades_per_hour"]
         return p
+
+    @r.get("/params/effective/{name}")
+    def params_effective(name: str, static: bool = False, _: str = A):
+        from bot import params as P  # type: ignore
+        eff, prov, errs, meta = P.explain(name, use_overlay=not static)
+        return {"portfolio": name, "meta": meta, "effective": eff, "provenance": prov, "errors": errs,
+                "summary": P.summary(eff)}
+
+    @r.get("/params/types")
+    def params_types(_: str = A):
+        from bot import params as P  # type: ignore
+        doc = P.STORE.doc() or {}
+        out = {}
+        for t in sorted(doc.get("types") or {}):
+            eff, prov, errs = P.type_view(t, doc=doc)
+            out[t] = {"effective": eff, "provenance": prov, "errors": errs, "summary": P.summary(eff)}
+        return {"types": out, "doc_errors": P.STORE.doc_errors}
 
     @r.get("/param_changes")
     def param_changes(limit: int = 200, _: str = A):
@@ -766,7 +796,8 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
         "meme": lambda: [ROOT / "data" / "meme" / "status.json", ROOT / "logs" / "meme_trades.jsonl"],
         "lab": lambda: [ROOT / "data" / "lab" / "status.json", ROOT / "data" / "lab" / "registry.json",
                         ROOT / "data" / "nightly" / "verdicts.json", ROOT / "data" / "rules" / "status.json"],
-        "params": lambda: [ROOT / "data" / "params_overlay.json", ROOT / "models.json", ROOT / "logs" / "param_changes.jsonl"],
+        "params": lambda: [ROOT / "data" / "params_overlay.json", ROOT / "models.json", ROOT / "logs" / "param_changes.jsonl",
+                           ROOT / "params.json"],
         "funding": lambda: [FUND / "data" / "status.json"],
         "health": lambda: [ROOT / "data" / "nightly" / "status.json"] + list((ROOT / "run").glob("*.pid")),
     }

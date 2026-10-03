@@ -30,7 +30,7 @@ from bot.paths import ROOT as DEFAULT_ROOT  # noqa: E402
 
 BRT = timezone(timedelta(hours=-3))
 
-COPY = ["config.json", "memecoins.json", "models.json", "criteria_baseline.json", "criteria_v2.json",
+COPY = ["config.json", "params.json", "memecoins.json", "models.json", "criteria_baseline.json", "criteria_v2.json",
         "data/params_overlay.json", "data/prices.jsonl", "data/meme/prices"]
 MOVE = ["status.json", "data/meme/portfolios", "data/meme/equity", "data/meme/status.json", "data/rules/equity",
         "data/rules/status.json", "data/lab/equity", "data/lab/portfolios", "data/lab/registry.json",

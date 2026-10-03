@@ -67,14 +67,34 @@ Perguntas mandadas ao modelo, iguais às do artigo:
 - hold: “anything else”
 - skip: “conditions are too hostile to trade at all”
 
-Portões, também os do artigo:
+Portões (os cortes vêm do perfil de parâmetros, ver abaixo; entre parênteses, perfil `article` / `relaxed_paper`):
 
 1. Sem resposta utilizável do von → `hold`, motivo `fail_closed`.
 2. Sem preço → `hold`, motivo `market_unavailable`.
-3. `skip >= 0.55` → `hold`, motivo `skip`.
-4. `confiança < 0.55` → `hold`, motivo `low_confidence`.
-5. Escolha `hold` → não opera.
-6. `buy` ou `sell` com confiança suficiente → pode operar. O tamanho é o valor de `BUY_USDT` ou `SELL_SOL` vezes a confiança, limitado por `MAX_BUY_USDT` (5) e `MAX_SELL_SOL` (0.01).
+3. `skip >= skip_min` (0.55 / 0.5) → `hold`, motivo `skip`.
+4. `confiança < confidence_min` (0.55 / 0.35) → `hold`, motivo `low_confidence`.
+5. Só se `prob_margin_min > 0` (– / 0.20): probabilidade da primeira opção menos a da segunda abaixo do mínimo, ou sem probabilidades → `hold`, motivo `low_prob_margin`.
+6. Escolha `hold` → não opera.
+7. `buy` ou `sell` com confiança suficiente → pode operar. O tamanho é o valor de `buy_usdt` ou `sell_sol` vezes a confiança, limitado por `max_buy_usdt` (5) e `max_sell_sol` (0.01).
+
+### Perfis de parâmetros (`config/params.json`)
+
+Portões, tamanhos, ciclo e custo do paper vêm de `config/params.json`: `defaults` e por cima `profiles.<PARAMS_PROFILE>`.
+
+| Perfil | Portão | Uso |
+| --- | --- | --- |
+| `relaxed_paper` (padrão) | confiança ≥ 0.35 **e** margem de probabilidade ≥ 0.20, skip < 0.5 — o portão `relaxed` do laboratório | só paper (`paper_only: true`) |
+| `article` | confiança ≥ 0.55, skip < 0.55 — o artigo | paper ou ao vivo |
+
+- `PARAMS_PROFILE` escolhe o perfil (padrão `relaxed_paper`); `PARAMS_PATH` o ficheiro (padrão `config/params.json`).
+- As variáveis antigas continuam a sobrepor o perfil, por compatibilidade: `CONFIDENCE_THRESHOLD`, `SKIP_THRESHOLD`,
+  `PROB_MARGIN_MIN` (nova), `BUY_USDT`, `SELL_SOL`, `MAX_BUY_USDT`, `MAX_SELL_SOL`, `LOOP_SECONDS`, `PAPER_COST_BPS`. No
+  `.env.example` ficam comentadas; um `.env` antigo com `CONFIDENCE_THRESHOLD=0.55` mantém o corte do artigo.
+- Fail-safe: ficheiro em falta, ilegível, chave desconhecida, valor fora do intervalo ou perfil desconhecido → valores do artigo
+  (os antigos padrões do ambiente), com o motivo em `Config.params_errors`.
+- Um perfil `paper_only` nunca vale com `LIVE_TRADING=1`: a configuração cai no `article` (mesmo com `--dry-run`, por precaução).
+- Cada decisão em `logs/decisions.jsonl` regista `params_profile`.
+- O laboratório tem o seu próprio `research/paper-lab/params.json`, por tipo de teste (ver o README do lab).
 
 `px_in` no log é o preço na hora do ciclo. `px_15m` é o preço cerca de 15 minutos antes, o insumo do retorno. O preço de saída, para o hit rate, é o `px_in` de um ciclo posterior.
 
@@ -164,7 +184,7 @@ python -m jev_trader rewrite --propose --percentile 90 --fixed 0.8 --band 0.001
 
 1. Lê `logs/decisions.jsonl` do run e fica com as decisões em que o von respondeu (fonte diferente de `fail-closed`, `model_action` presente).
 2. Corte = percentil P (90 por omissão) dessas confianças, pelo método **nearest-rank**: com as n confianças ordenadas, o valor na posição ⌈P/100 × n⌉. O corte é sempre uma confiança observada.
-3. Confiante = confiança ≥ corte e ação final `buy` ou `sell`, isto é, passou os portões. Em paper trading não há swap real, por isso as decisões de dry-run contam. Com `CONFIDENCE_THRESHOLD` em 0.55 e o von em ~0.2–0.45, nenhuma decisão passa os portões e a auditoria sai vazia; a auditoria regista quantas escolhas `buy`/`sell` acima do corte foram bloqueadas.
+3. Confiante = confiança ≥ corte e ação final `buy` ou `sell`, isto é, passou os portões. Em paper trading não há swap real, por isso as decisões de dry-run contam. Com o perfil `article` (confiança ≥ 0.55) e o von em ~0.2–0.45, nenhuma decisão passa os portões e a auditoria sai vazia (por isso o padrão em paper é `relaxed_paper`); a auditoria regista quantas escolhas `buy`/`sell` acima do corte foram bloqueadas.
 4. Erro: compra seguida de retorno abaixo de −banda, ou venda seguida de retorno acima de +banda (banda 0.001 = 0.1%), com o `px_in` da decisão entre +15 e +20 minutos, a mesma regra do hit rate.
 5. A mesma conta com a barra fixa (`--fixed`, 0.8) entra na proposta em `audit.fixed`, só para comparação. O texto proposto sai de `audit.percentile`.
 6. Reescrita determinística: para cada lado, as palavras de estado que aparecem em pelo menos metade dos erros disparam frases fixas (por exemplo `thin` numa compra errada acrescenta “only when depth is deep not thin” ao critério de compra). Sem erros, a proposta é igual aos critérios atuais e vem com `"changed": false`. Frase já presente não se repete.

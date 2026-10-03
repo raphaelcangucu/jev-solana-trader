@@ -102,13 +102,16 @@ def main():
     v2 = port_summary("v2", decisions, trades, ROOT / "data" / "equity_v2.jsonl",
                       ROOT / "data" / "portfolio_v2.json", live_px)
 
-    g_r = cfg.get("gates_relaxed") or {}
+    from bot import params as P  # portões efetivos de params.json (sem overlay)
+    gb = P.explain("baseline", use_overlay=False)[0]["gates"]
+    g_r = dict(P.explain("relaxed", use_overlay=False)[0]["gates"])
+    g_r["calibration_note"] = ((P.STORE.doc() or {}).get("profiles") or {}).get("relaxed", {}).get("note", "")
     lines = [
         "# Day 1 paper trading report",
         f"\n**Generated (BRT):** {datetime.now(tz=BRT).isoformat()}",
         "\n## Gate rules\n",
-        f"- **Baseline (article-faithful):** conf ≥ {cfg['gates']['min_confidence']}, skip_noul < {cfg['gates']['max_skip_noul']}, "
-        f"cooldown {cfg['gates']['cooldown_seconds']}s, max {cfg['gates']['max_trades_per_hour']}/h, buy {cfg['gates']['buy_fraction_usdt']*100:.0f}% USDT.",
+        f"- **Baseline (article-faithful):** conf ≥ {gb['min_confidence']}, skip_noul < {gb['max_skip_noul']}, "
+        f"cooldown {gb['cooldown_seconds']}s, max {gb['max_trades_per_hour']}/h, buy {gb['buy_fraction_usdt']*100:.0f}% USDT.",
         f"- **Relaxed (calibrated to von output):** conf ≥ {g_r.get('min_confidence')} (~80th pct of observed ~0.229/0.379 clusters), "
         f"prob margin (chosen−runner-up) ≥ {g_r.get('min_prob_margin')}, skip_noul < {g_r.get('max_skip_noul')}, "
         f"same sizing/cooldown/cap. Same von decision reused — no extra model calls.",
@@ -467,6 +470,7 @@ def day_report(day):
     txt = "\n".join([f"# Relatório do dia {day} (dia {n} do experimento)", "",
         f"Janela 00:00–24:00 BRT (portfólios que começaram no meio do dia usam o próprio início). Gerado {datetime.now(BRT).isoformat()}. Paper only.", "",
         "Excesso vs B&H = PnL − variação do benchmark buy-and-hold do próprio portfólio (SOL: mix inicial; memes: capital inicial na moeda). vs USDT = PnL.", "",
+        A.STATS_LEGEND, "",
         tbl, "", "## Veredito (regra de dados mínimos)", "", verdict_table(A, cat, tb), "",
         "## Linhagens (original → forks)", "", lineage_table(A, cat, reg), "",
         "## Qualidade de fills", "", f"- {fq['mark_fallbacks']}/{fq['market_fills']} fills a mercado no fallback de mark; motivos: {fq['reasons']}",
@@ -483,6 +487,7 @@ def cumulative_report():
     fq = A.fill_quality(0, now)
     txt = "\n".join(["# Relatório acumulado desde o início", "",
         f"Cada portfólio desde o SEU início até {datetime.now(BRT).isoformat()} (BRT). Paper only.", "",
+        A.STATS_LEGEND, "",
         tbl, "", "## Veredito (regra de dados mínimos)", "", verdict_table(A, cat, tb), "",
         "## Linhagens (original → forks)", "", lineage_table(A, cat, reg), "",
         "## Qualidade de fills (acumulado)", "", f"- {fq['mark_fallbacks']}/{fq['market_fills']} fills a mercado no fallback de mark; motivos: {fq['reasons']}", ""])

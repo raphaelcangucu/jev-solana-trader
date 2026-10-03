@@ -280,7 +280,7 @@ def main() -> int:
         sleep_for = max(1.0, rotate - elapsed)
         end_sleep = time.time() + sleep_for
         while time.time() < end_sleep and not STOP:
-            time.sleep(min(0.5, end_sleep - time.time()))
+            time.sleep(max(0.0, min(0.5, end_sleep - time.time())))
 
     print(f"meme stopped cycles={cycles} errors={errors}", flush=True)
     return 0
