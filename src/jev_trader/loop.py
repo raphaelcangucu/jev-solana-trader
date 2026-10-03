@@ -1,14 +1,14 @@
-"""Um ciclo: estado, System One, portões, log e (ao vivo) swap."""
+"""Um ciclo: estado, System One, portões, log e swap (ao vivo) ou fill no livro de papel (dry-run)."""
 
 from __future__ import annotations
 
 import json
 import math
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
 from jev_trader.config import Config
 from jev_trader.decide import ask_system_one, resolve_action
+from jev_trader.paper import paper_cycle
+from jev_trader.records import append_jsonl, now_iso
 from jev_trader.state import build_state, fetch_features, neutral_features
 from jev_trader.swap import SwapError, execute_swap
 
@@ -52,9 +52,11 @@ def run_cycle(cfg: Config, *, dry_run: bool) -> dict:
                     "error": swap_error,
                 },
             )
+    decision_t = _now_iso()
+    paper = _paper_fields(cfg, gate, model.confidence, features.px_in, decision_t) if dry_run else _NO_PAPER
     reason = "swap_failed" if swap_error else gate.reason
     record = {
-        "t": _now_iso(),
+        "t": decision_t,
         "state": state,
         "action": gate.action,
         "conf": _round(model.confidence, 6),
@@ -73,7 +75,13 @@ def run_cycle(cfg: Config, *, dry_run: bool) -> dict:
         "sol_ui": _round(features.sol_ui, 9),
         "usdt_ui": _round(features.usdt_ui, 6),
         "signature": signature,
-        "error": model.error or fetch_error or swap_error,
+        "paper": paper["paper"],
+        "paper_fill": paper["paper_fill"],
+        "paper_reason": paper["paper_reason"],
+        "paper_sol": paper["paper_sol"],
+        "paper_usdt": paper["paper_usdt"],
+        "run_id": paper["run_id"],
+        "error": model.error or fetch_error or swap_error or paper["paper_error"],
         "wallet": cfg.hot_wallet,
     }
     append_jsonl(cfg.decisions_path, record)
@@ -81,21 +89,43 @@ def run_cycle(cfg: Config, *, dry_run: bool) -> dict:
     return record
 
 
-def append_jsonl(path: Path, record: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    line = json.dumps(record, ensure_ascii=False, separators=(",", ":"))
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(line + "\n")
+_NO_PAPER = {
+    "paper": False,
+    "paper_fill": False,
+    "paper_reason": None,
+    "paper_sol": None,
+    "paper_usdt": None,
+    "run_id": None,
+    "paper_error": None,
+}
+
+
+def _paper_fields(cfg: Config, gate, confidence: float, px_in: float | None, t: str) -> dict:
+    """Só em dry-run. Um erro do livro de papel fica no registo e não derruba o ciclo."""
+    try:
+        result = paper_cycle(
+            cfg,
+            execute=gate.execute,
+            side=gate.action,
+            confidence=confidence,
+            px_in=px_in,
+            t=t,
+        )
+    except Exception as exc:
+        return {**_NO_PAPER, "paper": True, "paper_reason": "paper_error", "paper_error": _clip(exc)}
+    return {
+        "paper": True,
+        "paper_fill": result.fill,
+        "paper_reason": result.reason,
+        "paper_sol": _round(result.book.sol, 9),
+        "paper_usdt": _round(result.book.usdt, 6),
+        "run_id": result.book.run_id,
+        "paper_error": None,
+    }
 
 
 def _now_iso() -> str:
-    try:
-        from zoneinfo import ZoneInfo
-
-        clock = ZoneInfo("America/Sao_Paulo")
-    except Exception:
-        clock = timezone(timedelta(hours=-3))
-    return datetime.now(clock).isoformat(timespec="seconds")
+    return now_iso()
 
 
 def _round(value, digits: int):

@@ -1,0 +1,38 @@
+{
+  "name": "h2_ensemble_MEW",
+  "asset_mode": "token",
+  "asset": "MEW",
+  "sol": 0.0,
+  "usdt": 997.8847782485,
+  "token": 0.0,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 0.0004976,
+  "benchmark_buy_hold": {
+    "token": 2009646.3022508041,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": -1.7662460816104897,
+  "fees_paid_usdt": 0.6896843751580551,
+  "fees_paid_sol": 0.0,
+  "trade_count": 5,
+  "last_trade_ts": 1790329797.4284484,
+  "trade_timestamps": [
+    1790315092.7688007,
+    1790317615.118972,
+    1790325592.6110134,
+    1790329377.307167,
+    1790329797.4284484
+  ],
+  "position": "sold",
+  "recent_pnl_mood": "stung",
+  "created_ts": 1790294866.5673187,
+  "started_brt": "2026-09-24T21:07:46.567320-03:00",
+  "entry_price": null,
+  "peak_price": null,
+  "strategy": "hyp:h2_ensemble_MEW"
+}

@@ -1,0 +1,194 @@
+{
+  "ok": true,
+  "ts": 1790294865.1734846,
+  "ts_brt": "2026-09-24T21:07:45.173485-03:00",
+  "cycles": 59,
+  "errors": 0,
+  "skipped_no_price": 0,
+  "pid": 409953,
+  "finished": false,
+  "price_usd": 117.275,
+  "price_source": "coinbase",
+  "fabricated": false,
+  "baseline": {
+    "sol": 0.017392206,
+    "usdt": 50.00929,
+    "equity_usd": 52.04896095865,
+    "last_final": "hold",
+    "last_chosen": "buy",
+    "last_conf": 0.334,
+    "last_skip": 0.1529,
+    "last_latency_ms": 334.01,
+    "trades": 0,
+    "state": "deep quiet flat calm late gray wide soft late mid quiet held",
+    "gate_reasons": [
+      "low_confidence"
+    ]
+  },
+  "relaxed": {
+    "sol": 0.4044136698203796,
+    "usdt": 3.783479866939229,
+    "equity_usd": 51.21109299512425,
+    "last_final": "hold",
+    "last_chosen": "buy",
+    "last_conf": 0.334,
+    "trades": 39,
+    "gate_reasons": [
+      "low_confidence"
+    ]
+  },
+  "hybrid_von_relaxed_cap2": {
+    "sol": 0.4120158028954693,
+    "usdt": 3.7549318507003786,
+    "equity_usd": 52.07408513526654,
+    "last_final": "hold",
+    "last_chosen": "buy",
+    "last_conf": 0.334,
+    "trades": 9,
+    "gate_reasons": [
+      "low_confidence"
+    ],
+    "model": "von+rules",
+    "strategy": "rule:hybrid_von_relaxed_cap2",
+    "sol_regime_bull": true,
+    "started_brt": "2026-09-24T15:08:28.370392-03:00"
+  },
+  "v2": {
+    "sol": 0.0,
+    "usdt": 51.9196889101826,
+    "equity_usd": 51.9196889101826,
+    "last_final": "hold",
+    "last_chosen": "buy",
+    "last_conf": 0.161,
+    "last_skip": 0.1702,
+    "last_latency_ms": 380.95,
+    "trades": 3,
+    "state": "deep quiet flat calm late gray wide buoyed late mid quiet sold",
+    "gate_reasons": [
+      "low_confidence",
+      "low_prob_margin"
+    ],
+    "gate_profile": "relaxed"
+  },
+  "gates": {
+    "baseline": {
+      "min_confidence": 0.6,
+      "max_skip_noul": 0.5
+    },
+    "relaxed": {
+      "min_confidence": 0.35,
+      "min_prob_margin": 0.2,
+      "max_skip_noul": 0.5
+    },
+    "v2": {
+      "min_confidence": 0.35,
+      "min_prob_margin": 0.2,
+      "max_skip_noul": 0.5,
+      "note": "v2 uses relaxed gate + criteria_v2.json von call"
+    }
+  },
+  "review_done": true,
+  "uptime_seconds": 872.6,
+  "paper_only": true,
+  "end_at_brt": "2099-12-31T00:00:00-03:00",
+  "laya_baseline": {
+    "sol": 0.017392206,
+    "usdt": 50.00929,
+    "equity_usd": 52.04896095865,
+    "last_final": "hold",
+    "last_chosen": "buy",
+    "last_conf": 0.017,
+    "trades": 0,
+    "gate_reasons": [
+      "low_confidence"
+    ],
+    "model": "laya",
+    "started_brt": "2026-09-24T04:48:57.833587-03:00",
+    "latency_ms": 931.31
+  },
+  "laya_relaxed": {
+    "sol": 0.017392206,
+    "usdt": 50.00929,
+    "equity_usd": 52.04896095865,
+    "last_final": "hold",
+    "last_chosen": "buy",
+    "last_conf": 0.017,
+    "trades": 0,
+    "gate_reasons": [
+      "low_confidence",
+      "low_prob_margin"
+    ],
+    "model": "laya",
+    "started_brt": "2026-09-24T04:48:57.833587-03:00",
+    "latency_ms": 931.31
+  },
+  "poorjev_baseline": {
+    "sol": 0.2074024818572578,
+    "usdt": 28.130225625,
+    "equity_usd": 52.45335168480991,
+    "last_final": "hold",
+    "last_chosen": "buy",
+    "last_conf": 0.5164206552279672,
+    "trades": 2,
+    "gate_reasons": [
+      "low_confidence"
+    ],
+    "model": "poorjev",
+    "started_brt": "2026-09-24T04:48:57.833587-03:00",
+    "latency_ms": 654.1
+  },
+  "poorjev_relaxed": {
+    "sol": 0.20739024997625777,
+    "usdt": 28.130225625,
+    "equity_usd": 52.45191719096563,
+    "last_final": "hold",
+    "last_chosen": "buy",
+    "last_conf": 0.5164206552279672,
+    "trades": 2,
+    "gate_reasons": [
+      "low_prob_margin"
+    ],
+    "model": "poorjev",
+    "started_brt": "2026-09-24T04:48:57.833587-03:00",
+    "latency_ms": 654.1
+  },
+  "models": {
+    "von": {
+      "enabled": true,
+      "label": "von (local)",
+      "kind": "http_systemone",
+      "base_url": "http://127.0.0.1:8765"
+    },
+    "laya": {
+      "enabled": true,
+      "label": "Laya (local)",
+      "kind": "http_systemone",
+      "base_url": "http://127.0.0.1:8766"
+    },
+    "poorjev": {
+      "enabled": true,
+      "label": "poorjev (local)",
+      "kind": "http_systemone_adapted",
+      "base_url": "http://127.0.0.1:8767"
+    },
+    "jev": {
+      "enabled": false,
+      "label": "Jev (hosted TypeSafe)",
+      "kind": "hosted_typesafe",
+      "base_url": "https://api.typesafe.ai"
+    }
+  },
+  "jev": {
+    "enabled": false,
+    "key_present": false,
+    "status": "disabled",
+    "api_key_env": "JEV_API_KEY",
+    "endpoint": "https://api.typesafe.ai/v1/systemone",
+    "live_trading": false
+  },
+  "extra_latencies_ms": {
+    "poorjev": 654.1,
+    "laya": 931.31
+  },
+  "cycle_wall_ms": 1710.2
+}

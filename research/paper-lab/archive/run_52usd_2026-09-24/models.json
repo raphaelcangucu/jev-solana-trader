@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "note": "Pluggable System One decision backends. Simulation only. von SOL/meme portfolios unchanged unless noted.",
+  "memes_default_model": "von",
+  "memes_allow_other_models": true,
+  "backends": {
+    "von": {
+      "enabled": true,
+      "kind": "http_systemone",
+      "base_url": "http://127.0.0.1:8765",
+      "label": "von (local)",
+      "port": 8765,
+      "sol_portfolios": [
+        "baseline",
+        "relaxed",
+        "v2"
+      ],
+      "note": "Existing default; do not alter von meme/SOL portfolio behavior.",
+      "memes_enabled": true
+    },
+    "laya": {
+      "enabled": true,
+      "kind": "http_systemone",
+      "base_url": "http://127.0.0.1:8766",
+      "label": "Laya (local)",
+      "port": 8766,
+      "sol_portfolios": [
+        "laya_baseline",
+        "laya_relaxed"
+      ],
+      "venv_python": "/workspace/jev-alts/venvs/laya/bin/python",
+      "serve_script": "bot/serve_laya.py",
+      "memes_enabled": true,
+      "note": ""
+    },
+    "poorjev": {
+      "enabled": true,
+      "kind": "http_systemone_adapted",
+      "base_url": "http://127.0.0.1:8767",
+      "label": "poorjev (local)",
+      "port": 8767,
+      "sol_portfolios": [
+        "poorjev_baseline",
+        "poorjev_relaxed"
+      ],
+      "venv_python": "/workspace/jev-alts/venvs/poorjev/bin/python",
+      "serve_script": "bot/serve_poorjev.py",
+      "memes_enabled": true,
+      "note": ""
+    },
+    "jev": {
+      "enabled": false,
+      "kind": "hosted_typesafe",
+      "base_url": "https://api.typesafe.ai",
+      "endpoint": "/v1/systemone",
+      "label": "Jev (hosted TypeSafe)",
+      "api_key_env": "JEV_API_KEY",
+      "model_name": "jev-latest",
+      "sol_portfolios": [
+        "jev_baseline",
+        "jev_relaxed",
+        "jev_article"
+      ],
+      "status_if_no_key": "aguardando chave",
+      "live_trading": false,
+      "note": "DISABLED by default. Key from env JEV_API_KEY only; never log/write key. Restart bots after setting key.",
+      "memes_enabled": false
+    }
+  }
+}

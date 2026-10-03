@@ -1,0 +1,41 @@
+{
+  "name": "h2_ensemble_BONK",
+  "asset_mode": "token",
+  "asset": "BONK",
+  "sol": 0.0,
+  "usdt": 988.463485382711,
+  "token": 0.0,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 3.798e-06,
+  "benchmark_buy_hold": {
+    "token": 263296471.8272775,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": -1.22982927455584,
+  "fees_paid_usdt": 1.0722205973999226,
+  "fees_paid_sol": 0.0,
+  "trade_count": 8,
+  "last_trade_ts": 1790335791.6234088,
+  "trade_timestamps": [
+    1790314791.488229,
+    1790322784.5465367,
+    1790329077.0056484,
+    1790329917.7612574,
+    1790330339.4722204,
+    1790330759.8328507,
+    1790335385.7413404,
+    1790335791.6234088
+  ],
+  "position": "sold",
+  "recent_pnl_mood": "neutral",
+  "created_ts": 1790294866.565732,
+  "started_brt": "2026-09-24T21:07:46.565733-03:00",
+  "entry_price": null,
+  "peak_price": null,
+  "strategy": "hyp:h2_ensemble_BONK"
+}

@@ -1,0 +1,27 @@
+{
+  "version": "v2",
+  "source": "night_review_rules_based",
+  "parent": "baseline",
+  "generated_at_brt": "2026-09-25T00:30:13.181741-03:00",
+  "method": "Deterministic rules-based rewrite from audit stats (baseline+relaxed). Baseline untouched (human gate).",
+  "action": {
+    "instructions": "buy on strength only when the book can absorb it; be stricter after overnight audit",
+    "criteria": {
+      "buy": "the move is strong and depth is not thin; prefer deep quiet pumping with calm tape",
+      "sell": "the move is fading or fees are climbing; prefer fading or dumping with harsh or loud tape",
+      "hold": "anything else; prefer flat gray chop or unclear mixed signals"
+    }
+  },
+  "skip_this_cycle": {
+    "instructions": "conditions are too hostile to trade at all; prefer thin bot_war violent conditions"
+  },
+  "audit": {
+    "n_decisions": 1620,
+    "n_trades": 20,
+    "n_decisions_baseline": 810,
+    "n_decisions_relaxed": 810,
+    "n_trades_baseline": 0,
+    "n_trades_relaxed": 20,
+    "lose_words": []
+  }
+}

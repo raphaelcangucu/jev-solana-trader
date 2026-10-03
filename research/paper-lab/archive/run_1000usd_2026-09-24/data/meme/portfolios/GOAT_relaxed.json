@@ -1,0 +1,39 @@
+{
+  "name": "meme_GOAT_relaxed",
+  "asset_mode": "token",
+  "sol": 0.0,
+  "usdt": 984.2108983818374,
+  "token": 0.0,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 0.01922,
+  "benchmark_buy_hold": {
+    "token": 52029.13631633715,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": -8.645819238623886,
+  "fees_paid_usdt": 1.5592332437723933,
+  "fees_paid_sol": 0.0,
+  "trade_count": 11,
+  "last_trade_ts": 1790393631.8416846,
+  "trade_timestamps": [
+    1790309950.195338,
+    1790315568.9925096,
+    1790316409.9631917,
+    1790317668.7863991,
+    1790318089.8062708,
+    1790318509.627565,
+    1790384812.223204,
+    1790385232.045499,
+    1790387331.7633047,
+    1790387750.9271505,
+    1790393631.8416846
+  ],
+  "position": "sold",
+  "recent_pnl_mood": "stung",
+  "created_ts": 1790294875.9849746
+}

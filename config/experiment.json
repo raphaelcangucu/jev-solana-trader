@@ -1,0 +1,13 @@
+{
+  "run_id": "run1_2026-09-30",
+  "start_t": "2026-09-30T00:50:19-03:00",
+  "wallet": "GNJv4FcMb4j1A6NFiVaaHkGVTZ5p5A7ea9GsFgccS75r",
+  "slot": 451848237,
+  "book": {
+    "sol": 0.017392206,
+    "usdt": 50.00929
+  },
+  "ref_sol_usd": 119.305,
+  "ref_source": "coinbase spot",
+  "mode": "paper"
+}

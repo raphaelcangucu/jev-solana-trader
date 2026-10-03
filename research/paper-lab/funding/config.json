@@ -1,0 +1,141 @@
+{
+ "service": "funding-carry-paper",
+ "version": 1,
+ "paper_only": true,
+ "poll_seconds": 120,
+ "hl_min_request_interval_s": 1.2,
+ "fees": {
+  "hl_perp_taker": 0.00045,
+  "hl_perp_maker": 0.00015,
+  "hl_spot_taker": 0.0007,
+  "hl_spot_maker": 0.0004,
+  "gate_spot_taker": 0.002,
+  "gate_spot_maker_cf": 0.002,
+  "source_hl": "https://hyperliquid.gitbook.io/hyperliquid-docs/trading/fees (Tier 0 base)",
+  "source_gate": "GET https://api.gateio.ws/api/v4/spot/currency_pairs field fee=0.2 (%) for all universe pairs, queried 2026-09-24",
+  "fill_model": "All simulated fills are TAKER, walking the real L2 book (HL l2Book / Gate order_book). Maker is NOT assumed because post-only fills are not guaranteed; a maker-fee counterfactual is logged per trade (fee_maker_cf) for comparison only."
+ },
+ "rules": {
+  "entry_min_mean7d_ann": 0.08,
+  "entry_require_current_funding_positive": true,
+  "entry_min_oi_usd": 10000000,
+  "entry_max_flips_24h": 1,
+  "exit_mean3d_ann_below": 0.06,
+  "exit_flips_24h_at_least": 2,
+  "exit_min_hold_hours_for_bar_rule": 24,
+  "reentry_cooldown_hours": 24,
+  "perp_leverage": 2,
+  "cash_reserve_frac": 0.05,
+  "min_position_notional": 12.0,
+  "margin_topup_when_equity_below_x_mm": 2.0,
+  "usdc_bar_ann": 0.06,
+  "cadence": "markets polled every poll_seconds + snapshot at hh:00:15 (oracle for funding); funding accrual + rule evaluation hourly at hh:02; benchmarks polled every 24h"
+ },
+ "hedge": {
+  "BTC": {
+   "venue": "hl_spot",
+   "token": "UBTC"
+  },
+  "ETH": {
+   "venue": "hl_spot",
+   "token": "UETH"
+  },
+  "ZEC": {
+   "venue": "hl_spot",
+   "token": "UZEC"
+  },
+  "GRASS": {
+   "venue": "gate",
+   "pair": "GRASS_USDT"
+  },
+  "ONDO": {
+   "venue": "gate",
+   "pair": "ONDO_USDT"
+  },
+  "UNI": {
+   "venue": "gate",
+   "pair": "UNI_USDT"
+  },
+  "TAO": {
+   "venue": "gate",
+   "pair": "TAO_USDT",
+   "note": "HL spot HTAO exists but ~$17.5k/day volume -> Gate used"
+  },
+  "PONS": {
+   "venue": "gate",
+   "pair": "PONS_USDT"
+  }
+ },
+ "portfolios": {
+  "p1000": {
+   "capital": 1000.0,
+   "universe": [
+    "GRASS",
+    "ONDO",
+    "UNI",
+    "ZEC",
+    "TAO",
+    "ETH",
+    "BTC"
+   ],
+   "max_positions": 7,
+   "note": "v1 universe, PONS excluded."
+  },
+  "p1000_pons": {
+   "capital": 1000.0,
+   "universe": [
+    "GRASS",
+    "ONDO",
+    "UNI",
+    "ZEC",
+    "TAO",
+    "ETH",
+    "BTC",
+    "PONS"
+   ],
+   "max_positions": 8,
+   "weight_caps": {
+    "PONS": 0.1
+   },
+   "note": "Variant: v1 + PONS capped at 10% of hedged notional."
+  }
+ },
+ "oneoff_costs": {
+  "hl_new_account_fee_usdc": 1.0,
+  "hl_withdraw_fee_usdc": 1.0,
+  "source_hl_new_account": "hyperliquid-docs llms-full.txt: 'New HyperCore accounts require 1 quote token (e.g., 1 USDC...) of fees for the first transaction'",
+  "source_hl_withdraw": "hyperliquid-docs llms-full.txt: 'There is a $1 fee for withdrawing'",
+  "bridge_quote": "LI.FI GET https://li.quest/v1/quote fromChain=SOL fromToken=USDT toChain=1337 (HyperCore) toToken=USDC, fetched at start; reverse quote for cash-out estimate",
+  "not_modeled": "Moving funds to/from Gate for Gate-hedged legs (p1000*): Gate deposit/withdraw fees not public without auth -> NOT charged; flagged in reports."
+ },
+ "benchmarks": {
+  "kamino_usdc": {
+   "url": "https://api.kamino.finance/kamino-market/7u3HeHxYDLhnCoErrtycNokbQYbWGzLs6JSDqGAv5PfF/reserves/metrics?env=mainnet-beta",
+   "reserve": "D6q6wuQSrifJKZYpR1M8R4YawnLDtDsMmWM1NbBmgJ59",
+   "field": "supplyApy",
+   "accrual_apy": "trailing-24h mean of hourly supplyInterestAPY from /metrics/history (spot value spikes, e.g. 27% at 2026-09-24T00Z)"
+  },
+  "jitosol": {
+   "url": "https://kobe.mainnet.jito.network/api/v1/stake_pool_stats",
+   "field": "apy[-1].data",
+   "fallback": "https://yields.llama.fi/chart/0e7d0722-9054-4907-8593-567b353c0900",
+   "note": "Yield-only accrual on USD notional; real JitoSOL also carries SOL price beta (not included)."
+  }
+ },
+ "run_mode": "indefinite (no end date; portfolios never permanently deactivated; only rule-based rotation between assets)",
+ "log_rotation": {
+  "when": "daily at first loop after local midnight (America/Sao_Paulo)",
+  "archive_dir": "logs/archive/YYYY-MM/",
+  "format": "<name>.<YYYY-MM-DD>.gz (gzip, verified line/byte count before truncating original)",
+  "files": [
+   "positions.jsonl",
+   "funding_accruals.jsonl",
+   "trades.jsonl",
+   "marks.jsonl",
+   "service.log",
+   "watchdog.log",
+   "stdout.log"
+  ]
+ },
+ "portfolios_retired_note": "p52 ($52) stopped 2026-09-24 when the paper experiment moved to $1,000; archived in paper/archive/run_52usd_2026-09-24/funding_p52/"
+}

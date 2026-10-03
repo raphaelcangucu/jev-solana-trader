@@ -1,0 +1,33 @@
+{
+  "name": "meme_FARTCOIN_relaxed",
+  "asset_mode": "token",
+  "sol": 0.0,
+  "usdt": 747.8762415905625,
+  "token": 1288.6195029325,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 0.18506,
+  "benchmark_buy_hold": {
+    "token": 5403.652869339674,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": -0.1376291329865751,
+  "fees_paid_usdt": 0.625764754782212,
+  "fees_paid_sol": 0.0,
+  "trade_count": 5,
+  "last_trade_ts": 1790405632.0314014,
+  "trade_timestamps": [
+    1790311031.470311,
+    1790314552.7347903,
+    1790398914.7425146,
+    1790399330.4482613,
+    1790405632.0314014
+  ],
+  "position": "held",
+  "recent_pnl_mood": "neutral",
+  "created_ts": 1790294875.9783587
+}

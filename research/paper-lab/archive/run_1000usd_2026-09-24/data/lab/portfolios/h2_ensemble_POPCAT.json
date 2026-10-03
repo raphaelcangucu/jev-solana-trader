@@ -1,0 +1,44 @@
+{
+  "name": "h2_ensemble_POPCAT",
+  "asset_mode": "token",
+  "asset": "POPCAT",
+  "sol": 0.0,
+  "usdt": 1015.065388887547,
+  "token": 0.0,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 0.05677,
+  "benchmark_buy_hold": {
+    "token": 17614.93746697199,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": -5.501568128449776,
+  "fees_paid_usdt": 1.4209072770129516,
+  "fees_paid_sol": 0.0,
+  "trade_count": 11,
+  "last_trade_ts": 1790336332.791134,
+  "trade_timestamps": [
+    1790321220.6089275,
+    1790322482.5056279,
+    1790326253.0557637,
+    1790326673.140839,
+    1790327514.3912992,
+    1790327935.2883863,
+    1790330038.0833166,
+    1790330880.7324672,
+    1790331301.1025605,
+    1790335491.1096787,
+    1790336332.791134
+  ],
+  "position": "sold",
+  "recent_pnl_mood": "stung",
+  "created_ts": 1790294866.5663059,
+  "started_brt": "2026-09-24T21:07:46.566307-03:00",
+  "entry_price": null,
+  "peak_price": null,
+  "strategy": "hyp:h2_ensemble_POPCAT"
+}

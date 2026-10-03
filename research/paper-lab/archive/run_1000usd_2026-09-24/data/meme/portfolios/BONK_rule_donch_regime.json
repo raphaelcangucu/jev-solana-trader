@@ -1,0 +1,30 @@
+{
+  "name": "BONK_rule_donch_regime",
+  "asset_mode": "token",
+  "sol": 0.0,
+  "usdt": 1000.0,
+  "token": 0.0,
+  "start_sol": 0.0,
+  "start_usdt": 1000.0,
+  "start_token": 0.0,
+  "start_price": 3.806e-06,
+  "benchmark_buy_hold": {
+    "token": 262743037.3095113,
+    "usdt": 0.0
+  },
+  "benchmark_all_usdt": {
+    "usdt": 1000.0
+  },
+  "realized_pnl_usdt": 0.0,
+  "fees_paid_usdt": 0.0,
+  "fees_paid_sol": 0.0,
+  "trade_count": 0,
+  "last_trade_ts": null,
+  "trade_timestamps": [],
+  "position": "flat",
+  "recent_pnl_mood": "neutral",
+  "created_ts": 1790294882.0608108,
+  "strategy": "rule:BONK_rule_donch_regime",
+  "rule_state": {},
+  "started_brt": "2026-09-24T21:07:54.411779-03:00"
+}
