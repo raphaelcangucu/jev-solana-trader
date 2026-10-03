@@ -1,75 +1,166 @@
+@import "@fontsource-variable/archivo/wdth.css";
 @import "tailwindcss";
-@import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* shadcn/ui-style tokens — dark financial theme by default */
+/* ---------------------------------------------------------------- tokens: o caderno do laboratório */
 :root {
-  --radius: 0.6rem;
-  --background: oklch(0.155 0.012 255);
-  --foreground: oklch(0.94 0.008 255);
-  --card: oklch(0.19 0.013 255);
-  --card-foreground: oklch(0.94 0.008 255);
-  --popover: oklch(0.2 0.014 255);
-  --popover-foreground: oklch(0.94 0.008 255);
-  --primary: oklch(0.72 0.15 245);
-  --primary-foreground: oklch(0.16 0.02 255);
-  --secondary: oklch(0.25 0.014 255);
-  --secondary-foreground: oklch(0.92 0.008 255);
-  --muted: oklch(0.235 0.013 255);
-  --muted-foreground: oklch(0.68 0.02 255);
-  --accent: oklch(0.27 0.016 255);
-  --accent-foreground: oklch(0.96 0.005 255);
-  --destructive: oklch(0.63 0.2 25);
-  --border: oklch(0.285 0.014 255);
-  --input: oklch(0.3 0.014 255);
-  --ring: oklch(0.72 0.15 245);
-  --up: oklch(0.74 0.16 155);
-  --down: oklch(0.66 0.2 22);
-  --warn: oklch(0.8 0.15 80);
+  color-scheme: light;
+  --paper: #EEF2F6;
+  --surface: #F8FAFC;
+  --sunk: #E3E9F0;
+  --ink: #14213D;
+  --ink-2: #475569;
+  --ink-3: #64748B;
+  --rule: #D5DDE6;
+  --rule-strong: #B8C4D2;
+  --grid-line: rgba(20, 33, 61, 0.055);
+  --grid-line-major: rgba(20, 33, 61, 0.085);
+  --hl: #FFE45C;
+  --hl-ink: #14213D;
+  --gain: #1F7A4D;
+  --loss: #C2372F;
+  --gain-wash: rgba(31, 122, 77, 0.12);
+  --loss-wash: rgba(194, 55, 47, 0.12);
+  --focus: #1d5fbf;
+  --shadow: 0 1px 0 rgba(20, 33, 61, 0.04), 0 8px 24px -16px rgba(20, 33, 61, 0.25);
+  /* famílias (paleta documentada, ordem fixa; validada claro/escuro) */
+  --fam-von: #2a78d6;
+  --fam-poorjev: #eb6834;
+  --fam-laya: #1baf7a;
+  --fam-lab: #eda100;
+  --fam-rules: #e87ba4;
+  --fam-hybrid: #4a3aa7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0F1B2D; --surface: #13233A; --sunk: #0B1626;
+    --ink: #E8EEF6; --ink-2: #B4C1D3; --ink-3: #8798AF;
+    --rule: #22385A; --rule-strong: #335079;
+    --grid-line: rgba(140, 180, 230, 0.06); --grid-line-major: rgba(140, 180, 230, 0.1);
+    --hl-ink: #0F1B2D;
+    --gain: #56C994; --loss: #FF8577;
+    --gain-wash: rgba(86, 201, 148, 0.14); --loss-wash: rgba(255, 133, 119, 0.14);
+    --focus: #8fb8ff;
+    --shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 10px 28px -18px rgba(0, 0, 0, 0.7);
+    --fam-von: #3987e5; --fam-poorjev: #d95926; --fam-laya: #199e70; --fam-lab: #c98500; --fam-rules: #d55181; --fam-hybrid: #9085e9;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0F1B2D; --surface: #13233A; --sunk: #0B1626;
+  --ink: #E8EEF6; --ink-2: #B4C1D3; --ink-3: #8798AF;
+  --rule: #22385A; --rule-strong: #335079;
+  --grid-line: rgba(140, 180, 230, 0.06); --grid-line-major: rgba(140, 180, 230, 0.1);
+  --hl-ink: #0F1B2D;
+  --gain: #56C994; --loss: #FF8577;
+  --gain-wash: rgba(86, 201, 148, 0.14); --loss-wash: rgba(255, 133, 119, 0.14);
+  --focus: #8fb8ff;
+  --shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 10px 28px -18px rgba(0, 0, 0, 0.7);
+  --fam-von: #3987e5; --fam-poorjev: #d95926; --fam-laya: #199e70; --fam-lab: #c98500; --fam-rules: #d55181; --fam-hybrid: #9085e9;
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-up: var(--up);
-  --color-down: var(--down);
-  --color-warn: var(--warn);
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-hl: var(--hl);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
+  --color-focus: var(--focus);
+  --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
+/* ---------------------------------------------------------------- base */
 @layer base {
-  * { @apply border-border outline-ring/50; }
-  html, body { @apply bg-background text-foreground; }
-  body { font-feature-settings: "tnum" 1, "cv11" 1; -webkit-font-smoothing: antialiased; }
-  .num { font-variant-numeric: tabular-nums; }
-  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    font-weight: 420;
+    font-stretch: 100%;
+    color: var(--ink);
+    background-color: var(--paper);
+    /* papel milimetrado: quadradinho de 8px, régua mais forte a cada 40px */
+    background-image:
+      linear-gradient(var(--grid-line-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line-major) 1px, transparent 1px),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px;
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  * { border-color: var(--rule); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  ::selection { background: color-mix(in srgb, var(--hl) 70%, transparent); color: var(--hl-ink); }
 }
+
+/* ---------------------------------------------------------------- tipografia (eixo de largura = personalidade) */
+@utility t-display { font-stretch: 125%; font-weight: 720; letter-spacing: -0.01em; line-height: 1.05; }
+@utility t-title { font-stretch: 118%; font-weight: 680; letter-spacing: -0.005em; line-height: 1.15; }
+@utility t-num { font-stretch: 112%; font-weight: 650; font-variant-numeric: tabular-nums; }
+@utility t-tab { font-variant-numeric: tabular-nums; }
+@utility t-cond { font-stretch: 78%; font-weight: 560; }
+@utility t-semi { font-stretch: 100%; font-weight: 600; }
+
+/* ---------------------------------------------------------------- marca-texto */
+/* Um traço de caneta: levemente inclinado, pontas irregulares, translúcido (multiplica sobre o papel claro). */
+.marker { position: relative; z-index: 0; background: none; color: inherit; padding: 0 0.12em; }
+.marker::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -0.22em; right: -0.3em; top: 0.16em; bottom: 0.02em;
+  background:
+    linear-gradient(97deg, transparent 0 0.18em, var(--hl) 0.34em calc(100% - 0.4em), transparent calc(100% - 0.12em)),
+    var(--hl);
+  background-size: 100% 100%, 0 0;
+  background-repeat: no-repeat;
+  border-radius: 0.55em 0.18em 0.45em 0.22em / 0.5em 0.35em 0.6em 0.3em;
+  transform: skewX(-9deg) rotate(-0.6deg);
+  opacity: 0.88;
+  mix-blend-mode: multiply;
+  transform-origin: left center;
+}
+:root[data-theme="dark"] .marker { color: var(--hl-ink); }
+:root[data-theme="dark"] .marker::before { mix-blend-mode: normal; opacity: 0.96; top: 0.08em; bottom: -0.02em; }
+/* onde o nome pode quebrar linha, o traço segue cada linha (fundo clonado) */
+@media (max-width: 1023px) {
+  .marker::before { display: none; }
+  .marker {
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    background: linear-gradient(97deg, transparent 0, color-mix(in srgb, var(--hl) 92%, transparent) 0.25em calc(100% - 0.25em), transparent 100%) no-repeat 0 80% / 100% 78%;
+    border-radius: 0.4em 0.15em 0.35em 0.2em;
+  }
+  :root[data-theme="dark"] .marker { background-size: 100% 92%; background-position: 0 60%; }
+}
+.marker-sweep::before { animation: marker-sweep 820ms cubic-bezier(.25,.7,.2,1) 200ms both; }
+@keyframes marker-sweep { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+/* folha de caderno: superfície com margem vermelha discreta à esquerda (só na peça central) */
+.sheet { background: var(--surface); border: 1px solid var(--rule); box-shadow: var(--shadow); }
+
+/* tooltips de gráfico e popovers */
+.pop { background: var(--surface); border: 1px solid var(--rule-strong); box-shadow: var(--shadow); color: var(--ink); }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+  .marker-sweep::before { animation: none; }
 }
+
+/* scrollbars discretas */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 10px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-track { background: transparent; }

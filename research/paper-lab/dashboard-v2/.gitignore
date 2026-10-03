@@ -1,1 +1,4 @@
 node_modules/
+dist/
+screenshots/*.tmp.png
+*.tsbuildinfo

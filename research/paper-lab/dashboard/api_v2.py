@@ -19,6 +19,11 @@ _LAB = str(Path(__file__).resolve().parents[1])  # código do lab (research/pape
 if _LAB not in _sys_paths.path:
     _sys_paths.path.insert(0, _LAB)
 from bot.paths import ROOT, LAB_DIR  # noqa: E402  (ROOT = PAPER_LAB_ROOT ou a pasta do lab)
+_DASH = str(Path(__file__).resolve().parent)
+if _DASH not in _sys_paths.path:
+    _sys_paths.path.insert(0, _DASH)
+import insights as INS  # noqa: E402  (habilidade sem beta, sparklines, experimento, bot real — sem FastAPI)
+SKILL = INS.SkillCache()
 FUND = ROOT / "funding"
 BRT = timezone(timedelta(hours=-3))
 FUNDING_SHOWN = ("p1000", "p1000_pons")  # user: show only the $1000 funding portfolios
@@ -249,13 +254,14 @@ def meme_syms() -> list[str]:
 def universe() -> list[dict]:
     items: list[dict] = []
     status = read_json(ROOT / "status.json", {}) or {}
+    orig = INS.originals_meta()
     for f in sorted(glob.glob(str(ROOT / "data" / "portfolio_*.json"))):
         name = Path(f).stem[len("portfolio_"):]
         items.append({"name": name, "group": "sol", "asset": "SOL", "file": f,
                       "equity_file": str(ROOT / "data" / f"equity_{name}.jsonl"),
                       "model": sol_model_of(name, status.get(name) or {}),
                       "kind": "rule" if name.startswith(("grid_", "rsi_")) else ("hybrid" if name.startswith("hybrid_") else "model"),
-                      "strategy": name})
+                      "strategy": name, "meta": INS.row_meta(name, "sol", None, orig)})
     syms = meme_syms()
     for f in sorted(glob.glob(str(ROOT / "data" / "meme" / "portfolios" / "*.json"))):
         stem = Path(f).stem
@@ -266,7 +272,7 @@ def universe() -> list[dict]:
         items.append({"name": stem, "group": "meme", "asset": sym, "file": f,
                       "equity_file": str(ROOT / "data" / "meme" / "equity" / f"{stem}.jsonl"),
                       "model": model, "kind": "rule" if strat.startswith("rule_") else ("hybrid" if strat.startswith("hybrid_") else "model"),
-                      "strategy": strat})
+                      "strategy": strat, "meta": INS.row_meta(stem, "meme", None, orig)})
     reg = read_json(ROOT / "data" / "lab" / "registry.json", {}) or {}
     for name, e in (reg.get("portfolios") or {}).items():
         asset = e.get("asset") or "SOL"
@@ -275,7 +281,8 @@ def universe() -> list[dict]:
                       "equity_file": str(ROOT / "data" / "lab" / "equity" / f"{name}.jsonl"),
                       "model": e.get("model") or e.get("kind"), "kind": e.get("kind"), "strategy": strat, "hyp": e.get("hyp"),
                       "label": e.get("label"), "parent": e.get("parent"), "lineage": e.get("lineage"),
-                      "report_label": e.get("report_label"), "status": e.get("status")})
+                      "report_label": e.get("report_label"), "status": e.get("status"),
+                      "meta": INS.row_meta(name, "lab", e, orig)})
     return items
 
 
@@ -286,7 +293,7 @@ def verdict_for(verdicts: dict, it: dict, pname: str | None):
     return None
 
 
-def portfolio_row(it: dict, verdicts: dict, overlay_ports: dict, control_names: set) -> dict:
+def portfolio_row(it: dict, verdicts: dict, overlay_ports: dict, control_names: set, skill: dict | None = None) -> dict:
     pdata = read_json(Path(it["file"]), {}) or {}
     s = eq_stats(Path(it["equity_file"]))
     last = (s.last if s else None) or {}
@@ -328,6 +335,10 @@ def portfolio_row(it: dict, verdicts: dict, overlay_ports: dict, control_names: 
                      "days": prog.get("days"), "min_days": prog.get("min_days")} if prog else None,
         "control": ctrl, "paused": paused,
     }
+    meta = it.get("meta") or {}
+    row.update({k: meta.get(k) for k in ("catalog", "profile", "test_type", "variant", "rule", "source", "params_diff", "created_brt")})
+    row["skill"] = (skill or {}).get(meta.get("catalog") or it["name"])
+    row["params_brief"] = INS.params_brief(meta.get("catalog") or it["name"])
     return row
 
 
@@ -422,8 +433,8 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
         return (read_json(ROOT / "data" / "nightly" / "verdicts.json", {}) or {}).get("verdicts") or {}
 
     def rows_all() -> list[dict]:
-        ver = verdicts_all(); ov = overlay_ports(); cn = control_names()
-        return [portfolio_row(it, ver, ov, cn) for it in universe()]
+        ver = verdicts_all(); ov = overlay_ports(); cn = control_names(); sk = SKILL.get()
+        return [portfolio_row(it, ver, ov, cn, sk) for it in universe()]
 
     # ---------- health
     def health_payload() -> dict:
@@ -447,8 +458,9 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
         models = read_json(ROOT / "models.json", {}) or {}
         # expected-but-down: model servers disabled in models.json are not "errors"
         disabled = {m for m, b in (models.get("backends") or {}).items() if not b.get("enabled")}
+        tunnel_on = INS.tunnel_expected(ROOT)
         for p in procs:
-            p["expected"] = p["name"] not in disabled
+            p["expected"] = p["name"] not in disabled and (p["name"] != "tunnel" or tunnel_on or p["running"])
         beats = [
             {"name": "sol_bot", "age_s": sol_age, "ts_brt": sol.get("ts_brt"), "cycles": sol.get("cycles"), "errors": sol.get("errors")},
             {"name": "meme_bot", "age_s": meme_age, "ts_brt": meme.get("ts_brt"), "cycles": meme.get("cycles"), "errors": meme.get("errors")},
@@ -482,6 +494,7 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
             "review_done": sol.get("review_done"),
             "price_usd": sol.get("price_usd"), "price_source": sol.get("price_source"),
             "dashboard_url": url, "paper_only": True, "live_trading": False,
+            "extras": INS.health_extras(),
         }
 
     @r.get("/health")
@@ -499,7 +512,8 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
         return {
             "ts_brt": brt_iso(), "price_usd": h["price_usd"], "price_source": h["price_source"],
             "portfolios_total": len(rows), "trades_today": trades_today, "errors": h["errors"], "health": h["level"],
-            "rows": rows,
+            "rows": rows, "experiment": INS.experiment_info([x.get("started_ts") for x in rows]),
+            "skill_status": SKILL.status(),
             "verdict_rule": "inconclusivo até ≥30 RT fechados e ≥21 dias (≥28 p/ regras 1h e filtros de regime); fork líder = base de tuning, não veredito",
         }
 
@@ -550,6 +564,22 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
             }
         return out
 
+    @r.get("/sparks")
+    def sparks(points: int = 60, _: str = A):
+        """Curvas reduzidas de todos os portfólios, em % desde o início (sparklines e pequenos múltiplos)."""
+        points = max(12, min(int(points), 240))
+        out = {}
+        for it in universe():
+            sp = INS.spark_series(jsonl_rows(Path(it["equity_file"])), points, ts_of=row_ts)
+            if sp:
+                out[it["name"]] = sp
+        return out
+
+    @r.get("/realbot")
+    def realbot(points: int = 360, _: str = A):
+        """Livro de papel do bot real (jev_trader score, calculado em processo; só leitura dos logs)."""
+        return INS.real_bot_board(max(60, min(int(points), 2000)))
+
     # ---------- portfolio details
     def decisions_file_for(it: dict) -> Path:
         if it["group"] == "lab":
@@ -563,7 +593,7 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
         it = next((x for x in universe() if x["name"] == name), None)
         if not it:
             raise HTTPException(404, "unknown portfolio")
-        row = portfolio_row(it, verdicts_all(), overlay_ports(), control_names())
+        row = portfolio_row(it, verdicts_all(), overlay_ports(), control_names(), SKILL.get())
         pdata = read_json(Path(it["file"]), {}) or {}
         # decision log uses meme_{SYM}_x for meme von, lab/sol names as-is
         keys = {name, pdata.get("name") or name, f"meme_{name}"}
@@ -800,8 +830,9 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
                            ROOT / "params.json"],
         "funding": lambda: [FUND / "data" / "status.json"],
         "health": lambda: [ROOT / "data" / "nightly" / "status.json"] + list((ROOT / "run").glob("*.pid")),
+        "realbot": lambda: [INS.real_bot_root() / "logs" / "decisions.jsonl", INS.real_bot_root() / "logs" / "paper_trades.jsonl"],
     }
-    MIN_GAP = {"sol": 5, "meme": 10, "lab": 15, "params": 0, "funding": 15, "health": 10}
+    MIN_GAP = {"sol": 5, "meme": 10, "lab": 15, "params": 0, "funding": 15, "health": 10, "realbot": 30}
 
     def topic_version(files) -> float:
         m = 0.0

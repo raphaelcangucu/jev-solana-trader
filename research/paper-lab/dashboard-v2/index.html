@@ -1,12 +1,17 @@
 <!doctype html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b0e14" />
+    <meta name="theme-color" content="#EEF2F6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0F1B2D" media="(prefers-color-scheme: dark)" />
     <meta name="robots" content="noindex" />
-    <title>Paper Trader · Painel</title>
+    <title>Paper lab</title>
+    <script>
+      // tema antes do primeiro paint (sem piscar): preferência salva ou a do sistema
+      try { var t = localStorage.getItem('paperlab.theme'); document.documentElement.dataset.theme = t === 'light' || t === 'dark' ? t : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
