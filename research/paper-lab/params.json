@@ -54,15 +54,38 @@
         "exec.fee_bps"
       ],
       "bounds": {
-        "gates.buy_fraction_usdt": [0.05, 0.5],
-        "gates.max_trades_per_hour": [1, 8],
-        "gates.cooldown_seconds": [30, 3600],
-        "gates.min_confidence": [0.0, 0.99],
-        "gates.min_prob_margin": [0.0, 0.9],
-        "gates.max_skip_noul": [0.05, 0.95]
+        "gates.buy_fraction_usdt": [
+          0.05,
+          0.5
+        ],
+        "gates.max_trades_per_hour": [
+          1,
+          8
+        ],
+        "gates.cooldown_seconds": [
+          30,
+          3600
+        ],
+        "gates.min_confidence": [
+          0.0,
+          0.99
+        ],
+        "gates.min_prob_margin": [
+          0.0,
+          0.9
+        ],
+        "gates.max_skip_noul": [
+          0.05,
+          0.95
+        ]
       },
       "max_rel_change": 0.2,
-      "steps": [0.8, 0.9, 1.1, 1.2],
+      "steps": [
+        0.8,
+        0.9,
+        1.1,
+        1.2
+      ],
       "train_frac": 0.7,
       "min_improvement_pct": 0.25,
       "trade_penalty_bps": 2.0
@@ -109,7 +132,10 @@
         "timeframe": "1h"
       },
       "tuning": {
-        "params": ["rule.grid_pct", "rule.levels"]
+        "params": [
+          "rule.grid_pct",
+          "rule.levels"
+        ]
       }
     },
     "rule_rsi": {
@@ -121,7 +147,11 @@
         "timeframe": "1h"
       },
       "tuning": {
-        "params": ["rule.rsi_period", "rule.lo", "rule.hi"]
+        "params": [
+          "rule.rsi_period",
+          "rule.lo",
+          "rule.hi"
+        ]
       }
     },
     "rule_regime": {
@@ -132,7 +162,10 @@
         "timeframe": "1h"
       },
       "tuning": {
-        "params": ["rule.ema_fast", "rule.ema_slow"]
+        "params": [
+          "rule.ema_fast",
+          "rule.ema_slow"
+        ]
       },
       "variants": {
         "full": {
@@ -155,7 +188,11 @@
         "timeframe": "1h"
       },
       "tuning": {
-        "params": ["rule.ema_fast", "rule.ema_slow", "rule.donchian"]
+        "params": [
+          "rule.ema_fast",
+          "rule.ema_slow",
+          "rule.donchian"
+        ]
       },
       "variants": {
         "full": {
@@ -207,7 +244,13 @@
     },
     "lab_h4_hours": {
       "note": "H4: só opera nas horas BRT listadas (compras e vendas).",
-      "hours": [5, 10, 11, 12, 18]
+      "hours": [
+        5,
+        10,
+        11,
+        12,
+        18
+      ]
     },
     "funding_carry": {
       "note": "Carry de funding (funding/funding_carry.py) NÃO lê este ficheiro: é um serviço à parte com regras em funding/config.json (rules), incluindo perp_leverage 2 na perna curta, o que o limite 'sem alavancagem' do lab recusaria. Fica documentado aqui, sem ligação."
@@ -217,12 +260,24 @@
     }
   },
   "models": {
-    "von": {"note": "von local (127.0.0.1:8765)."},
-    "laya": {"note": "Laya (shim local :8766)."},
-    "poorjev": {"note": "poorjev (shim local :8767)."},
-    "jev": {"note": "Jev hospedado; desligado sem JEV_API_KEY."},
-    "ensemble": {"note": "H2: von + poorjev + laya."},
-    "rule": {"note": "Regras clássicas (sem modelo)."}
+    "von": {
+      "note": "von local (127.0.0.1:8765)."
+    },
+    "laya": {
+      "note": "Laya (shim local :8766)."
+    },
+    "poorjev": {
+      "note": "poorjev (shim local :8767)."
+    },
+    "jev": {
+      "note": "Jev hospedado; desligado sem JEV_API_KEY."
+    },
+    "ensemble": {
+      "note": "H2: von + poorjev + laya."
+    },
+    "rule": {
+      "note": "Regras clássicas (sem modelo)."
+    }
   },
   "assets": {
     "sol": {
@@ -267,6 +322,21 @@
       "note": "Passo 3 do HANDOFF: von relaxed com exposição máxima a SOL de 50% do valor do portfólio (separa beta de seleção).",
       "gates": {
         "max_exposure_frac": 0.5
+      }
+    },
+    "relaxed__fork1": {
+      "note": "Correção 2026-10-03: o fork foi criado com os níveis de saída mas sem exits.enabled (desligado por omissão); liga as saídas para testar a hipótese original (saídas + exposição ≤50%).",
+      "exits": {
+        "enabled": true
+      }
+    },
+    "poorjev_relaxed__fork1": {
+      "note": "Correção 2026-10-03: liga as saídas (faltava exits.enabled) e tira a margem mínima, que bloqueava o poorjev SOL (conf 0,52–0,62); sem isto o fork era igual ao pai e não operava.",
+      "exits": {
+        "enabled": true
+      },
+      "gates": {
+        "min_prob_margin": 0.0
       }
     }
   }

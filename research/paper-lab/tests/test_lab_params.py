@@ -477,10 +477,10 @@ def test_sol_bot_applies_exposure_cap_regime_and_exits(tmp_path, monkeypatch):
 def test_nightly_reports_fork_params_with_provenance():
     pytest.importorskip("numpy")
     from bot import nightly as N
-    e = {"name": "relaxed__fork1", "asset": "SOL", "cls": "sol", "kind": "gated", "source": "relaxed", "profile": "relaxed",
+    e = {"name": "relaxed__fork9", "asset": "SOL", "cls": "sol", "kind": "gated", "source": "relaxed", "profile": "relaxed",
          "model": "von", "test_type": "model_gated", "parent": "relaxed", "lineage": "relaxed",
          "params_diff": {"gates": {"min_confidence": 0.4}}}
     reg = {"portfolios": {e["name"]: e}, "lineages": {}}
     lines = N.fork_params_lines(e, reg)
-    assert lines == ["`gates.min_confidence` = 0.4 (pai: 0.35; camada `fork:relaxed__fork1`)"]
+    assert lines == ["`gates.min_confidence` = 0.4 (pai: 0.35; camada `fork:relaxed__fork9`)"]
     assert N.params_for("hybrid_von_relaxed_cap2")[0]["gates"]["max_trades_per_hour"] == 2
