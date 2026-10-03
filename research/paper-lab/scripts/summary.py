@@ -114,6 +114,25 @@ def main() -> int:
     except Exception:
         pass
 
+    # 2b) forks: cada um contra o pai, na mesma janela (desde a criação do fork)
+    forks = [m for m in cat.values() if m.get("parent")]
+    if forks:
+        L += ["", f"## Forks ({len(forks)})", "",
+              "| Fork | O que mudou | Idade | PnL fork − pai (pp) | Habilidade fork − pai US$ | Trades fork/pai |", "|---|---|---:|---:|---:|---|"]
+        for m in sorted(forks, key=lambda m: m["start_ts"]):
+            par = cat.get(m["parent"])
+            try:
+                f = A.window_stats(m, tb, m["start_ts"], now)
+                p = A.window_stats(par, tb, m["start_ts"], now) if par else {"empty": True}
+            except Exception:
+                continue
+            if f.get("empty") or p.get("empty"):
+                L.append(f"| {m['name']} | {json.dumps(m.get('params_diff'), ensure_ascii=False)[:60]} | {(now - m['start_ts']) / 3600:.0f} h | – | – | – |")
+                continue
+            dsk = (f.get("ex_exposure") or 0) - (p.get("ex_exposure") or 0)
+            L.append(f"| {m['name']} | {json.dumps(m.get('params_diff'), ensure_ascii=False)[:60]} | {(now - m['start_ts']) / 3600:.0f} h | "
+                     f"{f['pnl_pct'] - p['pnl_pct']:+.2f} | {dsk:+.2f} | {f.get('trades', 0)}/{p.get('trades', 0)} |")
+
     # 3) bot real em paper
     rb = _real_bot()
     L += ["", "## Bot real (paper, livro da carteira)", ""]
