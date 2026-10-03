@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Paper trading dashboard — SIMULATION ONLY. No live trading. No keypair access."""
 from __future__ import annotations
-import json, os, secrets, time
+import hashlib, hmac, json, os, secrets, time
+from urllib.parse import parse_qs
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, FileResponse, RedirectResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 import uvicorn
@@ -21,7 +22,8 @@ from bot import params as P  # noqa: E402  (params.json por tipo de teste; resol
 DASH = ROOT / "dashboard"          # dados locais: .auth, url.txt (fora do git)
 DASH_CODE = LAB_DIR / "dashboard"  # código: static/, defaults.py, api_v2.py
 BRT = timezone(timedelta(hours=-3))
-security = HTTPBasic()
+security = HTTPBasic(auto_error=False)
+SESSION_COOKIE = "lab_session"
 
 # Hard deny — never serve these
 FORBIDDEN_NAMES = {"keypair.json", "secret.b58", ".auth"}
@@ -42,17 +44,59 @@ def read_auth():
     return user, pw
 
 
-def require_auth(credentials: HTTPBasicCredentials = Depends(security)):
+def _session_token() -> str:
+    """Token do cookie de sessão: HMAC derivado do .auth (muda se a senha mudar)."""
+    key = hashlib.sha256((DASH / ".auth").read_bytes()).digest()
+    return hmac.new(key, b"lab-session-v1", hashlib.sha256).hexdigest()
+
+
+def _creds_ok(username: str, password: str) -> bool:
     user, pw = read_auth()
-    ok_user = secrets.compare_digest(credentials.username, user)
-    ok_pw = secrets.compare_digest(credentials.password, pw)
-    if not (ok_user and ok_pw):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-    return credentials.username
+    return secrets.compare_digest(username, user) & secrets.compare_digest(password, pw)
+
+
+def require_auth(request: Request, credentials: HTTPBasicCredentials | None = Depends(security)):
+    """HTTP Basic (scripts, curl) ou cookie de sessão de /login (navegador sem diálogo Basic)."""
+    cookie = request.cookies.get(SESSION_COOKIE)
+    if cookie and secrets.compare_digest(cookie, _session_token()):
+        return read_auth()[0]
+    if credentials and _creds_ok(credentials.username, credentials.password):
+        return credentials.username
+    if request.method == "GET" and not request.url.path.startswith("/api"):
+        raise HTTPException(status_code=status.HTTP_303_SEE_OTHER, headers={"Location": "/login"})
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Unauthorized",
+        headers={"WWW-Authenticate": "Basic"},
+    )
+
+
+_LOGIN_HTML = """<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Paper lab — entrar</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{font-family:system-ui,sans-serif;background:#0f1115;color:#e6e6e6;display:grid;place-items:center;height:100vh;margin:0}
+form{background:#181b22;padding:24px 28px;border-radius:10px;display:grid;gap:10px;min-width:260px}
+input,button{font:inherit;padding:8px 10px;border-radius:6px;border:1px solid #333;background:#0f1115;color:inherit}
+button{background:#2d6cdf;border:0;cursor:pointer}p{margin:0;color:#f87171;font-size:14px}</style></head>
+<body><form method="post" action="/login"><strong>Paper lab (simulação)</strong>
+<input name="username" placeholder="utilizador" autocomplete="username" required>
+<input name="password" type="password" placeholder="senha" autocomplete="current-password" required>
+<button type="submit">Entrar</button>__ERR__</form></body></html>"""
+
+
+@app.get("/login", response_class=HTMLResponse)
+def login_page():
+    return _LOGIN_HTML.replace("__ERR__", "")
+
+
+@app.post("/login")
+async def login_submit(request: Request):
+    form = parse_qs((await request.body()).decode("utf-8", "replace"))
+    if not _creds_ok((form.get("username") or [""])[0], (form.get("password") or [""])[0]):
+        return HTMLResponse(_LOGIN_HTML.replace("__ERR__", "<p>Credenciais inválidas.</p>"), status_code=401)
+    resp = RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    # Só 127.0.0.1: sem Secure (HTTP local); HttpOnly + SameSite=Strict contra uso cruzado.
+    resp.set_cookie(SESSION_COOKIE, _session_token(), httponly=True, samesite="strict", max_age=40 * 86400)
+    return resp
 
 
 def read_json(path: Path, default=None):
