@@ -336,7 +336,8 @@ def portfolio_row(it: dict, verdicts: dict, overlay_ports: dict, control_names: 
         "control": ctrl, "paused": paused,
     }
     meta = it.get("meta") or {}
-    row.update({k: meta.get(k) for k in ("catalog", "profile", "test_type", "variant", "rule", "source", "params_diff", "created_brt")})
+    row.update({k: meta.get(k) for k in ("catalog", "profile", "test_type", "variant", "rule", "source", "params_diff", "created_brt",
+                                         "fork_who", "fork_summary", "fork_reason", "criteria_summary")})
     row["skill"] = (skill or {}).get(meta.get("catalog") or it["name"])
     row["params_brief"] = INS.params_brief(meta.get("catalog") or it["name"])
     return row
@@ -718,6 +719,10 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
                 m["parent"] = e.get("parent")
                 m["params_diff"] = e.get("params_diff")
                 m["is_original"] = bool(e.get("is_original")) or not e.get("parent")
+                if e.get("parent"):
+                    m["who"] = e.get("who") or "nightly"
+                    m["reason"] = e.get("reason")
+                    m["criteria_summary"] = e.get("criteria_summary")
                 rr = rows.get(m["name"]) or {}
                 m["max_dd_pct"] = rr.get("max_dd_pct"); m["vs_bh_pct"] = rr.get("vs_bh_pct"); m["pnl_pct"] = rr.get("pnl_pct")
                 m["progress_obj"] = rr.get("progress")

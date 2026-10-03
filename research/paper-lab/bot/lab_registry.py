@@ -208,10 +208,17 @@ def ensure_hypotheses(cfg):
     return created
 
 
-def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_override=None):
+def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_override=None, who="nightly",
+                criteria=None, extra=None):
     """Fork `parent` (original bot portfolio or lab portfolio) with params_diff (só o diff vs o pai, validado pelo
-    resolver de params.json antes de criar). Returns (fork name | None, motivo)."""
+    resolver de params.json antes de criar). Returns (fork name | None, motivo).
+
+    `criteria` (critérios de texto já validados por bot/lab_criteria.validate) faz um *fork de critérios*: o texto vai
+    para data/lab/criteria/<fork>.json e o diff ganha `criteria = {file, sha256}`. `who` (quem criou: nightly,
+    claude-night, ...) e `extra` (ex.: hipótese, noite) ficam na entrada do registry e na linha de param_changes.jsonl."""
     from bot import params as P
+    from bot import lab_criteria as LC
+    params_diff = dict(params_diff or {})
     orig = originals()
     with locked() as reg:
         if parent in reg["portfolios"]:
@@ -239,6 +246,8 @@ def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_overr
             return None, f"cap_total_{caps['total']}_atingido"
         n = 1 + sum(1 for e in reg["portfolios"].values() if e.get("lineage") == lineage and e.get("parent"))
         name = f"{lineage}__fork{n}"
+        if criteria is not None:
+            params_diff["criteria"] = {"file": LC.rel_path(name), "sha256": LC.digest(criteria)}
         meta = dict(base, name=name, parent=parent, params_diff=params_diff, lineage=lineage)
         _eff, _prov, errs, _m = P.explain(name, meta=meta, use_overlay=False, registry=reg)
         if errs:
@@ -246,6 +255,11 @@ def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_overr
         if dry_run:
             return name, "dry_run"
         px = _mark(base["asset"])
+        if criteria is not None:
+            try:
+                LC.store(name, criteria, {"parent": parent, "generated_at_brt": brt_iso(), "who": who, "reason": reason})
+            except LC.CriteriaTextError as ex:
+                return None, f"criterios: {ex}"
         st = new_state(name, base["asset"], px, sol=float(pstate.get("sol") or 0), usdt=float(pstate["usdt"]),
                        token=float(pstate.get("token") or 0))
         if pstate.get("entry_price"):
@@ -253,13 +267,46 @@ def create_fork(parent, params_diff, reason, dry_run=False, cfg=None, caps_overr
         st["strategy"] = f"fork:{name}"; st["fork_of"] = parent
         write_json(port_path(name), st)
         e = dict(base, name=name, status="active", created_brt=st["started_brt"], strategy=st["strategy"], lineage=lineage,
-                 parent=parent, params_diff=params_diff, reason=reason, is_original=False,
+                 parent=parent, params_diff=params_diff, reason=reason, is_original=False, who=who,
                  label=f"Fork {n} de {parent}", start_value=st["benchmark_all_usdt"]["usdt"])
+        e.update({k: v for k, v in (extra or {}).items() if k not in e})
         reg["portfolios"][name] = e
         reg["lineages"].setdefault(lineage, {"root": lineage, "lead": None, "members": [lineage]})["members"].append(name)
     append_jsonl(PARAM_LOG, {"ts": time.time(), "ts_brt": brt_iso(), "type": "fork_created", "portfolio": name, "parent": parent,
-                             "lineage": lineage, "params_diff": params_diff, "reason": reason, "who": "nightly"})
+                             "lineage": lineage, "params_diff": params_diff, "reason": reason, "who": who,
+                             **{k: v for k, v in (extra or {}).items() if k not in ("ts", "type", "portfolio", "who")}})
     return name, "created"
+
+
+DIFF_WORDS = {
+    "gates.min_confidence": "confiança mínima", "gates.min_prob_margin": "margem mínima", "gates.margin_gate": "portão de margem",
+    "gates.max_skip_noul": "skip máximo", "gates.cooldown_seconds": "pausa entre trades (s)",
+    "gates.max_trades_per_hour": "trades por hora", "gates.buy_fraction_usdt": "fração por compra",
+    "gates.max_exposure_frac": "exposição máxima", "exits.enabled": "saídas", "exits.tp": "take-profit", "exits.sl": "stop-loss",
+    "exits.trail": "trailing", "exits.trail_arm": "armar trailing", "exits.reentry_cooldown_min": "reentrada (min)",
+    "exec.mode": "execução", "exec.offset_bps": "distância da limite (bps)", "exec.ttl_min": "validade da limite (min)",
+    "ensemble.pct_threshold": "percentil mínimo", "ensemble.min_agree": "modelos de acordo", "hours": "horas BRT",
+    "regime_filter.enabled": "filtro de regime",
+}
+
+
+def fork_who(e) -> str:
+    return (e or {}).get("who") or "nightly"
+
+
+def describe_fork(e) -> str:
+    """O que mudou num fork, em palavras simples (relatórios, dashboard, contexto da noite)."""
+    diff = dict((e or {}).get("params_diff") or {})
+    parts = []
+    if diff.pop("criteria", None):
+        parts.append("critérios reescritos")
+    for g, vals in diff.items():
+        if isinstance(vals, dict):
+            for k, v in vals.items():
+                parts.append(f"{DIFF_WORDS.get(f'{g}.{k}', f'{g}.{k}')} {json.dumps(v, ensure_ascii=False)}")
+        else:
+            parts.append(f"{DIFF_WORDS.get(g, g)} {json.dumps(vals, ensure_ascii=False)}")
+    return ", ".join(parts) or "sem diferença registada"
 
 
 def label(name, label_text, reason):

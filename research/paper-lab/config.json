@@ -206,5 +206,17 @@
     ],
     "require_bear_regime_for_rule": false
   },
-  "live_trading_enabled": false
+  "live_trading_enabled": false,
+  "claude_night": {
+    "enabled": true,
+    "model": "claude-fable-5-1",
+    "run_at": "01:30",
+    "max_forks_per_night": 6,
+    "per_lineage_days": 2,
+    "total_forks": 80,
+    "max_realbot_per_night": 1,
+    "timeout_s": 1800,
+    "experiment_days": 30,
+    "note": "Revis\u00e3o noturna aut\u00f3noma (decis\u00e3o do utilizador, 2026-10-03): o Claude Code corre \u00e0s 01:30 (launchd com.jev.night-claude, scripts/macos/night_claude.sh) e s\u00f3 pode executar scripts/night_cli.py. Cria forks de par\u00e2metros ou de crit\u00e9rios de texto sem aprova\u00e7\u00e3o humana, nunca altera originais; S\u00d3 paper. max_forks_per_night conta fork + criteria-fork; per_lineage_days e total_forks valem s\u00f3 neste caminho (o tuner noturno mant\u00e9m tuning.caps). realbot-criteria aprova crit\u00e9rios do bot real s\u00f3 se este estiver em paper (LIVE_TRADING!=1, experiment.json mode=paper, perfil paper_only)."
+  }
 }

@@ -61,7 +61,17 @@ def row_meta(name: str, group: str, registry_entry: dict | None, originals: dict
             catalog = f"meme_{name}"
             e = originals[catalog]
     e = e or {}
+    fork = {}
+    if e.get("parent"):
+        try:
+            from bot import lab_registry as R
+            fork = {"fork_who": R.fork_who(e), "fork_summary": R.describe_fork(e)}
+        except Exception:
+            fork = {"fork_who": e.get("who") or "nightly", "fork_summary": None}
+        fork["fork_reason"] = str(e.get("reason") or "").replace("[claude-night] ", "")[:400] or None
+        fork["criteria_summary"] = e.get("criteria_summary") if (e.get("params_diff") or {}).get("criteria") else None
     return {
+        **{k: fork.get(k) for k in ("fork_who", "fork_summary", "fork_reason", "criteria_summary")},
         "catalog": catalog,
         "profile": e.get("profile"),
         "test_type": e.get("test_type") or LAB_TYPES.get(e.get("hyp") or ""),

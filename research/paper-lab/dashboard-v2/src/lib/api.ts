@@ -47,6 +47,7 @@ export interface Row {
   hyp?: string | null; label?: string | null; parent?: string | null; lineage?: string | null; report_label?: string | null
   catalog?: string | null; profile?: string | null; test_type?: string | null; variant?: string | null; rule?: string | null; source?: string | null
   params_diff?: Record<string, Record<string, unknown>> | null; created_brt?: string | null
+  fork_who?: string | null; fork_summary?: string | null; fork_reason?: string | null; criteria_summary?: string | null
   equity: number | null; start_value: number | null; pnl: number | null; pnl_pct: number | null; vs_bh: number | null; vs_bh_pct: number | null
   vs_usdt: number | null; bh_equity: number | null; trades: number | null; exposure_pct: number | null; max_dd_pct: number | null
   points: number; last_ts: number | null; started_brt: string | null; started_ts: number | null

@@ -238,3 +238,90 @@ def test_decide_loads_approved_criteria_and_falls_back(tmp_path):
     assert current_questions(cfg) == ARTICLE_QUESTIONS
     cfg.criteria_path.write_text(json.dumps({"buy": "only buy"}), encoding="utf-8")
     assert current_questions(cfg) == ARTICLE_QUESTIONS
+
+
+# ------------------------------------------------------------------ caminho autónomo (revisão noturna, só paper)
+
+from jev_trader.rewrite import build_autonomous_proposal, paper_guard  # noqa: E402
+
+NEW = {"buy": "the move is lifting with calm tape and a deep book", "sell": "the move is fading or dumping",
+       "hold": "flat gray chop or anything unclear", "skip": "a thin book or a bot war"}
+
+
+def _paper_root(tmp_path, *, mode="paper", paper_only=True, dotenv=None, experiment=True):
+    root = tmp_path / "bot"
+    (root / "config").mkdir(parents=True)
+    if experiment:
+        (root / "config" / "experiment.json").write_text(json.dumps(
+            {"run_id": "runR", "start_t": "2026-09-30T00:00:00-03:00", "book": {"sol": 0.01, "usdt": 50}, "mode": mode}))
+    prof = {"gates": {"confidence_min": 0.35}}
+    if paper_only:
+        prof["paper_only"] = True
+    (root / "config" / "params.json").write_text(json.dumps({"defaults": {}, "profiles": {"article": {}, "relaxed_paper": prof}}))
+    if dotenv is not None:
+        (root / ".env").write_text(dotenv)
+    return root
+
+
+def test_paper_guard_accepts_only_a_paper_bot(tmp_path):
+    assert paper_guard(_paper_root(tmp_path), env={}) == []
+
+
+@pytest.mark.parametrize(
+    "kw, env, why",
+    [
+        ({}, {"LIVE_TRADING": "1"}, "LIVE_TRADING=1 no ambiente"),
+        ({"dotenv": "SOLANA_KEYPAIR_PATH=/k\nexport LIVE_TRADING=1\n"}, {}, "LIVE_TRADING=1 no .env"),
+        ({"mode": "live"}, {}, "mode='live'"),
+        ({"experiment": False}, {}, "experiment.json"),
+        ({"paper_only": False}, {}, "não é paper_only"),
+        ({}, {"PARAMS_PROFILE": "article"}, "não é paper_only"),
+        ({"dotenv": "PARAMS_PROFILE=article\n"}, {}, "não é paper_only"),
+        ({}, {"PARAMS_PROFILE": "nope"}, "não resolve"),
+    ],
+)
+def test_paper_guard_refuses(tmp_path, kw, env, why):
+    reasons = paper_guard(_paper_root(tmp_path, **kw), env=env)
+    assert any(why in r for r in reasons), reasons
+    assert not any("/k" in r for r in reasons)  # nunca ecoa outras chaves do .env
+
+
+def _auto(tmp_path, proposed=NEW):
+    return build_autonomous_proposal(
+        von_like_log(), EXP, dict(DEFAULT_CRITERIA), "default", proposed, author="claude-night", reason="hipótese",
+        review_date=None, today=date(2026, 9, 30), now_t="T")
+
+
+def test_autonomous_approve_writes_only_in_paper(tmp_path):
+    root = _paper_root(tmp_path)
+    prop = _auto(tmp_path)
+    assert prop["proposed_criteria"] == NEW and prop["author"] == "claude-night" and prop["status"] == "pending"
+    assert prop["audit"]["percentile"]["n_mistakes"] == 3  # a mesma auditoria por percentil do caminho humano
+    path = write_proposal(tmp_path / "p", prop, filename="2026-09-30_claude-night.json")
+    criteria_path = root / "config" / "criteria.json"
+    approvals = tmp_path / "a.jsonl"
+    before = path.read_text(encoding="utf-8")
+    with pytest.raises(RewriteError, match="autonomous approval refused"):
+        approve(path, criteria_path=criteria_path, approvals_path=approvals, approver="claude-night", now_t="T",
+                autonomous=True, guard_root=root, env={"LIVE_TRADING": "1"})
+    assert not criteria_path.exists() and not approvals.exists() and path.read_text(encoding="utf-8") == before
+    with pytest.raises(RewriteError, match="guard_root"):
+        approve(path, criteria_path=criteria_path, approvals_path=approvals, approver="claude-night", now_t="T",
+                autonomous=True)
+    rec = approve(path, criteria_path=criteria_path, approvals_path=approvals, approver="claude-night", now_t="T",
+                  autonomous=True, guard_root=root, env={})
+    assert rec["autonomous"] is True and rec["approver"] == "claude-night" and rec["reason"] == "hipótese"
+    assert load_criteria(criteria_path) == (NEW, "file")
+    assert json.loads(path.read_text(encoding="utf-8"))["autonomous"] is True
+
+
+def test_human_approve_record_is_unchanged(tmp_path):
+    path = _written(tmp_path, _proposal(von_like_log()))
+    rec = approve(path, criteria_path=tmp_path / "c.json", approvals_path=tmp_path / "a.jsonl", approver="h", now_t="T")
+    assert set(rec) == {"t", "decision", "proposal", "criteria_path", "criteria_sha256", "approver"}
+
+
+@pytest.mark.parametrize("bad", [dict(DEFAULT_CRITERIA), dict(NEW, buy="buy after 3 candles"), {"buy": "x"}])
+def test_autonomous_proposal_refuses_invalid_or_unchanged(tmp_path, bad):
+    with pytest.raises(RewriteError):
+        _auto(tmp_path, bad)

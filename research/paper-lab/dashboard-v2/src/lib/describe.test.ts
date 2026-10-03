@@ -50,7 +50,16 @@ test('H1 explanation uses effective numbers when present', () => {
 test('fork explanation lists the diff', () => {
   assert.equal(diffText({ gates: { min_confidence: 0.3, max_trades_per_hour: 6 } }), 'confiança mínima 0,3, trades por hora 6')
   const d = describePortfolio({ name: 'relaxed__fork2', params_diff: { gates: { min_confidence: 0.3 } } })
-  assert.match(d.explain, /ajuste noturno com confiança mínima 0,3/)
+  assert.match(d.explain, /ajuste noturno: com confiança mínima 0,3/)
+})
+
+test('criteria fork created by the night review says so in plain words', () => {
+  const d = describePortfolio({ name: 'baseline__fork1', fork_who: 'claude-night',
+    params_diff: { criteria: { file: 'data/lab/criteria/baseline__fork1.json', sha256: 'abc' } } })
+  assert.equal(d.isFork, true)
+  assert.match(d.explain, /revisão noturna do Claude: critérios de leitura reescritos\./)
+  assert.doesNotMatch(d.explain, /criteria\.file/)
+  assert.equal(diffText({ criteria: { file: 'x' }, gates: { cooldown_seconds: 600 } }), 'pausa entre trades (s) 600')
 })
 
 test('layer names', () => {

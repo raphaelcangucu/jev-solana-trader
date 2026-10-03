@@ -180,7 +180,9 @@ def run(day=None, dry=False):
     L += ["", "## 5. Forks (linhagens): lead fork e rótulos", "",
           f"Nada é desativado ou aposentado: originais e forks rodam indefinidamente. Criação limitada a 1 fork por linhagem a cada {tc['caps']['per_lineage_days']} dias e {tc['caps']['total']} forks no total. "
           f"Lead fork exige ≥{tc['lead']['min_days']} dias e ≥{tc['lead']['min_trades']} trades desde a criação, margem ≥{tc['lead']['min_margin_pct']}pp sobre o pai e à frente em ≥{int(tc['lead']['consistent_frac']*100)}% dos dias. "
-          "**Lead fork = só a base para novos ajustes, não é veredito de vencedora.** Forks que perdem do pai recebem o rótulo 'atrás da original'.", ""]
+          "**Lead fork = só a base para novos ajustes, não é veredito de vencedora.** Forks que perdem do pai recebem o rótulo 'atrás da original'. "
+          "Forks da revisão autónoma (`who=claude-night`, scripts/night_cli.py: parâmetros ou critérios de texto) seguem os limites de "
+          "`config.json:claude_night` e são acompanhados aqui como os outros.", ""]
     n_forks = sum(1 for e in reg["portfolios"].values() if e.get("parent"))
     L.append(f"- Forks existentes: {n_forks}/{tc['caps']['total']}" + (" — **cap total atingido: novos forks não serão criados** (os existentes continuam)." if n_forks >= tc["caps"]["total"] else ""))
     for note in cap_notes:
@@ -201,7 +203,9 @@ def run(day=None, dry=False):
                 daily.append(fa["pnl_pct"] - pa["pnl_pct"])
             d0 += timedelta(days=1)
         tot_f = A.window_stats(m, tb, m["start_ts"], now); tot_p = A.window_stats(par, tb, m["start_ts"], now)
-        margin = (tot_f.get("pnl_pct", 0) - tot_p.get("pnl_pct", 0)) if not tot_f.get("empty") and not tot_p.get("empty") else 0.0
+        both = not tot_f.get("empty") and not tot_p.get("empty")
+        margin = (tot_f.get("pnl_pct", 0) - tot_p.get("pnl_pct", 0)) if both else 0.0
+        skill = ((tot_f.get("ex_exposure") or 0) - (tot_p.get("ex_exposure") or 0)) if both else None
         ahead = sum(1 for x in daily if x > 0) / len(daily) if daily else 0
         lab_txt = "em observação"
         if cc["days"] >= tc["lead"]["min_days"] and cc["trades"] >= tc["lead"]["min_trades"]:
@@ -214,7 +218,18 @@ def run(day=None, dry=False):
             lab_txt = "atrás da original (amostra ainda pequena)"
         if not dry:
             R.label(e["name"], lab_txt, f"margem {margin:+.2f}pp, à frente {ahead:.0%} de {len(daily)} dias")
-        L.append(f"- {e['name']} (pai {e['parent']}): {cc['days']:.1f} d, {cc['trades']} trades, margem {margin:+.2f}pp, à frente {ahead:.0%} de {len(daily)} dias → **{lab_txt}** (continua rodando)")
+        L.append(f"- {e['name']} (pai {e['parent']}; criado por `{R.fork_who(e)}`; {R.describe_fork(e)}): {cc['days']:.1f} d, {cc['trades']} trades, "
+                 f"margem {margin:+.2f}pp" + (f", habilidade {skill:+.1f} US$" if skill is not None else "")
+                 + f", à frente {ahead:.0%} de {len(daily)} dias → **{lab_txt}** (continua rodando)")
+        if e.get("reason"):
+            L.append(f"  - motivo/hipótese: {str(e['reason'])[:300]}")
+        cref = (e.get("params_diff") or {}).get("criteria")
+        if cref:
+            try:
+                from bot import lab_criteria as LC
+                L.append(f"  - critérios ({str(cref.get('sha256'))[:10]}): {LC.summary(LC.load_ref(cref)[0])}")
+            except Exception as ex:
+                L.append(f"  - critérios inválidos ({ex}): o lab_bot segura (hold)")
         try:
             for ln in fork_params_lines(e, reg):
                 L.append(f"  - {ln}")
@@ -241,7 +256,7 @@ def run(day=None, dry=False):
         L.append(f"- Comparação com a barra fixa ({fx.get('rule')}): {fx.get('n_confident')} confiantes, {fx.get('n_mistakes')} erros.")
         L.append(f"- {'Frases novas: ' + json.dumps(p.get('phrases_added'), ensure_ascii=False) if p.get('changed') else 'Sem erros confiantes: nenhuma frase nova (proposta = critérios base).'}")
         L.append(f"- Proposta salva em `{prop.relative_to(ROOT)}`; {'idêntica aos critérios atuais' if same else 'DIFERENTE dos critérios atuais'}. "
-                 "O portfólio v2 original NÃO é alterado; um fork com critério de texto novo exigiria uma chamada extra ao von por ciclo (decisão do usuário). "
+                 "O portfólio v2 original NÃO é alterado; forks com critério de texto novo existem via `scripts/night_cli.py criteria-fork` (revisão autónoma, uma chamada extra ao modelo por ciclo, com cache). "
                  f"Resumo em `{tmp.relative_to(ROOT)}`.")
     except Exception as ex:
         L.append(f"- erro na auditoria v2: {ex}")

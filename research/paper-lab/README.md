@@ -200,6 +200,47 @@ A regra antiga (conf > 0,8 e `approx_pnl` negativo em vendas) nunca disparava co
 - Continua **só proposta** (`reviews/criteria_v2_proposed_<data>.json` + `data/nightly/v2_review_tmp.md`); nada altera os critérios em uso.
 - `bot/review.py` (variante antiga) está deprecado e delega em `sol_bot.night_review`.
 
+## Revisão noturna autónoma (Claude Code, `scripts/night_cli.py`)
+
+Decisão do utilizador (2026-10-03): no fim da noite o próprio Claude Code decide, **sem aprovação humana**, e cria forks
+(nunca altera os originais) com parâmetros ou critérios de texto novos, que depois acompanha nos dias seguintes. **Só paper.**
+É o passe lento do artigo: lê só os erros confiantes (confiança ≥ P90 da família e os 15 min seguintes contra a chamada)
+mais um resumo de uma linha do resto, e reescreve critérios (reflexão ao estilo GEPA).
+
+- **Quando:** launchd `com.jev.night-claude`, todos os dias às 01:30 locais (`config.json:claude_night.run_at`), depois do
+  tuner (00:30) e da rotação de logs (01:00). `scripts/macos/night_claude.sh` corre
+  `claude -p <night_prompt.md> --model claude-fable-5-1 --permission-mode dontAsk --permission-prompts none
+  --setting-sources project,local` com cwd = pasta do lab, timeout de 1800 s, log em `logs/claude_night_<dia>.log`.
+- **O que o Claude pode fazer:** executar só `$LAB_PYTHON scripts/night_cli.py ...` (regra de prefixo do Bash), ler com
+  Read/Grep/Glob dentro do lab e escrever só em `run/claude_night/<dia>/` (critérios e diário). Deny explícito para
+  `.auth`, `.env`, chaves e comandos de leitura/rede/processos; as definições do utilizador (`~/.claude/settings.json`) não
+  são carregadas.
+- **Subcomandos** (cada ação vai para `logs/param_changes.jsonl` com `who: "claude-night"` e `night`):
+
+| Comando | Faz |
+| --- | --- |
+| `context [--hours 24]` | contexto compacto (≤ ~6k tokens): dia N/30, mercado, famílias e notáveis (PnL, ex. B&H, habilidade, timing+p, exposição, C/V, MDD), forks com margem contra o pai, erros confiantes por família (adjetivos dos erros vs dos acertos, episódios), critérios em uso, limites, parâmetros ajustáveis por tipo, placar do bot real |
+| `fork --parent N --diff JSON --reason T [--dry-run]` | fork de parâmetros por `lab_registry.create_fork` (resolver valida; o pai nunca muda). Diff só em `gates`/`exec`/`exits`/`hours`/`ensemble`/`regime_filter`, dentro de `tuning.bounds` do tipo (e do clamp do lab) |
+| `criteria-fork --parent N --criteria-file F --reason T [--dry-run]` | fork cuja diferença é o texto dos critérios (esquema `criteria_*.json`, sem dígitos, ≤ 300/400/1600 caracteres). Guardado em `data/lab/criteria/<fork>.json` e referenciado em `params_diff.criteria = {file, sha256}`. Pais: portfólios com portões de von/laya/poorjev (SOL e memes) |
+| `realbot-criteria --criteria-file F --reason T` | proposta pela auditoria por percentil de `jev_trader.rewrite` com aprovação autónoma (`approve(..., autonomous=True)`, aprovador `claude-night`), **recusada sem escrever nada** se `LIVE_TRADING=1` (ambiente ou `.env`), `config/experiment.json` sem `"mode": "paper"` ou perfil de parâmetros ativo sem `paper_only` |
+| `journal --file F` | copia o diário (markdown em `run/`) para `reviews/claude_night_<data BRT>.md` (nunca sobrescreve: `_2`, `_3`) |
+| `status` | ações desta noite e limites restantes |
+
+- **Limites** (`config.json:claude_night`): `max_forks_per_night` 6 (fork + criteria-fork), `per_lineage_days` 2 e
+  `total_forks` 80 (só neste caminho; o tuner mantém `tuning.caps` 7 dias/40), `max_realbot_per_night` 1, `enabled`.
+  `--reason` com 40–800 caracteres (hipótese + o que a confirma/refuta em 3–7 dias). Ficheiros de entrada só de `run/`.
+- **Execução dos forks de critérios (`bot/lab_bot.py`):** para cada linha de decisão da fonte, o fork chama o backend do
+  modelo (`bot/backends.decide`) com o estado registado nessa linha e os seus critérios; cache LRU limitada por
+  (backend, sha256 dos critérios, estado); depois aplica os mesmos portões/saídas/execução das outras entradas. Critérios
+  em falta/alterados (sha256), backend desligado ou em erro → hold (fail-closed; o backend fica 30 s em pausa após um erro).
+  `logs/lab_decisions.jsonl` regista `model`, `criteria_sha256`, `confidence`, `state`, `cache`, `fail_closed`.
+  Os forks de parâmetros de um fork de critérios herdam os critérios (resolver: efetivo do pai + diff).
+- **Acompanhamento:** `context` e a revisão do tuner (secção 5) mostram cada fork com quem o criou, o que mudou em
+  palavras, margem contra o pai (PnL pp e habilidade US$) e rótulo; `scripts/summary.py` e o dashboard também
+  (`fork_who`, `fork_summary`, `fork_reason`, `criteria_summary`). Nada é apagado nem desligado.
+- **Instalar** (sem reiniciar o lab): `bash scripts/macos/install_launchd.sh --install-night`; primeira corrida
+  supervisionada: `--kick-night`; remover: `--uninstall-night`.
+
 ## Testes
 
 `pytest -q` na raiz do repositório corre também `research/paper-lab/tests/` (gates, estado, analytics, auditoria de confiança, caminhos e

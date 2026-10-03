@@ -38,6 +38,10 @@ export interface DescribeInput {
   label?: string | null
   params_diff?: Record<string, Record<string, unknown>> | null
   params_brief?: ParamsBrief | null
+  /** quem criou o fork: "nightly" (tuner) ou "claude-night" (revisão autónoma) */
+  fork_who?: string | null
+  /** resumo dos critérios de texto próprios (forks de critérios) */
+  criteria_summary?: string | null
 }
 
 export interface Description {
@@ -77,6 +81,7 @@ export function diffText(diff: Record<string, Record<string, unknown>> | null | 
   if (!diff) return ''
   const out: string[] = []
   for (const [g, vals] of Object.entries(diff)) {
+    if (g === 'criteria') continue // critérios de texto: descritos à parte (forks de critérios)
     if (!vals || typeof vals !== 'object') continue
     for (const [k, v] of Object.entries(vals)) {
       const label = DIFF_LABEL[`${g}.${k}`] || `${g}.${k}`
@@ -204,9 +209,12 @@ export function describePortfolio(inp: DescribeInput): Description {
     const base = describeBase({ ...inp, name: m[1], hyp: inp.hyp ?? null })
     const n = Number(m[2])
     const diff = diffText(inp.params_diff)
+    const crit = Boolean(inp.params_diff && 'criteria' in inp.params_diff)
+    const who = inp.fork_who === 'claude-night' ? 'pela revisão noturna do Claude' : 'pelo ajuste noturno'
+    const what = [crit ? 'critérios de leitura reescritos' : '', diff ? `com ${diff}` : ''].filter(Boolean).join(', ')
     return {
       ...base, title: `${base.title}, ajuste ${n}`, tag: 'fork', isFork: true, forkN: n,
-      explain: `Cópia do ${base.title} criada pelo ajuste noturno${diff ? ` com ${diff}` : ''}. O original continua rodando sem mudanças.`,
+      explain: `Cópia do ${base.title} criada ${who}${what ? `: ${what}` : ''}. O original continua rodando sem mudanças.`,
       search: `${base.title} ajuste ${n} fork ${base.asset} ${inp.name}`.toLowerCase(),
     }
   }

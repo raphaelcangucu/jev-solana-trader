@@ -25,7 +25,7 @@ from pathlib import Path
 
 from bot.paths import ROOT, LAB_DIR
 
-GROUPS = ("gates", "exec", "exits", "hours", "ensemble", "rule", "regime_filter", "tuning", "limits")
+GROUPS = ("gates", "exec", "exits", "hours", "ensemble", "rule", "regime_filter", "tuning", "limits", "criteria")
 SCHEMA = {
     "gates": ("min_confidence", "min_prob_margin", "margin_gate", "max_skip_noul", "cooldown_seconds",
               "max_trades_per_hour", "buy_fraction_usdt", "min_usdt_trade", "min_sol_trade", "max_exposure_frac"),
@@ -37,7 +37,12 @@ SCHEMA = {
     "tuning": ("enabled", "params", "bounds", "max_rel_change", "steps", "train_frac", "min_improvement_pct",
                "trade_penalty_bps"),
     "limits": ("buy_fraction_usdt_max", "max_trades_per_hour_max", "max_exposure_frac_max", "leverage"),
+    # Critérios de texto próprios (forks de critérios do lab_bot): referência ao ficheiro em data/lab/criteria/.
+    "criteria": ("file", "sha256"),
 }
+# Modelos com backend HTTP System One que um fork de critérios pode chamar (models.json).
+CRITERIA_MODELS = ("von", "laya", "poorjev")
+CRITERIA_DIR_REL = "data/lab/criteria/"
 DOC_KEYS = ("note", "description", "label")
 TOP_KEYS = ("version", "paper_only", "note", "defaults", "profiles", "types", "models", "assets", "portfolios")
 # Tetos absolutos: nem um bloco `limits` passa daqui (spot, sem alavancagem).
@@ -213,7 +218,7 @@ def overlay_layer(meta: dict, overlay: dict | None) -> tuple[dict, bool, list[st
             continue
         if k in OVERLAY_FLAT:
             layer.setdefault("gates", {})[k] = v
-        elif k in ("limits", "tuning"):
+        elif k in ("limits", "tuning", "criteria"):
             warn.append(f"overlay: '{k}' não pode ser alterado em tempo real (ignorado)")
         elif k in GROUPS:
             if isinstance(v, dict) and isinstance(layer.get(k), dict):
@@ -410,6 +415,20 @@ def validate(eff: dict, meta: dict | None = None) -> list[str]:
         chk("tuning.max_rel_change", tu["max_rel_change"], 0.0, 1.0, lo_open=True)
     if "steps" in tu and not (isinstance(tu["steps"], list) and all(_num(s) and s > 0 for s in tu["steps"])):
         E.append("tuning.steps: lista de multiplicadores positivos")
+
+    cr = eff.get("criteria")
+    if cr:
+        f = cr.get("file") if isinstance(cr, dict) else None
+        if not (isinstance(f, str) and f.startswith(CRITERIA_DIR_REL) and f.endswith(".json") and ".." not in f
+                and "/" not in f[len(CRITERIA_DIR_REL):]):
+            E.append(f"criteria.file: caminho em {CRITERIA_DIR_REL}<nome>.json (recebido {f!r})")
+        sha = cr.get("sha256") if isinstance(cr, dict) else None
+        if sha is not None and not (isinstance(sha, str) and len(sha) == 64 and all(c in "0123456789abcdef" for c in sha)):
+            E.append("criteria.sha256: hex sha256 (64 caracteres) ou ausente")
+        if meta.get("runner") not in (None, "lab_bot"):
+            E.append(f"criteria: só portfólios do lab_bot (forks) têm critérios próprios ({meta.get('runner')} usa os do bot)")
+        if meta.get("kind") not in (None, "gated") or (meta.get("model") and meta.get("model") not in CRITERIA_MODELS):
+            E.append(f"criteria: só portfólios com portões de um modelo HTTP ({', '.join(CRITERIA_MODELS)})")
 
     runner = meta.get("runner")
     if runner == "rules_bot":
@@ -832,6 +851,9 @@ def summary(eff: dict) -> str:
     ru = eff.get("rule")
     if ru:
         parts.append("regra " + ", ".join(f"{k}={v}" for k, v in ru.items() if k != "timeframe"))
+    cr = eff.get("criteria")
+    if cr and cr.get("file"):
+        parts.append(f"critérios próprios ({str(cr.get('sha256') or '')[:10] or Path(cr['file']).stem})")
     if eff.get("paused"):
         parts.append("PAUSADO")
     return " · ".join(parts)

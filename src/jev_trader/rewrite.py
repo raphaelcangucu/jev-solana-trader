@@ -3,6 +3,12 @@
 `propose`: relê as decisões, separa as confiantes que erraram a 15 min e escreve uma proposta
 `pending`. `approve`/`reject`: uma pessoa decide; só a aprovação escreve `config/criteria.json`.
 
+Caminho autónomo (decisão do utilizador, 2026-10-03, SÓ em paper): `build_autonomous_proposal` usa a mesma auditoria
+por percentil mas com o texto escrito pela revisão noturna do Claude, e `approve(..., autonomous=True)` aprova sem
+pessoa apenas se `paper_guard` não encontrar nenhum motivo de recusa (LIVE_TRADING=1 no ambiente ou no `.env`,
+`config/experiment.json` sem `"mode": "paper"`, perfil de parâmetros ativo sem `paper_only`). O caminho humano
+(`rewrite --approve`) não muda.
+
 Percentil: método nearest-rank. Com as n confianças ordenadas, o corte do percentil P é o valor
 na posição ceil(P/100 × n) (base 1). O corte é sempre uma confiança observada.
 """
@@ -12,7 +18,9 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 from collections import Counter
+from collections.abc import Mapping
 from datetime import date as Date
 from datetime import datetime
 from pathlib import Path
@@ -24,6 +32,7 @@ from jev_trader.criteria import (
     load_criteria,
     validate_criteria,
 )
+from jev_trader.config import DEFAULT_PROFILE, load_params
 from jev_trader.experiment import Experiment
 from jev_trader.records import append_jsonl, brt_clock, parse_t, write_json_atomic
 from jev_trader.score import Timeline, build_timeline, forward_return, select_run
@@ -228,9 +237,9 @@ def build_proposal(
     }
 
 
-def write_proposal(directory: Path, proposal: dict) -> Path:
-    """`AAAA-MM-DD.json`. Uma proposta já aprovada ou rejeitada nesse dia não é sobrescrita."""
-    path = directory / f"{proposal['date']}.json"
+def write_proposal(directory: Path, proposal: dict, *, filename: str | None = None) -> Path:
+    """`AAAA-MM-DD.json` (ou `filename`). Uma proposta já aprovada ou rejeitada não é sobrescrita."""
+    path = directory / (filename or f"{proposal['date']}.json")
     if path.is_file():
         try:
             status = json.loads(path.read_text(encoding="utf-8")).get("status")
@@ -261,11 +270,22 @@ def approve(
     approvals_path: Path,
     approver: str,
     now_t: str,
+    autonomous: bool = False,
+    guard_root: Path | None = None,
+    env: Mapping[str, str] | None = None,
 ) -> dict:
     """Valida, escreve `config/criteria.json` de forma atómica, marca a proposta e anexa o registo.
 
     Proposta feita sobre critérios que já não são os do ar (outra aprovação entretanto) é recusada.
+    `autonomous=True` (aprovação sem pessoa): exige `guard_root` (raiz do bot real) e recusa, antes de escrever
+    qualquer coisa, se `paper_guard` devolver algum motivo.
     """
+    if autonomous:
+        if guard_root is None:
+            raise RewriteError("autonomous approval needs guard_root")
+        refused = paper_guard(Path(guard_root), env)
+        if refused:
+            raise RewriteError("autonomous approval refused: " + "; ".join(refused))
     proposal = read_pending(path)
     try:
         criteria = validate_criteria(proposal.get("proposed_criteria"))
@@ -279,10 +299,10 @@ def approve(
         {**criteria, "approved_t": now_t, "proposal": str(path), "run_id": proposal.get("run_id")},
     )
     digest = hashlib.sha256(criteria_path.read_bytes()).hexdigest()
-    write_json_atomic(
-        path,
-        {**proposal, "status": "approved", "approved_t": now_t, "approved_by": approver, "criteria_sha256": digest},
-    )
+    marks = {"status": "approved", "approved_t": now_t, "approved_by": approver, "criteria_sha256": digest}
+    if autonomous:
+        marks["autonomous"] = True
+    write_json_atomic(path, {**proposal, **marks})
     record = {
         "t": now_t,
         "decision": "approved",
@@ -291,8 +311,118 @@ def approve(
         "criteria_sha256": digest,
         "approver": approver,
     }
+    if autonomous:
+        record["autonomous"] = True
+        record["reason"] = proposal.get("reason")
     append_jsonl(approvals_path, record)
     return record
+
+
+# ------------------------------------------------------------------ caminho autónomo (só paper)
+
+GUARD_ENV_KEYS = ("LIVE_TRADING", "PARAMS_PROFILE", "PARAMS_PATH", "EXPERIMENT_PATH")
+
+
+def _dotenv_keys(path: Path, keys: tuple[str, ...]) -> dict[str, str]:
+    """Só as chaves pedidas de um `.env` (nunca devolve nem imprime as outras)."""
+    out: dict[str, str] = {}
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return out
+    for raw in lines:
+        line = raw.strip()
+        if line.startswith("export "):
+            line = line[len("export "):].strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        if key in keys:
+            out[key] = value.strip().strip('"').strip("'")
+    return out
+
+
+def _under(root: Path, value: str) -> Path:
+    p = Path(value)
+    return p if p.is_absolute() else root / p
+
+
+def paper_guard(root: Path, env: Mapping[str, str] | None = None) -> list[str]:
+    """Motivos para RECUSAR uma aprovação autónoma (lista vazia = bot real em paper). Fail-closed: qualquer leitura
+    impossível conta como motivo. Vê o ambiente do processo e só as chaves LIVE_TRADING/PARAMS_*/EXPERIMENT_PATH
+    do `.env` da raiz do bot real."""
+    env = os.environ if env is None else env
+    dot = _dotenv_keys(root / ".env", GUARD_ENV_KEYS)
+    reasons: list[str] = []
+    if str(env.get("LIVE_TRADING", "")).strip() == "1":
+        reasons.append("LIVE_TRADING=1 no ambiente")
+    if dot.get("LIVE_TRADING", "").strip() == "1":
+        reasons.append("LIVE_TRADING=1 no .env do bot real")
+    exp_path = _under(root, env.get("EXPERIMENT_PATH") or dot.get("EXPERIMENT_PATH") or "config/experiment.json")
+    try:
+        mode = json.loads(exp_path.read_text(encoding="utf-8")).get("mode")
+    except (OSError, json.JSONDecodeError, AttributeError) as exc:
+        mode = None
+        reasons.append(f"experiment.json ilegível ou em falta ({type(exc).__name__})")
+    else:
+        if mode != "paper":
+            reasons.append(f"experiment.json mode={mode!r} (tem de ser 'paper')")
+    params_path = _under(root, env.get("PARAMS_PATH") or dot.get("PARAMS_PATH") or "config/params.json")
+    profile = env.get("PARAMS_PROFILE") or dot.get("PARAMS_PROFILE") or DEFAULT_PROFILE
+    _values, used, errors = load_params(params_path, profile, live=False)
+    try:
+        doc = json.loads(params_path.read_text(encoding="utf-8"))
+        paper_only = bool(((doc.get("profiles") or {}).get(used) or {}).get("paper_only"))
+    except (OSError, json.JSONDecodeError, AttributeError):
+        paper_only = False
+    if used != profile:
+        reasons.append(f"perfil de parâmetros '{profile}' não resolve (usado '{used}'): {'; '.join(errors)[:200]}")
+    if not paper_only:
+        reasons.append(f"perfil de parâmetros ativo '{used}' não é paper_only")
+    return reasons
+
+
+def build_autonomous_proposal(
+    decisions: list[dict],
+    experiment: Experiment,
+    current: dict[str, str],
+    current_source: str,
+    proposed: dict,
+    *,
+    author: str,
+    reason: str,
+    review_date: Date | None,
+    today: Date,
+    now_t: str,
+    percentile: float = DEFAULT_PERCENTILE,
+    fixed_bar: float = DEFAULT_FIXED_BAR,
+    band: float = DEFAULT_BAND,
+) -> dict:
+    """Proposta com a mesma auditoria por percentil de `build_proposal`, mas com o texto `proposed` escrito pela
+    revisão autónoma (validado: quatro chaves, sem dígitos, ≤ 400 caracteres). Sem mudança → RewriteError."""
+    try:
+        criteria = validate_criteria(proposed)
+    except CriteriaError as exc:
+        raise RewriteError(f"proposed criteria invalid: {exc}") from None
+    if criteria == current:
+        raise RewriteError("proposed criteria are identical to the live criteria")
+    proposal = build_proposal(
+        decisions, experiment, current, current_source, review_date=review_date, today=today,
+        percentile=percentile, fixed_bar=fixed_bar, band=band, now_t=now_t,
+    )
+    proposal.update(
+        {
+            "title": f"Reescrita autónoma ({author}) — {proposal['date']}",
+            "author": author,
+            "reason": reason,
+            "proposed_criteria": criteria,
+            "deterministic_proposal": proposal["proposed_criteria"],
+            "additions": {},
+            "changed": True,
+        }
+    )
+    return proposal
 
 
 def reject(path: Path, *, approvals_path: Path, approver: str, now_t: str) -> dict:

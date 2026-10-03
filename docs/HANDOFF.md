@@ -23,6 +23,8 @@ Bot real em paper: o livro parte de `config/experiment.json` (0.017392206 SOL + 
 
 **Run local (desde 2026-10-01 22:24 BRT até 2026-10-30):** no Mac, worktree `~/jev-lab/code` (branch `run/local-2026-09-30`), modelos em `~/jev-alts` (von 1.3, Laya, poorjev), launchd `com.jev.paperlab`, `com.jev.trader-paper`, `com.jev.caffeinate` (`scripts/macos/install_launchd.sh --status`). Dashboard em 127.0.0.1:8787, credencial em `research/paper-lab/dashboard/.auth` do worktree.
 
+**Revisão noturna autónoma (2026-10-03, decisão do utilizador):** às 01:30 o Claude Code corre só `research/paper-lab/scripts/night_cli.py` (contexto, forks de parâmetros e de critérios, critérios do bot real só em paper, diário em `reviews/claude_night_<data>.md`), sem aprovação humana e com limites em `config.json:claude_night` (6 forks/noite, 1 por linhagem a cada 2 dias, 80 no total). Ver o README do lab, secção "Revisão noturna autónoma".
+
 Testes: `pytest -q` na raiz → 130 passed (bot e lab; o lab precisa de `numpy`, extra `pip install -e .[lab]`).
 
 ## 1. Contexto e objetivo

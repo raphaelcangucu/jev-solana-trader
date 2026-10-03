@@ -6,10 +6,15 @@ logs/meme_decisions.jsonl); it makes NO extra model calls. Portfolios live in da
 equity in data/lab/equity, trades go to the shared logs/trades.jsonl / logs/meme_trades.jsonl
 (tagged strategy=hyp:* or fork:*), decisions to logs/lab_decisions.jsonl, limit orders to logs/lab_orders.jsonl.
 Registry (hypotheses + forks + lineages): data/lab/registry.json (see bot/lab_registry.py).
+
+Exceção — forks de critérios (`params.criteria`, ver bot/lab_criteria.py): a cada linha de decisão da fonte, o fork
+chama o backend do seu modelo (bot/backends.decide) com o estado registado nessa linha e os SEUS critérios de texto;
+depois aplica os mesmos portões/saídas/execução das outras entradas com portões. Cache LRU limitado por
+(backend, hash dos critérios, estado). Qualquer falha (critérios inválidos, backend desligado ou em erro) → hold.
 """
 from __future__ import annotations
 import json, os, signal, sys, time, traceback, uuid
-from collections import deque
+from collections import OrderedDict, deque
 from datetime import datetime
 from pathlib import Path
 
@@ -18,6 +23,8 @@ from bot.paths import ROOT, LAB_DIR  # noqa: E402
 from bot.lib import brt_iso, brt_now, load_cfg, apply_gates, append_jsonl, write_json, BRT
 from bot import lab_registry as R
 from bot import params as P
+from bot import backends as BK
+from bot import lab_criteria as LC
 import bot.sol_bot as SB
 import bot.meme_bot as MB
 
@@ -118,6 +125,108 @@ def gates_for(entry, cfg=None, overlay=None):
     return R.clamp_gates(eff["gates"], eff.get("limits"))
 
 
+def _fail_closed(err, **kw):
+    return dict({"chosen_action": "hold", "probabilities": {"buy": 0.0, "sell": 0.0, "hold": 1.0}, "confidence": 0.0,
+                 "skip_noul": 1.0, "fail_closed": True, "error": err}, **kw)
+
+
+class CriteriaCaller:
+    """Decisões dos forks de critérios: chama o backend do modelo com o estado da linha da fonte e os critérios do fork.
+
+    Cache LRU limitado por (backend, sha256 dos critérios, estado): forks com os mesmos critérios e o mesmo estado
+    reaproveitam a resposta (os modelos são determinísticos). Falhas nunca vão para a cache. Depois de um erro do
+    backend, as chamadas a esse backend ficam em hold durante `breaker_s` (o ciclo do lab não fica preso a timeouts)."""
+
+    def __init__(self, decide=None, models_cfg=None, max_items=2048, timeout_s=8.0, breaker_s=30.0):
+        self._decide = decide or BK.decide
+        self._models_fixed = models_cfg
+        self._models = None; self._models_key = None
+        self.cache: OrderedDict = OrderedDict()
+        self.max_items = int(max_items); self.timeout_s = float(timeout_s); self.breaker_s = float(breaker_s)
+        self._crit = {}           # file -> (key do ficheiro, critérios limpos, sha)
+        self.down_until = {}      # backend -> ts
+        self.stats = {"calls": 0, "hits": 0, "errors": 0, "fail_closed": 0}
+
+    def models(self):
+        if self._models_fixed is not None:
+            return self._models_fixed
+        p = ROOT / "models.json"
+        try:
+            st = p.stat(); k = (st.st_mtime_ns, st.st_size)
+        except FileNotFoundError:
+            return {"backends": {}}
+        if k != self._models_key:
+            try:
+                self._models = json.loads(p.read_text()); self._models_key = k
+            except Exception:
+                pass
+        return self._models or {"backends": {}}
+
+    def criteria(self, ref):
+        p = LC.abs_path(ref["file"])
+        st = p.stat()
+        k = (st.st_mtime_ns, st.st_size, ref.get("sha256"))
+        hit = self._crit.get(ref["file"])
+        if hit and hit[0] == k:
+            return hit[1], hit[2]
+        clean, sha = LC.load_ref(ref)
+        self._crit[ref["file"]] = (k, clean, sha)
+        return clean, sha
+
+    def decide(self, e, src):
+        """-> decisão normalizada (chosen_action, probabilities, confidence, skip_noul, fail_closed, error) + `log`."""
+        model = (e.get("model") or "").split("+")[0]
+        ref = (e.get("params") or {}).get("criteria") or {}
+        state = (src or {}).get("state")
+        log = {"criteria_model": model, "criteria_file": ref.get("file"), "criteria_sha256": ref.get("sha256"),
+               "state": state, "source_chosen": (src or {}).get("chosen_action"),
+               "source_confidence": (src or {}).get("confidence")}
+        self.stats["calls"] += 1
+        out = self._decide_inner(model, ref, state, log)
+        if out.get("fail_closed"):
+            self.stats["fail_closed"] += 1
+        log.update(probabilities=out.get("probabilities"), skip_noul=out.get("skip_noul"),
+                   fail_closed=bool(out.get("fail_closed")), backend_error=out.get("error"))
+        out["log"] = log
+        return out
+
+    def _decide_inner(self, model, ref, state, log):
+        if not state or any(ch.isdigit() for ch in str(state)):
+            return _fail_closed("sem_estado")
+        try:
+            clean, sha = self.criteria(ref)
+        except Exception as ex:
+            return _fail_closed(f"criterios: {ex}"[:200])
+        log["criteria_sha256"] = sha
+        b = (self.models().get("backends") or {}).get(model)
+        if not b or not b.get("enabled") or b.get("kind") == "hosted_typesafe" or not b.get("base_url"):
+            return _fail_closed(f"backend_indisponivel:{model}")
+        key = (model, sha, state)
+        if key in self.cache:
+            self.cache.move_to_end(key)
+            self.stats["hits"] += 1
+            log["cache"] = "hit"
+            return dict(self.cache[key])
+        log["cache"] = "miss"
+        if time.time() < self.down_until.get(model, 0):
+            return _fail_closed(f"backend_em_pausa_apos_erro:{model}")
+        try:
+            r = self._decide(model, b, state, clean, self.timeout_s)
+        except Exception as ex:
+            r = _fail_closed(f"{type(ex).__name__}:{ex}"[:200])
+        if not r or r.get("fail_closed") or not r.get("ok", True) or r.get("chosen_action") not in ("buy", "sell", "hold"):
+            self.stats["errors"] += 1
+            self.down_until[model] = time.time() + self.breaker_s
+            return _fail_closed(str((r or {}).get("error") or "resposta_invalida")[:200])
+        out = {"chosen_action": r["chosen_action"], "probabilities": r.get("probabilities") or {},
+               "confidence": float(r.get("confidence") or 0.0), "skip_noul": float(r.get("skip_noul") or 0.0),
+               "fail_closed": False, "error": None, "latency_ms": r.get("latency_ms")}
+        self.cache[key] = dict(out)
+        while len(self.cache) > self.max_items:
+            self.cache.popitem(last=False)
+        return out
+
+
 class Lab:
     def __init__(self):
         self.cfg = load_cfg()
@@ -130,6 +239,9 @@ class Lab:
         self.last_eq = {}
         self.errors = 0; self.cycles = 0
         self.processed = 0
+        lc = self.cfg.get("lab") or {}
+        self.crit = CriteriaCaller(max_items=int(lc.get("criteria_cache_max", 2048)),
+                                   timeout_s=float(lc.get("criteria_timeout_s", 8.0)))
         self._seed_windows()
 
     # ---------- portfolios ----------
@@ -414,6 +526,12 @@ class Lab:
                     if not px:
                         continue
                     self.processed += 1
+                    if (e.get("params") or {}).get("criteria"):
+                        # Fork de critérios: decisão própria (mesmo estado, critérios do fork); fail-closed = hold.
+                        r = self.crit.decide(e, d)
+                        self.act(e, r["chosen_action"], float(r["confidence"]), r.get("probabilities"),
+                                 float(r["skip_noul"]), float(px), d, extra=r["log"])
+                        continue
                     self.act(e, d.get("chosen_action"), float(d.get("confidence") or 0), d.get("probabilities"),
                              float(d.get("skip_noul") or 0), float(px), d)
                 if m and d.get("confidence") is not None and not d.get("fail_closed"):
@@ -497,6 +615,7 @@ def main():
                                    "parent": e.get("parent"), "lineage": e.get("lineage")}
             write_json(STATUS, {"ok": True, "ts": time.time(), "ts_brt": brt_iso(), "pid": os.getpid(),
                                 "cycles": lab.cycles, "errors": lab.errors, "processed_source_decisions": lab.processed,
+                                "criteria_calls": dict(lab.crit.stats, cache_size=len(lab.crit.cache)),
                                 "finished": False, "paper_only": True, "uptime_seconds": round(time.time() - started, 1),
                                 "portfolios": snap})
         except Exception as ex:
