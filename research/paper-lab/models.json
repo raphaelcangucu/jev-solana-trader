@@ -49,7 +49,7 @@
       "note": ""
     },
     "jev": {
-      "enabled": false,
+      "enabled": true,
       "kind": "hosted_typesafe",
       "base_url": "https://api.typesafe.ai",
       "endpoint": "/v1/systemone",
@@ -63,7 +63,7 @@
       ],
       "status_if_no_key": "aguardando chave",
       "live_trading": false,
-      "note": "DISABLED by default. Key from env JEV_API_KEY only; never log/write key. Restart bots after setting key.",
+      "note": "Ligado em 2026-10-03 (paper only, SOL). Chave só pela env JEV_API_KEY, carregada de ~/.config/jev/secrets.env por scripts/macos/env.sh; nunca registar nem escrever a chave.",
       "memes_enabled": false
     }
   }

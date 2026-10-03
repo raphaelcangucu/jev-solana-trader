@@ -11,6 +11,10 @@ export TRADER_PYTHON="${TRADER_PYTHON:-$REPO/.venv/bin/python}"
 export RUN_UNTIL_BRT="${RUN_UNTIL_BRT:-2026-10-30T23:59:59-03:00}"
 # Sem túnel público: o dashboard fica só em 127.0.0.1.
 export DISABLE_TUNNEL="${DISABLE_TUNNEL:-1}"
+# Segredos fora do git (só JEV_API_KEY por agora): ficheiro do utilizador com permissões 600; nunca é mostrado.
+if [[ -r "$HOME/.config/jev/secrets.env" ]]; then
+  set -a; . "$HOME/.config/jev/secrets.env"; set +a
+fi
 export PYTHONUNBUFFERED=1
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 

@@ -402,6 +402,13 @@
       "gates": {
         "min_prob_margin": 0.0
       }
+    },
+    "jev_article": {
+      "note": "Jev hospedado com os portões do artigo (conf >= 0,55, skip < 0,55), iguais ao perfil article do bot real; jev_baseline usa o baseline do lab (0,6 / 0,5).",
+      "gates": {
+        "min_confidence": 0.55,
+        "max_skip_noul": 0.55
+      }
     }
   }
 }
