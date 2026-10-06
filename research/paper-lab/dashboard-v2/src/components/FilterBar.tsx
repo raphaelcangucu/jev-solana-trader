@@ -6,7 +6,7 @@ import { useFilters } from '@/lib/filters'
 import { cn } from '@/lib/utils'
 import { Tip } from './ui'
 
-function Pill({ on, onClick, children, color }: { on: boolean; onClick: () => void; children: React.ReactNode; color?: string }) {
+export function Pill({ on, onClick, children, color }: { on: boolean; onClick: () => void; children: React.ReactNode; color?: string }) {
   return (
     <button type="button" aria-pressed={on} onClick={onClick}
       className={cn('inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] t-cond transition-colors',

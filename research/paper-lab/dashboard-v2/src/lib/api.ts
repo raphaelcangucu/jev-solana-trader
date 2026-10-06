@@ -10,6 +10,12 @@ export async function getJSON<T>(url: string): Promise<T> {
   return r.json() as Promise<T>
 }
 
+export async function getText(url: string): Promise<string> {
+  const r = await fetch(url, { headers: { Accept: 'text/markdown, text/plain' }, credentials: 'same-origin' })
+  if (!r.ok) throw new ApiError(r.status, (await r.text()) || r.statusText)
+  return r.text()
+}
+
 export async function postJSON<T = unknown>(url: string, body?: unknown): Promise<T> {
   const r = await fetch(url, {
     method: 'POST', credentials: 'same-origin',
@@ -159,6 +165,44 @@ export interface Funding {
   shown?: string[]
 }
 
+// ---- simulação retroativa de 30 dias (data/backtest; contrato de scripts/backtest_30d.py)
+export type BtVerdict = 'vencedora' | 'perdedora' | 'inconclusiva'
+export interface BtPortfolio {
+  name: string; family?: string | null; asset?: string | null; model?: string | null; test_type?: string | null; profile?: string | null
+  parent?: string | null; is_fork?: boolean | null; label?: string | null
+  start_value: number | null; end_value: number | null; pnl: number | null; pnl_pct: number | null
+  /** US$ contra só segurar o livro inicial (vs_bh_pct é derivado pelo backend) */
+  vs_bh: number | null; vs_bh_pct?: number | null; vs_usdt?: number | null
+  /** habilidade sem beta em US$ (skill_pct derivado pelo backend) */
+  skill: number | null; skill_pct?: number | null; timing?: number | null; timing_p: number | null
+  max_dd_pct: number | null; trades: number | null; buys?: number | null; sells?: number | null; closed_rt?: number | null; exposure_pct?: number | null
+  weeks?: (number | null)[] | null; weeks_beat_bh?: number | null
+  verdict: BtVerdict; verdict_reason?: string | null; p_bh?: number | null; p_usdc?: number | null
+  // metadados do placar ao vivo (para describePortfolio) e o nome da linha ao vivo, se existir
+  hyp?: string | null; kind?: string | null; catalog?: string | null; params_diff?: Record<string, Record<string, unknown>> | null
+  params_brief?: ParamsBrief | null; fork_who?: string | null; criteria_summary?: string | null; live_name?: string | null
+}
+export interface BtFamily { family: string; n: number; median_pnl_pct: number | null; best?: string | null; worst?: string | null; beat_bh?: number | null }
+export interface BtBook {
+  book: string; profile?: string | null; start_value?: number | null; end_value?: number | null; pnl?: number | null; pnl_pct?: number | null
+  vs_hold?: number | null; hit_15m?: number | null; max_dd_pct?: number | null; trades?: number | null; exits?: number | Record<string, number> | null
+}
+export interface BtSummary {
+  run_id: string; generated_brt?: string | null
+  window: { start_brt: string; end_brt: string; days?: number | null; step_s?: number | null }
+  assets: Record<string, { source?: string | null; coverage?: number | null; start_px?: number | null; end_px?: number | null; ret_pct?: number | null }>
+  assumptions?: string[]
+  models?: Record<string, { calls?: number | null; cache_hits?: number | null; coverage?: number | null; conf_p50?: number | null; conf_p90?: number | null }>
+  winner: { by_skill?: string | null; by_pnl?: string | null; by_verdict?: string | null; text?: string | null }
+  families: BtFamily[]; portfolios: BtPortfolio[]; realbot: BtBook[]
+}
+export interface BtRun { run_id: string; generated_brt?: string | null; start_brt?: string | null; end_brt?: string | null; days?: number | null; portfolios?: number }
+export interface BtPayload {
+  available: boolean; reason?: string; hint?: string; run_id: string | null; latest: string | null; runs: BtRun[]
+  has_report?: boolean; summary?: BtSummary
+}
+export interface BtEquity { t: number[]; equity: number[]; bh: (number | null)[] }
+
 export interface ParamChange { ts: number; ts_brt: string; portfolio?: string; layer?: string; field: string; old: unknown; new: unknown; who?: string; type?: string }
 
 export const api = {
@@ -175,6 +219,11 @@ export const api = {
   paramChanges: () => getJSON<ParamChange[]>('/api/v2/param_changes?limit=60'),
   realbot: () => getJSON<RealBot>('/api/v2/realbot'),
   funding: () => getJSON<Funding>('/api/v2/funding'),
+  backtest: (run?: string | null) => getJSON<BtPayload>(`/api/v2/backtest${run ? `?run=${encodeURIComponent(run)}` : ''}`),
+  backtestEquity: (run: string, name: string, points = 1500) =>
+    getJSON<BtEquity>(`/api/v2/backtest/${encodeURIComponent(run)}/equity/${encodeURIComponent(name)}?points=${points}`),
+  backtestSparks: (run: string, points = 60) => getJSON<Sparks>(`/api/v2/backtest/${encodeURIComponent(run)}/sparks?points=${points}`),
+  backtestReport: (run: string) => getText(`/api/v2/backtest/${encodeURIComponent(run)}/report`),
   // ---- gravações (endpoints de controle do app.py; sempre com confirmação na UI) ----
   setParams: (portfolio: string, body: Record<string, unknown>) =>
     postJSON<{ ok: boolean; changes: unknown[]; warning?: string | null }>(`/api/params/${encodeURIComponent(portfolio)}`, body),

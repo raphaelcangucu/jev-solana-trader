@@ -1,6 +1,6 @@
 // Do JSON do backend para as linhas do placar: nome humano, métricas, ordenação e filtros.
 import type { Row } from './api'
-import { describePortfolio, MEMES, type Description, type FamilyKey } from './describe'
+import { describePortfolio, MEMES, type Description, type FamilyKey } from './describe.ts'
 
 export type SortKey = 'lucro' | 'habilidade' | 'segurar'
 export const SORTS: { key: SortKey; label: string; hint: string }[] = [
@@ -68,7 +68,8 @@ export function sortEntries(es: Entry[], k: SortKey): Entry[] {
   })
 }
 
-export function matches(e: Entry, fam: FamilyFilter, asset: AssetFilter, q: string): boolean {
+/** Serve para o placar ao vivo e para o retroativo: só olha a descrição (família, fork, ativo, busca). */
+export function matches(e: { d: Description }, fam: FamilyFilter, asset: AssetFilter, q: string): boolean {
   if (fam === 'forks' ? !e.d.isFork : fam !== 'all' && e.d.family !== fam) return false
   if (asset === 'memes' ? !MEMES.includes(e.d.asset) : asset !== 'all' && e.d.asset !== asset) return false
   if (q) {

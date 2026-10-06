@@ -15,8 +15,10 @@ const BRT_SHIFT = -3 * 3600 // o gráfico desenha em UTC; desloca para o relógi
 const toTime = (ts: number) => (ts + BRT_SHIFT) as UTCTimestamp
 const resolve = (c: string) => (c.startsWith('var(') ? cssVar(c.slice(4, -1)) : c)
 
-export default function TimeChart({ series, markers, format, height = 300, ariaLabel, zeroLine }: {
+export default function TimeChart({ series, markers, format, height = 300, ariaLabel, zeroLine, idleLabel = 'agora' }: {
   series: SeriesDef[]; markers?: MarkDef[]; format: (v: number) => string; height?: number; ariaLabel: string; zeroLine?: number
+  /** rótulo do canto direito quando o cursor não está no gráfico (série histórica: "fim da janela") */
+  idleLabel?: string
 }) {
   const box = useRef<HTMLDivElement>(null)
   const chart = useRef<IChartApi | null>(null)
@@ -97,7 +99,7 @@ export default function TimeChart({ series, markers, format, height = 300, ariaL
           </span>
         ))}
         {markers?.length ? <span className="inline-flex items-baseline gap-2"><span className="text-gain">▲ compra</span><span className="text-loss">▼ venda</span></span> : null}
-        <span className="ml-auto t-tab">{hover ? tsTime(hover.t, true) : 'agora'}</span>
+        <span className="ml-auto t-tab">{hover ? tsTime(hover.t, true) : idleLabel}</span>
       </figcaption>
       <div ref={box} style={{ height }} className="w-full" />
     </figure>

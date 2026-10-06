@@ -7,6 +7,7 @@ import { useTheme } from '@/lib/theme'
 import Placar from '@/pages/Placar'
 
 const Familias = lazy(() => import('@/pages/Familias'))
+const Retroativo = lazy(() => import('@/pages/Retroativo'))
 const CarteiraReal = lazy(() => import('@/pages/CarteiraReal'))
 const Controle = lazy(() => import('@/pages/Controle'))
 const Saude = lazy(() => import('@/pages/Saude'))
@@ -30,6 +31,7 @@ export default function App() {
         <Suspense fallback={<Loading h={480} />}>
           {route.page === 'placar' && <Placar />}
           {route.page === 'familias' && <Familias />}
+          {route.page === 'retroativo' && <Retroativo />}
           {route.page === 'carteira' && <CarteiraReal />}
           {route.page === 'controle' && <Controle />}
           {route.page === 'saude' && <Saude />}

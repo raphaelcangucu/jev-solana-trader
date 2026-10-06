@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import PlainTextResponse, StreamingResponse
 
 import sys as _sys_paths
 _LAB = str(Path(__file__).resolve().parents[1])  # código do lab (research/paper-lab)
@@ -23,6 +23,7 @@ _DASH = str(Path(__file__).resolve().parent)
 if _DASH not in _sys_paths.path:
     _sys_paths.path.insert(0, _DASH)
 import insights as INS  # noqa: E402  (habilidade sem beta, sparklines, experimento, bot real — sem FastAPI)
+import backtest_view as BT  # noqa: E402  (simulação retroativa de 30 dias, data/backtest — sem FastAPI)
 SKILL = INS.SkillCache()
 FUND = ROOT / "funding"
 BRT = timezone(timedelta(hours=-3))
@@ -825,6 +826,40 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
             "usdc_bar_apr": FUNDING_USDC_BAR, "cum_funding": cum, "nav_series": snaps, "trades": trades,
             "shown": list(FUNDING_SHOWN), "paper_only": st.get("paper_only", True),
         }
+
+    # ---------- simulação retroativa (data/backtest; só leitura)
+    def _bt_meta():
+        items = universe()
+        return BT.live_meta_fn(items, read_json(ROOT / "data" / "lab" / "registry.json", {}) or {}, INS.originals_meta(),
+                               INS.row_meta, INS.params_brief)
+
+    BTV = BT.BacktestView(lambda: BT.backtest_dir(ROOT), meta_factory=_bt_meta, live_index_fn=lambda: BT.live_index(universe()))
+
+    @r.get("/backtest")
+    def backtest(run: str | None = None, _: str = A):
+        """Runs disponíveis + summary do mais recente (ou de `run`), com os portfólios descritos como no placar."""
+        return BTV.payload(run)
+
+    @r.get("/backtest/{run_id}/equity/{name}")
+    def backtest_equity(run_id: str, name: str, points: int = 1500, _: str = A):
+        d = BTV.equity(run_id, name, points)
+        if d is None:
+            raise HTTPException(404, "curva não encontrada")
+        return d
+
+    @r.get("/backtest/{run_id}/sparks")
+    def backtest_sparks(run_id: str, points: int = 60, _: str = A):
+        d = BTV.sparks(run_id, points)
+        if d is None:
+            raise HTTPException(404, "run desconhecido")
+        return d
+
+    @r.get("/backtest/{run_id}/report")
+    def backtest_report(run_id: str, _: str = A):
+        txt = BTV.report(run_id)
+        if txt is None:
+            raise HTTPException(404, "relatório não encontrado")
+        return PlainTextResponse(txt, media_type="text/markdown; charset=utf-8")
 
     # ---------- SSE stream
     TOPICS: dict[str, Callable[[], list]] = {
