@@ -5,6 +5,10 @@ Contrato (escrito por scripts/backtest_30d.py):
   <base>/<run_id>/summary.json       janela, ativos, vencedores, famílias, portfólios, bot real A × B
   <base>/<run_id>/equity/<nome>.json {"t": [epoch s], "equity": [...], "bh": [...]}
   <base>/<run_id>/report.md          relatório completo
+  <base>/<run_id>/chart.json         (só runs de 180 dias) patrimônio normalizado (1000 = início) por benchmark, família,
+                                     topo e bot real, mais o resumo por mês
+  <base>/index.json                  histórico de runs (mensais de 30 dias e de 6 meses); se faltar, é montado dos summaries
+  <base>/history.md                  relatório de comparação entre meses
 
 Segurança de caminho: `run_id` só com [A-Za-z0-9_.-] e tem de ser uma pasta com summary.json dentro de <base>;
 `nome` tem de estar na lista de portfólios do summary e o arquivo resolvido tem de ficar dentro de equity/.
@@ -216,6 +220,131 @@ def report_file(base: Path, run_id: str) -> Path | None:
     return f if f.is_file() else None
 
 
+# ------------------------------------------------------------------ histórico: índice, gráfico de 6 meses, comparação
+
+TOP_N = 5
+
+
+def run_kind(run_id: str, days) -> str:
+    """'180d' para janelas longas (≥ 60 dias ou id bt180_*; o gerador escreve "<N>d"), senão '30d' (os meses)."""
+    d = _f(days)
+    if str(run_id).startswith("bt180") or (d is not None and d >= 60):
+        return "180d"
+    return "30d"
+
+
+def index_entry(run_id: str, s: dict) -> dict:
+    """Uma linha do index.json a partir de um summary (mesmo contrato que o gerador escreve)."""
+    w = s.get("window") or {}
+    ports = [p for p in (s.get("portfolios") or []) if isinstance(p, dict) and p.get("name")]
+    verdicts = [norm_verdict(p.get("verdict")) for p in ports]
+    win = s.get("winner") or {}
+
+    def top(key: str) -> list[dict]:
+        rows = [p for p in ports if _f(p.get(key)) is not None]
+        rows.sort(key=lambda p: _f(p.get(key)), reverse=True)  # type: ignore[arg-type, return-value]
+        return [{"name": p["name"], "skill": _f(p.get("skill")), "pnl_pct": _f(p.get("pnl_pct"))} for p in rows[:TOP_N]]
+
+    return {
+        "run_id": run_id, "kind": run_kind(run_id, w.get("days")),
+        "start_brt": w.get("start_brt"), "end_brt": w.get("end_brt"), "days": w.get("days"),
+        "generated_brt": s.get("generated_brt"), "n_portfolios": len(ports),
+        "n_winners": verdicts.count("vencedora"), "n_losers": verdicts.count("perdedora"),
+        "n_inconclusive": verdicts.count("inconclusiva"),
+        "winner": {k: win.get(k) for k in ("by_skill", "by_pnl", "by_verdict")},
+        "top_skill": top("skill"), "top_pnl": top("pnl_pct"),
+        "realbot": [{"book": b.get("book"), "pnl_pct": _f(b.get("pnl_pct")), "vs_hold": _f(b.get("vs_hold"))}
+                    for b in (s.get("realbot") or []) if isinstance(b, dict)],
+        "assets": {str(k): _f((v or {}).get("ret_pct")) if isinstance(v, dict) else _f(v) for k, v in (s.get("assets") or {}).items()},
+        "look_ahead_forks": [p["name"] for p in ports if p.get("look_ahead")],
+    }
+
+
+def _end_key(r: dict) -> tuple:
+    return (str(r.get("end_brt") or ""), str(r.get("generated_brt") or ""), str(r.get("run_id")))
+
+
+def build_index(base: Path, index: dict | None = None) -> dict:
+    """index.json validado (só ids seguros; `available` diz se a pasta do run existe), completado com os runs que
+    existem em disco e não estão no índice. Sem index.json, é montado inteiro dos summaries. Ordem: fim mais recente primeiro."""
+    base = Path(base)
+    raw = index if index is not None else _read_json(base / "index.json", None)
+    source = "index" if isinstance(raw, dict) and isinstance(raw.get("runs"), list) else "runs"
+    runs: list[dict] = []
+    seen: set[str] = set()
+    if source == "index":
+        for r in raw["runs"]:  # type: ignore[index]
+            if not isinstance(r, dict) or not valid_run_id(r.get("run_id")) or r["run_id"] in seen:
+                continue
+            q = dict(r)
+            q["kind"] = q.get("kind") if q.get("kind") in ("30d", "180d") else run_kind(q["run_id"], q.get("days"))
+            q["available"] = run_dir(base, q["run_id"]) is not None
+            runs.append(q); seen.add(q["run_id"])
+    for r in list_runs(base):
+        if r["run_id"] in seen:
+            continue
+        s = _read_json(base / r["run_id"] / "summary.json", None)
+        if isinstance(s, dict):
+            q = index_entry(r["run_id"], s)
+            q["available"] = True
+            runs.append(q); seen.add(r["run_id"])
+    runs.sort(key=_end_key, reverse=True)
+    return {"runs": runs, "source": source, "latest": latest_run_id(base),
+            "has_history": (base / "history.md").is_file()}
+
+
+def _clean(v):
+    """NaN/inf viram None (o JSON da API não aceita NaN)."""
+    if isinstance(v, float):
+        return v if math.isfinite(v) else None
+    if isinstance(v, list):
+        return [_clean(x) for x in v]
+    if isinstance(v, dict):
+        return {str(k): _clean(x) for k, x in v.items()}
+    return v
+
+
+SERIES_GROUPS = ("benchmarks", "families", "top", "realbot")
+
+
+def chart_payload(d: dict, points: int = 2000) -> dict:
+    """chart.json com todas as séries alinhadas ao mesmo `t`, reduzidas aos mesmos índices quando passam de `points`."""
+    t = [x for x in (d.get("t") or [])]
+    n = len(t)
+    idx = _pick(n, max(2, points))
+    out: dict[str, Any] = {"t": [int(_f(t[i], 0)) for i in idx]}  # type: ignore[arg-type]
+    for g in SERIES_GROUPS:
+        grp = d.get(g) or {}
+        out[g] = {}
+        if not isinstance(grp, dict):
+            continue
+        for name, arr in grp.items():
+            if not isinstance(arr, list):
+                continue
+            if arr and not any(isinstance(x, (int, float)) and not isinstance(x, bool) for x in arr):
+                out[g][str(name)] = arr  # metadado, não série (ex.: benchmarks.memes_in_basket = ["WIF", …])
+                continue
+            out[g][str(name)] = [_f(arr[i]) if i < len(arr) else None for i in idx]
+    out["monthly"] = [m for m in (d.get("monthly") or []) if isinstance(m, dict)]
+    for k, v in d.items():  # campos extras (notas, unidades) passam como vieram
+        if k not in out and k not in SERIES_GROUPS:
+            out[k] = v
+    return _clean(out)
+
+
+def chart_file(base: Path, run_id: str) -> Path | None:
+    d = run_dir(base, run_id)
+    if d is None:
+        return None
+    f = d / "chart.json"
+    return f if f.is_file() else None
+
+
+def history_file(base: Path) -> Path | None:
+    f = Path(base) / "history.md"
+    return f if f.is_file() else None
+
+
 # ------------------------------------------------------------------ fachada com cache
 
 class BacktestView:
@@ -315,6 +444,54 @@ class BacktestView:
 
     def report(self, run_id: str) -> str | None:
         f = report_file(self.base, run_id)
+        if f is None:
+            return None
+        try:
+            return f.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            return None
+
+    def _index_key(self, base: Path) -> tuple:
+        parts: list = []
+        for f in [base / "index.json", base / "latest", base / "history.md"]:
+            try:
+                parts.append(f.stat().st_mtime_ns)
+            except OSError:
+                parts.append(None)
+        if base.is_dir():
+            for d in sorted(base.iterdir()):
+                try:
+                    parts.append((d.name, (d / "summary.json").stat().st_mtime_ns))
+                except OSError:
+                    pass
+        return tuple(parts)
+
+    def index(self) -> dict:
+        """Histórico de runs (index.json ou montado dos summaries), com cache pelo mtime dos arquivos."""
+        base = self.base
+        key = ("__index__", self._index_key(base))
+        with self._lock:
+            c = self._cache.get("__index__")
+            if c and c[0] == key and time.time() - c[1] < self.ttl:
+                return c[2]
+        out = build_index(base)
+        with self._lock:
+            self._cache["__index__"] = (key, time.time(), out)
+        return out
+
+    def chart(self, run_id: str, points: int = 2000) -> dict | None:
+        f = chart_file(self.base, run_id)
+        if f is None:
+            return None
+        d = _read_json(f, None)
+        if not isinstance(d, dict) or not isinstance(d.get("t"), list):
+            return None
+        out = chart_payload(d, max(50, min(int(points), 5000)))
+        out["run_id"] = run_id
+        return out
+
+    def history(self) -> str | None:
+        f = history_file(self.base)
         if f is None:
             return None
         try:

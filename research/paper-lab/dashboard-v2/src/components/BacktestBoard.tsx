@@ -1,4 +1,4 @@
-// Placar retroativo: mesma folha e mesmas marcas do placar ao vivo, com as colunas que fazem sentido para 30 dias fechados.
+// Placar retroativo: mesma folha e mesmas marcas do placar ao vivo, com as colunas que fazem sentido para uma janela fechada (30 dias ou 6 meses).
 import { memo, useMemo } from 'react'
 import type { BtVerdict, Sparks } from '@/lib/api'
 import { btMetric, isHighlight, type BtEntry, type BtSortKey } from '@/lib/backtest'
@@ -18,11 +18,13 @@ export function VerdictChip({ v, className }: { v: BtVerdict; className?: string
   return <Chip className={cn('border-dashed text-ink-3', className)}>inconclusiva</Chip>
 }
 
-/** Quantas das 4 semanas bateram só segurar (contagem, não posição). */
-export function WeekPips({ n, of = 4 }: { n: number | null; of?: number }) {
+/** Quantas das 4 semanas (ou 6 meses) bateram só segurar (contagem, não posição). Muitos trechos: só o número. */
+export function WeekPips({ n, of = 4, unit = 'semana' }: { n: number | null; of?: number; unit?: 'semana' | 'mês' }) {
   if (n == null) return <span className="text-[12px] text-ink-3">—</span>
+  const label = `Bateu só segurar em ${n} de ${of} ${unit === 'mês' ? 'meses' : 'semanas'}`
+  if (of > 8) return <span className="text-[12px] text-ink-2 t-tab" title={label}>{n}/{of}</span>
   return (
-    <span className="inline-flex items-center gap-[3px]" role="img" aria-label={`Bateu só segurar em ${n} de ${of} semanas`}>
+    <span className="inline-flex items-center gap-[3px]" role="img" aria-label={label}>
       {Array.from({ length: of }, (_, i) => (
         <i key={i} aria-hidden className={cn('inline-block size-[9px] rounded-[2px] border', i < n ? 'border-ink bg-ink' : 'border-rule-strong bg-transparent')} />
       ))}
@@ -31,7 +33,7 @@ export function WeekPips({ n, of = 4 }: { n: number | null; of?: number }) {
   )
 }
 
-function Head({ sort, onSort }: { sort: BtSortKey; onSort: (k: BtSortKey) => void }) {
+function Head({ sort, onSort, period, seg }: { sort: BtSortKey; onSort: (k: BtSortKey) => void; period: string; seg: { of: number; unit: 'semana' | 'mês' } }) {
   const H = ({ k, children, className, hint }: { k?: BtSortKey; children: React.ReactNode; className?: string; hint?: string }) => {
     const label = k ? (
       <button type="button" onClick={() => onSort(k)} className={cn('rounded-sm text-left hover:text-ink', sort === k && 'text-ink t-semi')}>
@@ -52,9 +54,9 @@ function Head({ sort, onSort }: { sort: BtSortKey; onSort: (k: BtSortKey) => voi
       <H k="lucro" className="justify-end text-right">Lucro</H>
       <H k="segurar" className="hidden md:flex">Vs. segurar</H>
       <H k="habilidade" className="justify-end text-right sm:justify-start sm:text-left">Habilidade</H>
-      <H className="hidden lg:flex" hint="Maior queda do pico ao vale nos 30 dias.">Queda</H>
+      <H className="hidden lg:flex" hint={`Maior queda do pico ao vale nos ${period}.`}>Queda</H>
       <H className="hidden lg:flex">Trades</H>
-      <H className="hidden lg:flex" hint="Em quantas das 4 semanas a carteira rendeu mais do que só segurar o livro inicial.">Semanas</H>
+      <H className="hidden lg:flex" hint={`Em quantos dos ${seg.of} ${seg.unit === 'mês' ? 'meses' : 'semanas'} a carteira rendeu mais do que só segurar o livro inicial.`}>{seg.unit === 'mês' ? 'Meses' : 'Semanas'}</H>
       <H k="veredito" className="hidden lg:flex">Veredito</H>
     </div>
   )
@@ -97,18 +99,19 @@ const Row = memo(function Row({ e, rank, top, spark, holdMax, sweep }: { e: BtEn
       </div>
       <div role="cell" className="hidden text-[13px] text-ink-2 t-tab lg:block">{e.maxDd == null ? "—" : `−${pct(Math.abs(e.maxDd), 1)}`}</div>
       <div role="cell" className="hidden text-[13px] text-ink-2 t-tab lg:block">{int(e.trades)}</div>
-      <div role="cell" className="hidden lg:block"><WeekPips n={e.weeksBeat} /></div>
+      <div role="cell" className="hidden lg:block"><WeekPips n={e.segBeat} of={e.segOf} unit={e.segUnit} /></div>
       <div role="cell" className="hidden lg:block"><VerdictChip v={e.verdict} /></div>
     </div>
   )
 })
 
-export function BacktestBoard({ entries, sort, onSort, sparks, firstPaint }: { entries: BtEntry[]; sort: BtSortKey; onSort: (k: BtSortKey) => void; sparks?: Sparks; firstPaint: boolean }) {
+export function BacktestBoard({ entries, sort, onSort, sparks, firstPaint, period = '30 dias' }: { entries: BtEntry[]; sort: BtSortKey; onSort: (k: BtSortKey) => void; sparks?: Sparks; firstPaint: boolean; period?: string }) {
+  const seg = entries[0] ? { of: entries[0].segOf, unit: entries[0].segUnit } : { of: 4, unit: 'semana' as const }
   const holdMax = useMemo(() => Math.max(1, ...entries.map(e => Math.abs(e.vsHoldPct ?? 0))), [entries])
   const firstOk = entries.length > 0 && btMetric(entries[0], sort) != null && isHighlight(entries[0], sort)
   return (
     <div role="table" aria-label="Placar da simulação retroativa" aria-rowcount={entries.length + 1} className="sheet rounded-xl">
-      <Head sort={sort} onSort={onSort} />
+      <Head sort={sort} onSort={onSort} period={period} seg={seg} />
       <div role="rowgroup">
         {entries.map((e, i) => (
           <Row key={e.p.name} e={e} rank={i + 1} top={i < 3 && firstOk && isHighlight(e, sort)} spark={sparks?.[e.p.name]} holdMax={holdMax} sweep={firstPaint && i < 3} />

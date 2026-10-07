@@ -1,6 +1,6 @@
 // Simulação retroativa de 30 dias: do summary.json às linhas do placar retroativo. Módulo puro (roda com `node --test`).
 import type { BtEquity, BtFamily, BtPortfolio, BtVerdict } from './api.ts'
-import { describePortfolio, FAMILIES, type Description, type FamilyKey } from './describe.ts'
+import { describePortfolio, type Description } from './describe.ts'
 
 export type BtSortKey = 'habilidade' | 'lucro' | 'segurar' | 'veredito'
 export const BT_SORTS: { key: BtSortKey; label: string; hint: string }[] = [
@@ -25,6 +25,10 @@ export interface BtEntry {
   maxDd: number | null
   trades: number | null
   weeksBeat: number | null
+  /** trechos que bateram só segurar: semanas (30 dias) ou meses (6 meses, quando o summary traz `months`) */
+  segBeat: number | null
+  segOf: number
+  segUnit: 'semana' | 'mês'
   verdict: BtVerdict
 }
 
@@ -44,7 +48,12 @@ export function toBtEntry(p: BtPortfolio): BtEntry {
   const d = describePortfolio({ ...p, name: p.name, asset: p.asset ?? null })
   const end = num(p.end_value), vs = num(p.vs_bh), start = num(p.start_value), skill = num(p.skill)
   const bh = end != null && vs != null ? end - vs : null
+  const months = Array.isArray(p.months) && p.months.length ? p.months : null
+  const seg = months || p.months_beat_bh != null
+    ? { segBeat: num(p.months_beat_bh), segOf: months?.length ?? 6, segUnit: 'mês' as const }
+    : { segBeat: num(p.weeks_beat_bh), segOf: p.weeks?.length || 4, segUnit: 'semana' as const }
   return {
+    ...seg,
     p, d, who: whoOf(d),
     pnlPct: num(p.pnl_pct), pnlUsd: num(p.pnl),
     vsHoldUsd: vs,
@@ -167,16 +176,35 @@ export function weeksFromEquity(eq: BtEquity | null | undefined, n = 4): WeekRow
 
 // ---------------------------------------------------------------- famílias e cobertura
 
-const FAM_ALIAS: Record<string, FamilyKey> = {
-  von: 'von', jev: 'von', modelo: 'von', model: 'von', poorjev: 'poorjev', laya: 'laya',
-  lab: 'lab', hipotese: 'lab', hipóteses: 'lab', hipoteses: 'lab', hypothesis: 'lab', h1: 'lab', h2: 'lab', h3: 'lab', h4: 'lab',
-  rules: 'rules', rule: 'rules', regra: 'rules', regras: 'rules', hybrid: 'hybrid', hybrids: 'hybrid', hibrido: 'hybrid', híbridos: 'hybrid',
+/** Famílias como aparecem em summaries, chart.json e no lab ao vivo. Ordem e cores fixas: as seis `--fam-*` do painel,
+ *  mais Jev e Forks nos dois slots que sobram da paleta documentada (`--series-6`, `--series-8`). */
+export const FAM_LINE: { key: string; label: string; color: string; re: RegExp }[] = [
+  { key: 'von', label: 'Modelos von', color: 'var(--fam-von)', re: /^(von|modelos?|models?)$/ },
+  { key: 'poorjev', label: 'poorjev', color: 'var(--fam-poorjev)', re: /^poorjev$/ },
+  { key: 'laya', label: 'Laya', color: 'var(--fam-laya)', re: /^laya$/ },
+  { key: 'lab', label: 'Hipóteses', color: 'var(--fam-lab)', re: /^(lab|hip[oó]teses?( \(lab\))?|hypothes[ie]s|h\d)$/ },
+  { key: 'rules', label: 'Regras', color: 'var(--fam-rules)', re: /^(rules?|regras?)$/ },
+  { key: 'jev', label: 'Jev', color: 'var(--series-6)', re: /^jev$/ },
+  { key: 'hybrid', label: 'Híbridos', color: 'var(--fam-hybrid)', re: /^(hybrids?|h[ií]bridos?)$/ },
+  { key: 'forks', label: 'Forks', color: 'var(--series-8)', re: /^forks?$/ },
+]
+export type FamScope = '' | 'SOL' | 'Memecoins'
+
+/** "SOL · poorjev" → { scope: 'SOL', fam: poorjev }; "meme · regras", "Meme · hipóteses (lab)", "SOL rule", "SOL lab",
+ *  "lab", "h1_exits" também. Família desconhecida: fam null e `rest` com o texto sem o prefixo. */
+export function parseFamilyKey(key: string): { scope: FamScope; fam: (typeof FAM_LINE)[number] | null; rest: string } {
+  const m = /^\s*(sol|memes?|memecoins?)(?:\s*[·:|/-]\s*|\s+)(.+)$/i.exec(key)
+  const scope: FamScope = m ? (m[1].toLowerCase() === 'sol' ? 'SOL' : 'Memecoins') : ''
+  const rest = (m ? m[2] : key).trim()
+  const k = rest.toLowerCase()
+  return { scope, rest, fam: FAM_LINE.find(f => f.re.test(k)) ?? FAM_LINE.find(f => f.re.test(k.split(/[_\s]/)[0])) ?? null }
 }
-export function familyInfo(key: string): { label: string; color: string } {
-  if (key.toLowerCase().startsWith('fork')) return { label: 'Forks', color: 'var(--ink-3)' }
-  const k = FAM_ALIAS[key.toLowerCase()] ?? FAM_ALIAS[key.toLowerCase().split(/[_\s]/)[0]]
-  const f = k ? FAMILIES.find(x => x.key === k) : undefined
-  return f ? { label: key.toLowerCase() === 'jev' ? 'Jev' : f.label, color: f.color } : { label: key, color: 'var(--ink-3)' }
+
+/** Rótulo humano, cor da família e escopo (SOL / Memecoins) de uma chave de família de qualquer fonte. */
+export function familyInfo(key: string): { label: string; color: string; scope: FamScope; key: string | null } {
+  const p = parseFamilyKey(key)
+  return p.fam ? { label: p.fam.label, color: p.fam.color, scope: p.scope, key: p.fam.key }
+    : { label: p.rest || key, color: 'var(--ink-3)', scope: p.scope, key: null }
 }
 
 /** Cobertura pode vir como fração (0,98) ou porcentagem (98): sempre devolve porcentagem. */

@@ -177,6 +177,8 @@ export interface BtPortfolio {
   skill: number | null; skill_pct?: number | null; timing?: number | null; timing_p: number | null
   max_dd_pct: number | null; trades: number | null; buys?: number | null; sells?: number | null; closed_rt?: number | null; exposure_pct?: number | null
   weeks?: (number | null)[] | null; weeks_beat_bh?: number | null
+  /** runs de 6 meses: retorno de cada mês e em quantos bateu só segurar (o veredito pede ≥ 4 de 6) */
+  months?: (number | null)[] | null; months_beat_bh?: number | null; look_ahead?: boolean | null
   verdict: BtVerdict; verdict_reason?: string | null; p_bh?: number | null; p_usdc?: number | null
   // metadados do placar ao vivo (para describePortfolio) e o nome da linha ao vivo, se existir
   hyp?: string | null; kind?: string | null; catalog?: string | null; params_diff?: Record<string, Record<string, unknown>> | null
@@ -203,6 +205,29 @@ export interface BtPayload {
 }
 export interface BtEquity { t: number[]; equity: number[]; bh: (number | null)[] }
 
+// ---- histórico: runs mensais de 30 dias + janela de 6 meses (data/backtest/index.json e <run>/chart.json)
+export type BtKind = '30d' | '180d'
+export interface BtTop { name: string; skill: number | null; pnl_pct: number | null }
+export interface BtIndexRun {
+  run_id: string; kind: BtKind; start_brt?: string | null; end_brt?: string | null; days?: number | null; generated_brt?: string | null
+  n_portfolios?: number | null; n_winners?: number | null; n_losers?: number | null; n_inconclusive?: number | null
+  winner?: { by_skill?: string | null; by_pnl?: string | null; by_verdict?: string | null } | null
+  top_skill?: BtTop[] | null; top_pnl?: BtTop[] | null
+  realbot?: { book: string; pnl_pct: number | null; vs_hold: number | null }[] | null
+  assets?: Record<string, number | null> | null; look_ahead_forks?: string[] | null
+  /** false quando o índice cita um run cuja pasta não existe (mais) em disco */
+  available?: boolean
+}
+export interface BtIndex { runs: BtIndexRun[]; source?: 'index' | 'runs'; latest?: string | null; has_history?: boolean }
+export interface BtMonth { month: string; start_brt?: string | null; end_brt?: string | null; top_by_pnl?: string | null; top_by_skill?: string | null; sol_ret?: number | null; memes_ret?: number | null }
+export interface BtChart {
+  run_id: string; t: number[]; start_brt?: string; end_brt?: string; normalized_to?: number
+  benchmarks: { sol_bh?: (number | null)[]; memes_bh?: (number | null)[]; usdc?: (number | null)[]; memes_in_basket?: string[] }
+  families: Record<string, (number | null)[]>
+  top: Record<string, (number | null)[]>; realbot: Record<string, (number | null)[]>
+  monthly: BtMonth[]
+}
+
 export interface ParamChange { ts: number; ts_brt: string; portfolio?: string; layer?: string; field: string; old: unknown; new: unknown; who?: string; type?: string }
 
 export const api = {
@@ -224,6 +249,9 @@ export const api = {
     getJSON<BtEquity>(`/api/v2/backtest/${encodeURIComponent(run)}/equity/${encodeURIComponent(name)}?points=${points}`),
   backtestSparks: (run: string, points = 60) => getJSON<Sparks>(`/api/v2/backtest/${encodeURIComponent(run)}/sparks?points=${points}`),
   backtestReport: (run: string) => getText(`/api/v2/backtest/${encodeURIComponent(run)}/report`),
+  backtestIndex: () => getJSON<BtIndex>('/api/v2/backtest/index'),
+  backtestChart: (run: string, points = 2000) => getJSON<BtChart>(`/api/v2/backtest/${encodeURIComponent(run)}/chart?points=${points}`),
+  backtestHistory: () => getText('/api/v2/backtest/history'),
   // ---- gravações (endpoints de controle do app.py; sempre com confirmação na UI) ----
   setParams: (portfolio: string, body: Record<string, unknown>) =>
     postJSON<{ ok: boolean; changes: unknown[]; warning?: string | null }>(`/api/params/${encodeURIComponent(portfolio)}`, body),

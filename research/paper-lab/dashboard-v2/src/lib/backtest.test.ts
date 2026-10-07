@@ -93,7 +93,7 @@ test('family keys map to the documented palette, unknown keys stay readable', ()
   assert.equal(familyInfo('poorjev').color, 'var(--fam-poorjev)')
   assert.equal(familyInfo('jev').label, 'Jev')
   assert.equal(familyInfo('forks').label, 'Forks')
-  assert.deepEqual(familyInfo('novidade'), { label: 'novidade', color: 'var(--ink-3)' })
+  assert.deepEqual(familyInfo('novidade'), { label: 'novidade', color: 'var(--ink-3)', scope: '', key: null })
   assert.equal(asPct(0.98), 98)
   assert.equal(asPct(97.5), 97.5)
 })
@@ -118,3 +118,33 @@ test('markdown: headings, lists, tables, code and inline marks', () => {
   assert.equal(t.rows.length, 1)
   assert.equal(parseMarkdown('<script>alert(1)</script>')[0].k, 'p') // vira texto, nunca HTML
 })
+
+test('family keys from real runs get human labels, family colours and the SOL/Memecoins scope', () => {
+  const cases: [string, string, string, string][] = [
+    // chave, rótulo, cor, escopo — formatos vistos no summary.json do run ao vivo e nos nomes curtos
+    ['SOL · von', 'Modelos von', 'var(--fam-von)', 'SOL'],
+    ['meme · poorjev', 'poorjev', 'var(--fam-poorjev)', 'Memecoins'],
+    ['Meme · hipóteses (lab)', 'Hipóteses', 'var(--fam-lab)', 'Memecoins'],
+    ['Meme · regras', 'Regras', 'var(--fam-rules)', 'Memecoins'],
+    ['Meme · híbridos', 'Híbridos', 'var(--fam-hybrid)', 'Memecoins'],
+    ['Meme · laya', 'Laya', 'var(--fam-laya)', 'Memecoins'],
+    ['SOL · jev', 'Jev', 'var(--series-6)', 'SOL'],
+    ['SOL · forks', 'Forks', 'var(--series-8)', 'SOL'],
+    ['SOL rule', 'Regras', 'var(--fam-rules)', 'SOL'],
+    ['SOL lab', 'Hipóteses', 'var(--fam-lab)', 'SOL'],
+    ['memecoins: hybrid', 'Híbridos', 'var(--fam-hybrid)', 'Memecoins'],
+    ['poorjev', 'poorjev', 'var(--fam-poorjev)', ''],
+    ['h1_exits', 'Hipóteses', 'var(--fam-lab)', ''],
+  ]
+  for (const [k, label, color, scope] of cases) {
+    const f = familyInfo(k)
+    assert.deepEqual([f.label, f.color, f.scope], [label, color, scope], k)
+  }
+  // o rótulo nunca carrega o prefixo cru; família desconhecida fica cinza com o nome sem o prefixo
+  assert.deepEqual(familyInfo('SOL · algo novo'), { label: 'algo novo', color: 'var(--ink-3)', scope: 'SOL', key: null })
+  // uma família "solana…" não é confundida com o prefixo SOL
+  assert.equal(familyInfo('solarium').scope, '')
+  // o summary da fixture antiga (chaves curtas) continua com cor
+  for (const f of summary.families) assert.notEqual(familyInfo(f.family).color, 'var(--ink-3)', f.family)
+})
+

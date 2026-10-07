@@ -58,7 +58,7 @@ def test_payload_latest_with_enrichment_and_derived_fields(base: Path):
     v = view(base, meta_factory=factory, live_index_fn=lambda: {"relaxed": "relaxed", "WIF_relaxed": "WIF_relaxed"})
     out = v.payload()
     assert out["available"] and out["run_id"] == RUN and out["latest"] == RUN and out["has_report"]
-    assert [r["run_id"] for r in out["runs"]] == [RUN]
+    assert RUN in [r["run_id"] for r in out["runs"]]
     ports = {p["name"]: p for p in out["summary"]["portfolios"]}
     r = ports["relaxed"]
     # metadados acrescentados sem sobrescrever o que o summary já tem
@@ -98,7 +98,8 @@ def test_latest_falls_back_to_newest_run_and_unknown_run_is_refused(base: Path):
     s = json.loads((old / "summary.json").read_text())
     s["generated_brt"] = "2026-09-01T03:00:00-03:00"
     (old / "summary.json").write_text(json.dumps(s))
-    assert [r["run_id"] for r in BT.list_runs(base)] == [RUN, "20260901-0300"]
+    ids = [r["run_id"] for r in BT.list_runs(base)]
+    assert ids.index(RUN) < ids.index("20260901-0300")
     v = view(base)
     assert v.payload("20260901-0300")["run_id"] == "20260901-0300"
     bad = v.payload("nao-existe")

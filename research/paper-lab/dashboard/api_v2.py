@@ -840,6 +840,26 @@ def make_router(require_auth: Callable, deps: dict) -> APIRouter:
         """Runs disponíveis + summary do mais recente (ou de `run`), com os portfólios descritos como no placar."""
         return BTV.payload(run)
 
+    @r.get("/backtest/index")
+    def backtest_index(_: str = A):
+        """Histórico de runs (index.json; sem ele, montado dos summaries), do fim mais recente para o mais antigo."""
+        return BTV.index()
+
+    @r.get("/backtest/history")
+    def backtest_history(_: str = A):
+        txt = BTV.history()
+        if txt is None:
+            raise HTTPException(404, "comparação entre meses ainda não gerada")
+        return PlainTextResponse(txt, media_type="text/markdown; charset=utf-8")
+
+    @r.get("/backtest/{run_id}/chart")
+    def backtest_chart(run_id: str, points: int = 2000, _: str = A):
+        """Gráfico de 6 meses (chart.json do run): benchmarks, famílias, topo e bot real, 1000 = início."""
+        d = BTV.chart(run_id, points)
+        if d is None:
+            raise HTTPException(404, "gráfico não encontrado")
+        return d
+
     @r.get("/backtest/{run_id}/equity/{name}")
     def backtest_equity(run_id: str, name: str, points: int = 1500, _: str = A):
         d = BTV.equity(run_id, name, points)

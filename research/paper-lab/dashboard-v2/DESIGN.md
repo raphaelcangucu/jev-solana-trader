@@ -30,6 +30,14 @@ claro e escuro: CVD adjacente ≥ 8,4, visão normal ≥ 19,3; no claro 3 tons f
 
 Forks herdam a cor da família do pai (filtro próprio "Forks").
 
+Gráfico de 6 meses (Retroativo): séries de estratégia usam `--series-1…8`, a paleta documentada inteira em ordem fixa
+(validada com `validate_palette.js` nas superfícies do painel: claro `#F8FAFC` CVD adjacente ≥ 9,1 / visão normal ≥ 19,6,
+3 tons < 3:1 → rótulos diretos + "Ver os valores em tabela"; escuro `#13233A` ≥ 8,4 / ≥ 19,3, todos ≥ 3:1). A cor é
+fixada pela posição da linha no conjunto do run (top 3 habilidade, top 2 lucro, bot A, bot B, extras até 8) e não muda
+ao ligar/desligar. Benchmarks nunca usam cor de série: tinta neutra e tracejado (só segurar SOL `--ink-2` tracejado,
+cesta de memecoins `--ink-3` traço longo, USDC 6%/ano `--ink-3` pontilhado). "Por família" (gráfico e painel, via `familyInfo`/`parseFamilyKey` em `lib/backtest.ts`, que entende chaves como "SOL · von", "meme · poorjev", "SOL rule") usa as cores `--fam-*`,
+com Jev em `--series-6` e Forks em `--series-8`. Um eixo y só (patrimônio, 1000 = início).
+
 ## Tipo
 
 Uma família só: **Archivo variable** (local, `@fontsource-variable/archivo/wdth.css`, sem CDN). O eixo de largura é a

@@ -1,4 +1,4 @@
-// Detalhe de um teste na simulação retroativa: curva × só segurar, semana a semana, veredito e link para o run ao vivo.
+// Detalhe de um teste na simulação retroativa: curva × só segurar, semana a semana (ou mês a mês nos 6 meses), veredito e link para o run ao vivo.
 import { lazy, Suspense, useMemo } from 'react'
 import * as D from '@radix-ui/react-dialog'
 import { useQuery } from '@tanstack/react-query'
@@ -13,16 +13,16 @@ import { Chip, Delta, ErrorNote, Loading, Note, Stat, Tip } from './ui'
 
 const TimeChart = lazy(() => import('./charts/TimeChart'))
 
-function Weeks({ e, eq }: { e: BtEntry; eq: ReturnType<typeof weeksFromEquity> }) {
+function Weeks({ e, eq, unit }: { e: BtEntry; eq: ReturnType<typeof weeksFromEquity>; unit: 'semana' | 'mês' }) {
   // Com a curva: carteira e só segurar medidos na mesma fonte. Sem ela: só o que o summary traz.
-  const fromSummary = (e.p.weeks ?? []).slice(0, 4)
+  const fromSummary = (unit === 'mês' ? e.p.months ?? [] : (e.p.weeks ?? []).slice(0, 4))
   const rows = eq.length ? eq : fromSummary.map((v, i) => ({ i: i + 1, from: 0, to: 0, pct: v, bhPct: null, beat: null }))
-  if (!rows.length) return <Note>Sem quebra semanal neste run.</Note>
+  if (!rows.length) return <Note>Sem quebra {unit === 'mês' ? 'mensal' : 'semanal'} neste run.</Note>
   return (
     <table className="w-full border-collapse text-[13.5px]">
       <thead>
         <tr className="border-b border-rule-strong text-left text-[12.5px] text-ink-3">
-          <th scope="col" className="py-1.5 pr-3 font-normal">Semana</th>
+          <th scope="col" className="py-1.5 pr-3 font-normal">{unit === 'mês' ? 'Mês' : 'Semana'}</th>
           <th scope="col" className="py-1.5 pr-3 text-right font-normal">Este teste</th>
           <th scope="col" className="py-1.5 pr-3 text-right font-normal">Só segurar</th>
           <th scope="col" className="py-1.5 text-right font-normal">Bateu?</th>
@@ -32,7 +32,7 @@ function Weeks({ e, eq }: { e: BtEntry; eq: ReturnType<typeof weeksFromEquity> }
         {rows.map(w => (
           <tr key={w.i} className="border-b border-rule t-tab">
             <th scope="row" className="py-1.5 pr-3 text-left font-normal">
-              {w.i}ª <span className="text-ink-3">{w.from ? `${dayMon(w.from)} a ${dayMon(w.to)}` : ''}</span>
+              {w.i}{unit === 'mês' ? 'º' : 'ª'} <span className="text-ink-3">{w.from ? `${dayMon(w.from)} a ${dayMon(w.to)}` : ''}</span>
             </th>
             <td className="py-1.5 pr-3 text-right"><Delta v={w.pct}>{signedPct(w.pct, 2)}</Delta></td>
             <td className="py-1.5 pr-3 text-right text-ink-2">{signedPct(w.bhPct, 2)}</td>
@@ -44,7 +44,9 @@ function Weeks({ e, eq }: { e: BtEntry; eq: ReturnType<typeof weeksFromEquity> }
   )
 }
 
-function Body({ e, run }: { e: BtEntry; run: string }) {
+function Body({ e, run, days }: { e: BtEntry; run: string; days: number }) {
+  const long = days > 60
+  const unit = long ? 'mês' as const : 'semana' as const
   const eq = useQuery({ queryKey: ['bt-equity', run, e.p.name], queryFn: () => api.backtestEquity(run, e.p.name), staleTime: 10 * 60_000, retry: 1 })
   const series = useMemo(() => {
     const s = eq.data
@@ -55,7 +57,7 @@ function Body({ e, run }: { e: BtEntry; run: string }) {
       { id: 'bh', label: 'só segurar', color: 'var(--ink-3)', width: 1 as const, data: pts.filter(p => p.b != null).map(p => ({ t: p.t, v: p.b as number })) },
     ]
   }, [eq.data])
-  const weeks = useMemo(() => weeksFromEquity(eq.data), [eq.data])
+  const weeks = useMemo(() => weeksFromEquity(eq.data, long ? Math.max(2, Math.round(days / 30.4)) : 4), [eq.data, long, days])
   const p = e.p
   const live = p.live_name
   return (
@@ -66,7 +68,7 @@ function Body({ e, run }: { e: BtEntry; run: string }) {
         <p className="mt-2 text-[12.5px] text-ink-3">Simulado sobre o histórico, com os parâmetros de hoje. Nada aqui foi executado.</p>
       </section>
       <dl className="grid grid-cols-2 gap-x-6 gap-y-5 border-y border-rule py-5 sm:grid-cols-4">
-        <Stat label="Lucro em 30 dias" sub={signedUsd(e.pnlUsd)}><Delta v={e.pnlPct}>{signedPct(e.pnlPct, 2)}</Delta></Stat>
+        <Stat label={long ? `Lucro em ${Math.round(days / 30.4)} meses` : `Lucro em ${Math.round(days)} dias`} sub={signedUsd(e.pnlUsd)}><Delta v={e.pnlPct}>{signedPct(e.pnlPct, 2)}</Delta></Stat>
         <Stat label="Vs. segurar" sub={signedUsd(e.vsHoldUsd)}><Delta v={e.vsHoldPct}>{signedPct(e.vsHoldPct, 2)}</Delta></Stat>
         <Stat label={<Tip content="Lucro menos exposição média × retorno do ativo. O que sobra quando se tira o beta."><span className="underline decoration-dotted underline-offset-2">Habilidade (sem beta)</span></Tip>}
           sub={p.timing != null ? `timing ${signedUsd(p.timing)}, ${pval(e.timingP)}` : pval(e.timingP)}>
@@ -77,7 +79,7 @@ function Body({ e, run }: { e: BtEntry; run: string }) {
         <Stat label="Compras / vendas" sub={p.closed_rt != null ? `${int(p.closed_rt)} operações fechadas` : `${int(e.trades)} trades`}>
           {p.buys == null ? int(e.trades) : `${int(p.buys)} / ${int(p.sells)}`}
         </Stat>
-        <Stat label="Semanas acima de segurar" sub="de 4">{e.weeksBeat == null ? '—' : int(e.weeksBeat)}</Stat>
+        <Stat label={`${e.segUnit === 'mês' ? 'Meses' : 'Semanas'} acima de segurar`} sub={`de ${e.segOf}`}>{e.segBeat == null ? '—' : int(e.segBeat)}</Stat>
         <div>
           <dt className="mb-1.5 text-[12.5px] text-ink-3">Veredito</dt>
           <dd><VerdictChip v={e.verdict} /></dd>
@@ -98,9 +100,9 @@ function Body({ e, run }: { e: BtEntry; run: string }) {
                 </Suspense>
               )}
       </section>
-      <section aria-label="Semana a semana">
-        <h3 className="t-title mb-2 text-[17px]">Semana a semana</h3>
-        <Weeks e={e} eq={weeks} />
+      <section aria-label={long ? 'Mês a mês' : 'Semana a semana'}>
+        <h3 className="t-title mb-2 text-[17px]">{long ? 'Mês a mês' : 'Semana a semana'}</h3>
+        <Weeks e={e} eq={weeks} unit={unit} />
       </section>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-rule pt-4 text-[13.5px]">
         {live ? (
@@ -114,7 +116,7 @@ function Body({ e, run }: { e: BtEntry; run: string }) {
   )
 }
 
-export default function BacktestSheet({ entry, name, run }: { entry: BtEntry | null; name: string | null; run: string }) {
+export default function BacktestSheet({ entry, name, run, days = 30 }: { entry: BtEntry | null; name: string | null; run: string; days?: number }) {
   return (
     <D.Root open={!!name} onOpenChange={o => { if (!o) closeBacktest() }}>
       <D.Portal>
@@ -135,7 +137,7 @@ export default function BacktestSheet({ entry, name, run }: { entry: BtEntry | n
             <D.Close className="grid size-9 place-items-center rounded-md text-ink-2 hover:bg-sunk hover:text-ink" aria-label="Fechar detalhe"><X className="size-5" /></D.Close>
           </div>
           <div className="flex-1 overflow-y-auto px-5 pb-10 pt-5 sm:px-7">
-            {entry ? <Body e={entry} run={run} /> : <Note>Esse teste não está neste run da simulação.</Note>}
+            {entry ? <Body e={entry} run={run} days={days} /> : <Note>Esse teste não está neste run da simulação.</Note>}
           </div>
         </D.Content>
       </D.Portal>

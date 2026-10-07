@@ -31,6 +31,10 @@
   --fam-lab: #eda100;
   --fam-rules: #e87ba4;
   --fam-hybrid: #4a3aa7;
+  /* séries do gráfico de 6 meses: a mesma paleta documentada, 8 slots em ordem fixa (validate_palette.js,
+     superfície #F8FAFC: CVD adjacente ≥ 9,1, visão normal ≥ 19,6; 3 tons < 3:1 → rótulos diretos + tabela) */
+  --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+  --series-5: #e87ba4; --series-6: #008300; --series-7: #4a3aa7; --series-8: #e34948;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,6 +50,8 @@
     --focus: #8fb8ff;
     --shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 10px 28px -18px rgba(0, 0, 0, 0.7);
     --fam-von: #3987e5; --fam-poorjev: #d95926; --fam-laya: #199e70; --fam-lab: #c98500; --fam-rules: #d55181; --fam-hybrid: #9085e9;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+    --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
   }
 }
 :root[data-theme="dark"] {
@@ -60,6 +66,8 @@
   --focus: #8fb8ff;
   --shadow: 0 1px 0 rgba(0, 0, 0, 0.2), 0 10px 28px -18px rgba(0, 0, 0, 0.7);
   --fam-von: #3987e5; --fam-poorjev: #d95926; --fam-laya: #199e70; --fam-lab: #c98500; --fam-rules: #d55181; --fam-hybrid: #9085e9;
+  --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+  --series-5: #d55181; --series-6: #008300; --series-7: #9085e9; --series-8: #e66767;
 }
 
 @theme inline {

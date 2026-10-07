@@ -1,4 +1,5 @@
-// Retroativo: a simulação dos últimos 30 dias com todas as estratégias do lab. "Quem teria ganho no mês passado?"
+// Retroativo: a simulação de um mês (30 dias) ou de 6 meses com todas as estratégias do lab. "Quem teria ganho no mês passado?"
+// Os meses ficam guardados como histórico: seletor de período, comparação entre meses e o gráfico de 6 meses.
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api, type BtBook, type BtSummary } from '@/lib/api'
@@ -6,10 +7,12 @@ import { asPct, BT_SORTS, familyInfo, familySorted, markWinners, sortBt, stamp, 
 import { matches, type AssetFilter, type FamilyFilter } from '@/lib/board'
 import { FAMILIES, familyOf, MEMES } from '@/lib/describe'
 import { int, num, pct, price, pval, signedPct, signedUsd, smartUsd, usd } from '@/lib/format'
-import { parseMarkdown, type Block, type Inline } from '@/lib/markdown'
-import { openBacktest, useRoute } from '@/lib/router'
+import { parseMarkdown } from '@/lib/markdown'
+import { Markdown } from '@/components/MarkdownView'
+import { openBacktest, openBtRun, useRoute } from '@/lib/router'
 import { cn } from '@/lib/utils'
 import { BacktestBoard, VerdictChip } from '@/components/BacktestBoard'
+import { CompareMonths, RunPills, SixMonths } from '@/components/BacktestHistory'
 import { Pill } from '@/components/FilterBar'
 import { Diverging } from '@/components/marks'
 import { Chip, Delta, ErrorNote, Loading, Mark, Note, SectionHead, Stat, Tip } from '@/components/ui'
@@ -19,7 +22,13 @@ const SORT_KEY = 'paperlab.bt.sort'
 
 // ---------------------------------------------------------------- abertura
 
-function Opening({ s, byName, runs, run, onRun }: { s: BtSummary; byName: Map<string, BtEntry>; runs: { run_id: string; generated_brt?: string | null }[]; run: string; onRun: (r: string | null) => void }) {
+/** "30 dias" ou "6 meses" (o texto que a página usa para a janela). */
+function periodText(days: number | null | undefined): string {
+  const d = days ?? 30
+  return d > 60 ? `${Math.round(d / 30.4)} meses` : `${Math.round(d)} dias`
+}
+
+function Opening({ s, byName }: { s: BtSummary; byName: Map<string, BtEntry> }) {
   const w = s.winner || {}
   const targets = [w.by_pnl, w.by_skill, w.by_verdict].filter((x): x is string => !!x)
     .map(raw => ({ raw, label: byName.get(raw)?.who ?? raw }))
@@ -30,7 +39,7 @@ function Opening({ s, byName, runs, run, onRun }: { s: BtSummary; byName: Map<st
     <section aria-labelledby="bt-title" className="sheet relative overflow-hidden rounded-xl px-4 pb-5 pt-4 sm:px-7 sm:pt-6">
       <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-3">
         <div>
-          <p className="text-[13.5px] text-ink-3">Se o lab tivesse rodado nos últimos {s.window?.days ?? 30} dias</p>
+          <p className="text-[13.5px] text-ink-3">Se o lab tivesse rodado nestes {periodText(s.window?.days)}</p>
           <h1 id="bt-title" className="t-display mt-1 text-[34px] sm:text-[42px]">{windowLabel(s.window)}</h1>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 sm:justify-end sm:pt-6">
@@ -38,14 +47,6 @@ function Opening({ s, byName, runs, run, onRun }: { s: BtSummary; byName: Map<st
           <Chip>{s.portfolios.length} testes</Chip>
           {step ? <Chip>passo de {step >= 60 ? `${num(step / 60, 0)} min` : `${step} s`}</Chip> : null}
           <Chip>gerada {stamp(s.generated_brt)}</Chip>
-          {runs.length > 1 && (
-            <label className="ml-1 inline-flex items-center gap-1.5 text-[12.5px] text-ink-3">
-              <span className="sr-only">Escolher simulação</span>
-              <select value={run} onChange={e => onRun(e.target.value)} className="h-7 rounded-md border border-rule-strong bg-surface px-1.5 text-[12.5px] text-ink">
-                {runs.map(r => <option key={r.run_id} value={r.run_id}>{r.generated_brt ? stamp(r.generated_brt) : r.run_id}</option>)}
-              </select>
-            </label>
-          )}
         </div>
       </div>
 
@@ -124,7 +125,7 @@ function Podium({ s, byName }: { s: BtSummary; byName: Map<string, BtEntry> }) {
         ) : (
           <div className="flex flex-col justify-center rounded-xl border border-dashed border-rule-strong px-5 py-4">
             <span className="text-[13px] text-ink-3">Melhor veredito</span>
-            <p className="mt-1 text-[15px] text-ink-2">Nenhum teste passou o critério de vencedora nestes {s.window?.days ?? 30} dias.</p>
+            <p className="mt-1 text-[15px] text-ink-2">Nenhum teste passou o critério de vencedora nestes {periodText(s.window?.days)}.</p>
           </div>
         )}
       </div>
@@ -139,7 +140,7 @@ const FAM_BASE: { key: FamilyFilter; label: string }[] = [
   { key: 'rules', label: 'Regras' }, { key: 'hybrid', label: 'Híbridos' }, { key: 'lab', label: 'Hipóteses' }, { key: 'forks', label: 'Forks' },
 ]
 
-function Board({ entries, run }: { entries: BtEntry[]; run: string }) {
+function Board({ entries, run, period }: { entries: BtEntry[]; run: string; period: string }) {
   const [sort, setSortS] = useState<BtSortKey>(() => {
     try { const v = localStorage.getItem(SORT_KEY); return v === 'lucro' || v === 'segurar' || v === 'veredito' ? v : 'habilidade' } catch { return 'habilidade' }
   })
@@ -155,7 +156,7 @@ function Board({ entries, run }: { entries: BtEntry[]; run: string }) {
   const active = fam !== 'all' || asset !== 'all'
   return (
     <section aria-labelledby="bt-board" className="flex flex-col gap-3">
-      <SectionHead id="bt-board" title="Placar dos 30 dias">Toque num teste para ver a curva contra só segurar e cada semana.</SectionHead>
+      <SectionHead id="bt-board" title={`Placar dos ${period}`}>Toque num teste para ver a curva contra só segurar e cada {entries[0]?.segUnit === 'mês' || period.includes('meses') ? 'mês' : 'semana'}.</SectionHead>
       <div className="flex flex-col gap-2.5">
         <div role="group" aria-label="Ordenar por" className="inline-flex max-w-full self-start overflow-x-auto rounded-lg border border-rule-strong bg-surface p-[3px]">
           {BT_SORTS.map(s => (
@@ -182,7 +183,7 @@ function Board({ entries, run }: { entries: BtEntry[]; run: string }) {
         </p>
       </div>
       {visible.length
-        ? <BacktestBoard entries={visible} sort={sort} onSort={setSort} sparks={sparks.data} firstPaint={firstPaint.current} />
+        ? <BacktestBoard entries={visible} sort={sort} onSort={setSort} sparks={sparks.data} firstPaint={firstPaint.current} period={period} />
         : <Note>Nenhum teste com esses filtros. <button type="button" className="underline" onClick={() => { setFam('all'); setAsset('all') }}>Limpar filtros</button></Note>}
     </section>
   )
@@ -215,6 +216,7 @@ function Families({ s, byName }: { s: BtSummary; byName: Map<string, BtEntry> })
                 <div className="min-w-0">
                   <p className="flex items-center gap-2 t-semi text-[15px]">
                     <i aria-hidden className="inline-block size-[9px] shrink-0 rounded-full" style={{ background: info.color }} />{info.label}
+                    {info.scope && <Chip>{info.scope}</Chip>}
                     <span className="text-[12.5px] font-normal text-ink-3 t-tab">{int(f.n)} {f.n === 1 ? 'teste' : 'testes'}</span>
                   </p>
                   <div className="mt-0.5 flex min-w-0 flex-col">
@@ -250,10 +252,10 @@ function exitsText(x: BtBook['exits']): string {
   return int(total)
 }
 
-function RealBot({ books }: { books: BtBook[] }) {
+function RealBot({ books, period }: { books: BtBook[]; period: string }) {
   return (
     <section aria-labelledby="bt-real" className="sheet min-w-0 rounded-xl p-4 sm:p-6">
-      <SectionHead id="bt-real" title="Bot real, A × B">O mesmo bot e o mesmo von nos 30 dias: A como roda hoje, B com saídas mecânicas e no máximo metade em SOL.</SectionHead>
+      <SectionHead id="bt-real" title="Bot real, A × B">O mesmo bot e o mesmo von nos {period}: A como roda hoje, B com saídas mecânicas e no máximo metade em SOL.</SectionHead>
       {books.length ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {books.map(b => (
@@ -282,37 +284,6 @@ function RealBot({ books }: { books: BtBook[] }) {
 }
 
 // ---------------------------------------------------------------- método e limitações
-
-function Inl({ xs }: { xs: Inline[] }) {
-  return <>{xs.map((x, i) => x.t === 'b' ? <b key={i} className="t-semi">{x.v}</b> : x.t === 'i' ? <em key={i}>{x.v}</em>
-    : x.t === 'code' ? <code key={i} className="rounded bg-sunk px-1 text-[0.92em]">{x.v}</code> : <span key={i}>{x.v}</span>)}</>
-}
-
-function Markdown({ blocks }: { blocks: Block[] }) {
-  return (
-    <div className="grid gap-3 text-[14px] leading-relaxed">
-      {blocks.map((b, i) => {
-        if (b.k === 'h') {
-          const cls = b.level === 1 ? 't-title text-[21px]' : b.level === 2 ? 't-title mt-2 text-[18px]' : 't-semi mt-1 text-[15px]'
-          return <p key={i} role="heading" aria-level={b.level + 2} className={cls}><Inl xs={b.text} /></p>
-        }
-        if (b.k === 'p') return <p key={i} className="text-ink-2"><Inl xs={b.text} /></p>
-        if (b.k === 'ul') return <ul key={i} className="ml-5 list-disc text-ink-2">{b.items.map((it, j) => <li key={j}><Inl xs={it} /></li>)}</ul>
-        if (b.k === 'ol') return <ol key={i} className="ml-5 list-decimal text-ink-2">{b.items.map((it, j) => <li key={j}><Inl xs={it} /></li>)}</ol>
-        if (b.k === 'code') return <pre key={i} className="overflow-x-auto rounded-md bg-sunk px-3 py-2 text-[12.5px]"><code>{b.text}</code></pre>
-        if (b.k === 'hr') return <hr key={i} className="border-rule" />
-        return (
-          <div key={i} className="overflow-x-auto">
-            <table className="w-full border-collapse text-[13px] t-tab">
-              <thead><tr className="border-b border-rule-strong text-left text-ink-3">{b.head.map((h, j) => <th key={j} scope="col" className="py-1 pr-3 font-normal"><Inl xs={h} /></th>)}</tr></thead>
-              <tbody>{b.rows.map((r, j) => <tr key={j} className="border-b border-rule">{r.map((c, k) => <td key={k} className="py-1 pr-3"><Inl xs={c} /></td>)}</tr>)}</tbody>
-            </table>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 function Report({ run }: { run: string }) {
   const q = useQuery({ queryKey: ['bt-report', run], queryFn: () => api.backtestReport(run), staleTime: 10 * 60_000, retry: 1 })
@@ -406,13 +377,33 @@ function Method({ s, run, hasReport }: { s: BtSummary; run: string; hasReport: b
 
 export default function Retroativo() {
   const route = useRoute()
-  const [run, setRun] = useState<string | null>(null)
-  const q = useQuery({ queryKey: ['backtest', run], queryFn: () => api.backtest(run), staleTime: 5 * 60_000, refetchInterval: 10 * 60_000 })
+  const compare = route.view === 'comparar'
+  const run = route.run
+  const idxQ = useQuery({ queryKey: ['bt-index'], queryFn: api.backtestIndex, staleTime: 5 * 60_000, refetchInterval: 10 * 60_000, retry: 1 })
+  const q = useQuery({ queryKey: ['backtest', run], queryFn: () => api.backtest(run), staleTime: 5 * 60_000, refetchInterval: 10 * 60_000, enabled: !compare })
   const d = q.data
-  useEffect(() => { if (run && d && !d.available && d.latest) setRun(null) }, [run, d])
+  // ?run= de um run que não existe (mais): volta para o mais recente
+  useEffect(() => { if (run && d && !d.available && d.latest) openBtRun(null) }, [run, d])
   const s = d?.available ? d.summary : undefined
   const entries = useMemo(() => (s?.portfolios ?? []).map(toBtEntry), [s])
   const byName = useMemo(() => new Map(entries.map(e => [e.p.name, e])), [entries])
+  const idx = idxQ.data
+  const pills = idx && idx.runs.length > 0 ? <RunPills idx={idx} current={d?.run_id ?? null} compare={compare} /> : null
+
+  if (compare) {
+    return (
+      <div className="flex flex-col gap-6">
+        <section aria-labelledby="cmp-h1" className="sheet rounded-xl px-4 pb-5 pt-4 sm:px-7 sm:pt-6">
+          <p className="text-[13.5px] text-ink-3">Simulação retroativa, histórico</p>
+          <h1 id="cmp-h1" className="t-display mt-1 text-[34px] sm:text-[42px]">Comparar meses</h1>
+          <div className="mt-4">{pills}</div>
+        </section>
+        {idxQ.isLoading ? <Loading h={360} label="Abrindo o histórico…" />
+          : idxQ.error ? <ErrorNote error={idxQ.error} what="histórico de runs" />
+            : idx ? <CompareMonths idx={idx} /> : null}
+      </div>
+    )
+  }
   if (q.isLoading) return <Loading h={520} label="Abrindo a simulação…" />
   if (q.error && !d) return <ErrorNote error={q.error} what="simulação retroativa" />
   if (!d?.available || !s || !d.run_id) {
@@ -427,18 +418,24 @@ export default function Retroativo() {
     )
   }
   const runId = d.run_id
+  const days = s.window?.days ?? 30
+  const period = periodText(days)
+  const meta = idx?.runs.find(r => r.run_id === runId) ?? null
+  const long = meta ? meta.kind === '180d' : days > 60
   const sheetEntry = route.b ? byName.get(route.b) ?? null : null
   return (
     <div className="flex flex-col gap-6">
-      <Opening s={s} byName={byName} runs={d.runs} run={runId} onRun={r => setRun(r === d.latest ? null : r)} />
+      {pills}
+      <Opening s={s} byName={byName} />
+      {long && <SixMonths runId={runId} run={meta} idx={idx} has={n => byName.has(n)} />}
       <Podium s={s} byName={byName} />
-      <Board entries={entries} run={runId} />
+      <Board entries={entries} run={runId} period={period} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Families s={s} byName={byName} />
-        <RealBot books={s.realbot ?? []} />
+        <RealBot books={s.realbot ?? []} period={period} />
       </div>
       <Method s={s} run={runId} hasReport={!!d.has_report} />
-      {route.b && <Suspense fallback={null}><BacktestSheet entry={sheetEntry} name={route.b} run={runId} /></Suspense>}
+      {route.b && <Suspense fallback={null}><BacktestSheet entry={sheetEntry} name={route.b} run={runId} days={days} /></Suspense>}
     </div>
   )
 }
