@@ -8,6 +8,15 @@ apenas em <live_root>/data/backtest/ (pasta `<run_id>/`, cache em `_cache/` e o 
 Uso:
     python research/paper-lab/scripts/backtest_30d.py [--days 30] [--end 2026-10-06T09:00-03:00] [--step 60]
         [--jev-max-calls 20000] [--no-jev] [--live-root ~/jev-lab/code/research/paper-lab] [--keep-servers]
+        [--same-as bt30_2026-10-06] [--run-id ID] [--eq-every 300]
+    python research/paper-lab/scripts/backtest_30d.py --index-only      # só reconstrói index.json e history.md
+
+Histórico: cada run fica na sua pasta `<run_id>/` (padrão bt{dias}_{data do fim em BRT}); no fim de cada run o CLI
+atualiza `index.json` e `history.md` (backtest/history.py). `latest` aponta sempre para o run mensal mais recente.
+`--same-as RUN` repete os pressupostos de um run anterior: copia o instantâneo `inputs/` dele (mesmo catálogo, params,
+critérios, models.json e bot real) e os custos de execução por ativo do summary dele, em vez de ler o run ao vivo agora.
+Janelas longas (> 45 dias): equity e métricas em grelha de 1 h e consistência mensal no veredito (backtest/metrics.py),
+e `chart.json` com as curvas normalizadas.
 
 Fases (progresso em <run>/progress.log e <run>/progress.json): dados → catálogo → modelos (cache) → simulação →
 bot real → métricas → saídas. Contrato das saídas: backtest/report.py.
@@ -15,7 +24,9 @@ bot real → métricas → saídas. Contrato das saídas: backtest/report.py.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
 import os
 import shutil
 import statistics
@@ -44,6 +55,10 @@ def parse_args(argv=None):
     ap.add_argument("--realbot-config", default=None, help="config/params.json do bot real (padrão: o do run ao vivo)")
     ap.add_argument("--keep-servers", action="store_true")
     ap.add_argument("--run-id", default=None)
+    ap.add_argument("--same-as", default=None, help="run anterior cujos inputs/ e custos por ativo se repetem")
+    ap.add_argument("--eq-every", type=int, default=None, help="grelha da equity em s (padrão: 300; 3600 se > 45 dias)")
+    ap.add_argument("--bg-servers", action="store_true", help="servidores de modelos em QoS de fundo (taskpolicy -b)")
+    ap.add_argument("--index-only", action="store_true", help="só reconstrói index.json e history.md")
     return ap.parse_args(argv)
 
 
@@ -108,11 +123,56 @@ def slippage_from_live(live_root: Path, extra_bps: float, memecoins: dict, until
     return out, info
 
 
+def build_chart_for_run(eng, data, ports, rb, trades_by, start, end, syms, grid):
+    """chart.json de uma janela longa: curvas normalizadas e vencedores de cada bloco de 30 dias (métricas na grelha
+    das métricas, as mesmas do veredito)."""
+    import numpy as np
+    from backtest import history as H, metrics as MET, states as ST, report as REP
+    equity = {n: ([r["ts"] for r in rows], [r["equity"] for r in rows]) for n, rows in eng.rec.rows.items() if len(rows) >= 3}
+    prices = {}
+    for s_ in syms:
+        ms = data["minute"][s_]
+        ts = ms.t0 + 60 * (np.arange(len(ms.c)) + 1)       # fecho da vela que começa em ts − 60
+        prices[s_] = (ts, ST.ffill(ms.c))
+    realbot = {lab: ([r["ts"] for r in d["equity"]], [r["equity"] for r in d["equity"]]) for lab, d in rb.items()}
+    months = []
+    memes = [s_ for s_ in syms if s_ != "SOL"]
+    for blk in H.month_blocks(start, end):
+        best_p = best_s = None
+        for p in ports:
+            rows = eng.rec.rows.get(p["name"]) or []
+            st = MET.window_stats_rows(rows, trades_by.get(p["name"], []), blk["a"], blk["b"], grid=grid)
+            if st.get("empty"):
+                continue
+            if best_p is None or st["pnl_pct"] > best_p[1]:
+                best_p = (p["name"], st["pnl_pct"])
+            sk = st.get("ex_exposure")
+            if sk is not None and (best_s is None or sk > best_s[1]):
+                best_s = (p["name"], sk)
+
+        def ret(s_):
+            ms = data["minute"][s_]
+            p0, p1 = ms.close_at(blk["a"]), ms.close_at(blk["b"])
+            return (p1 / p0 - 1) * 100 if p0 and p1 and p0 == p0 and p1 == p1 else None
+        mr = [r for r in (ret(s_) for s_ in memes) if r is not None]
+        months.append({"month": blk["month"], "start_brt": blk["start_brt"], "end_brt": blk["end_brt"],
+                       "top_by_pnl": best_p[0] if best_p else None, "top_by_pnl_pct": REP._r(best_p[1]) if best_p else None,
+                       "top_by_skill": best_s[0] if best_s else None, "top_by_skill_usd": REP._r(best_s[1]) if best_s else None,
+                       "sol_ret": REP._r(ret("SOL")), "memes_ret": REP._r(sum(mr) / len(mr)) if mr else None})
+    return H.build_chart(start=start, end=end, equity=equity, ports=ports, prices=prices, realbot=realbot, months=months)
+
+
 def main(argv=None) -> int:
     a = parse_args(argv)
     live_root = Path(a.live_root).expanduser().resolve()
     out_root = Path(a.out_root).expanduser() if a.out_root else live_root / "data" / "backtest"
     cache_dir = Path(a.cache_dir).expanduser() if a.cache_dir else live_root / "data" / "backtest" / "_cache"
+    if a.index_only:
+        sys.path.insert(0, str(LAB))
+        from backtest import history as H
+        idx = H.write_history(out_root)
+        print(f"index.json: {len(idx['runs'])} runs; history.md em {out_root}")
+        return 0
     if a.end:
         end_dt = datetime.fromisoformat(a.end)
         if end_dt.tzinfo is None:
@@ -124,6 +184,15 @@ def main(argv=None) -> int:
     if a.step % 60 != 0 and 60 % a.step != 0:
         raise SystemExit("--step tem de dividir 60 ou ser múltiplo de 60")
     run_id = a.run_id or f"bt{int(a.days)}_{datetime.fromtimestamp(end, tz=BRT).strftime('%Y-%m-%d')}"
+    long_run = a.days > 45
+    eq_every = int(a.eq_every or (3600 if long_run else 300))
+    grid = 3600 if long_run else 300                       # grelha das métricas (placebo O(n²), bootstrap)
+    n_blk = int(round(a.days / 30)) if long_run else 4      # consistência: meses nas janelas longas, semanas nas curtas
+    need_blk = math.ceil(n_blk * 2 / 3) if long_run else 3
+    blk_s = 30 * 86400 if long_run else 7 * 86400
+    ref_dir = (out_root / a.same_as) if a.same_as else None
+    if ref_dir is not None and not (ref_dir / "inputs").is_dir():
+        raise SystemExit(f"--same-as {a.same_as}: sem {ref_dir}/inputs")
     run_dir = out_root / run_id
     if run_dir.exists():
         shutil.rmtree(run_dir)
@@ -136,15 +205,23 @@ def main(argv=None) -> int:
     sys.path.insert(0, str(LAB))
     from backtest import catalog as CAT
     inputs = run_dir / "inputs"
-    snap = CAT.snapshot(live_root, inputs)
-    rb_cfg_src = Path(a.realbot_config) if a.realbot_config else (live_root.parents[1] / "config" / "params.json")
-    if not rb_cfg_src.exists():
-        rb_cfg_src = REPO / "config" / "params.json"
-    shutil.copy2(rb_cfg_src, inputs / "realbot_params.json")
+    if ref_dir is not None:
+        # mesmo catálogo/pressupostos do run de referência: cópia do instantâneo dele (não do run ao vivo de agora)
+        shutil.copytree(ref_dir / "inputs", inputs)
+        snap = {str(f.relative_to(inputs)): hashlib.sha256(f.read_bytes()).hexdigest()[:16]
+                for f in sorted(inputs.rglob("*")) if f.is_file()}
+        snap["_same_as"] = a.same_as
+        pg.log(f"inputs: cópia de {ref_dir / 'inputs'} ({len(snap) - 1} ficheiros)")
+    else:
+        snap = CAT.snapshot(live_root, inputs)
+        rb_cfg_src = Path(a.realbot_config) if a.realbot_config else (live_root.parents[1] / "config" / "params.json")
+        if not rb_cfg_src.exists():
+            rb_cfg_src = REPO / "config" / "params.json"
+        shutil.copy2(rb_cfg_src, inputs / "realbot_params.json")
     os.environ["PAPER_LAB_ROOT"] = str(inputs)
     os.environ.pop("LIVE_TRADING", None)
 
-    from backtest import data as D, states as ST, models as M, engine as EN, metrics as MET, report as REP
+    from backtest import data as D, states as ST, models as M, engine as EN, metrics as MET, report as REP, history as H
     from bot import params as P, lab_registry as R, lab_criteria as LC
     from bot.backends import load_models_cfg
     cfg = json.loads((inputs / "config.json").read_text())
@@ -157,11 +234,34 @@ def main(argv=None) -> int:
     try:
         # ------------------------------------------------------------ dados
         pg.phase("dados")
-        data = D.fetch_all(cache_dir, start, end, syms, logf=pg.logf)
-        unusable = [s for s in syms if not data["coverage"][s].get("usable")]
-        if unusable:
-            notes.append(f"ativos inutilizáveis (cobertura < 90%): {unusable}")
-        slip, slip_info = slippage_from_live(live_root, float(cfg["fees"].get("extra_slippage_bps", 5)), memecoins, end)
+        prefer = None
+        if ref_dir is not None:
+            prefer = {s_: (v.get("source") or "").replace(" 1m", "")
+                      for s_, v in json.loads((ref_dir / "summary.json").read_text())["assets"].items()}
+        data = D.fetch_all(cache_dir, start, end, syms, logf=pg.logf, prefer=prefer)
+        unusable = []
+        for s_ in syms:
+            cv = data["coverage"][s_]
+            hc = cv.get("hourly_coverage")
+            if not cv.get("usable") or (hc is not None and hc < D.MIN_COVERAGE):
+                unusable.append(s_)
+                notes.append(f"{s_}: cobertura insuficiente nesta janela (1 m {cv.get('coverage', 0) * 100:.1f}%, 1 h "
+                             f"{(hc or 0) * 100:.1f}%; mínimo {D.MIN_COVERAGE * 100:.0f}%; ex.: moeda ainda não listada no início "
+                             "da janela) — os portfólios deste ativo ficam fora deste run")
+        if data["coverage"].get("SOL_binance_grid", {}).get("coverage", 0) < D.MIN_COVERAGE and "SOL" not in unusable:
+            unusable.append("SOL")
+            notes.append("SOL: grelha Binance de 1 s com cobertura < 90% — portfólios SOL e bot real fora deste run")
+        pg.log(f"cobertura: " + ", ".join(f"{s_} {data['coverage'][s_].get('coverage', 0) * 100:.2f}%/1h "
+                                          f"{(data['coverage'][s_].get('hourly_coverage') or 0) * 100:.1f}%" for s_ in syms)
+               + f"; grelha SOL {data['coverage']['SOL_binance_grid']['coverage'] * 100:.2f}%")
+        if ref_dir is not None:
+            # custos de execução por ativo = os do run de referência (mesmos pressupostos; os fills ao vivo só começam
+            # em setembro, por isso uma janela antiga cairia nos valores de recurso)
+            ref_assets = json.loads((ref_dir / "summary.json").read_text())["assets"]
+            slip = {s_: float((ref_assets[s_].get("slippage") or {}).get("quote_slippage_bps")) for s_ in syms}
+            slip_info = {s_: dict(ref_assets[s_].get("slippage") or {}, from_run=a.same_as) for s_ in syms}
+        else:
+            slip, slip_info = slippage_from_live(live_root, float(cfg["fees"].get("extra_slippage_bps", 5)), memecoins, end)
         pg.log(f"slippage por ativo (bps sobre a marca, antes do extra de {cfg['fees'].get('extra_slippage_bps')} bps): {slip}")
 
         # ------------------------------------------------------------ catálogo
@@ -176,7 +276,7 @@ def main(argv=None) -> int:
 
         # ------------------------------------------------------------ modelos
         pg.phase("modelos")
-        M.start_servers(servers, Path(a.jev_alts).expanduser(), logf=pg.logf)
+        M.start_servers(servers, Path(a.jev_alts).expanduser(), logf=pg.logf, background=a.bg_servers)
         started_servers = True
         cache = M.ModelCache(cache_dir / "model_answers.sqlite")
         client = M.ModelClient(cache, jev_cfg=jcfg, jev_max_calls=a.jev_max_calls, workers=4, logf=pg.logf)
@@ -252,7 +352,7 @@ def main(argv=None) -> int:
                 notes.append(f"bot real {prof}: {errs}")
         eng = EN.Engine(data=data, start=start, end=end, step=a.step, items=items, client=client, cfg=cfg,
                         memecoins=memecoins, slip_bps=slip, crit_files={}, logf=pg.logf, jev_ready=jev_ready,
-                        progress=pg.log, realbot_params=rb_vals).setup()
+                        progress=pg.log, realbot_params=rb_vals, eq_every=eq_every).setup()
         eng.run()
         pg.log(f"simulação: {eng.counts}, trades {len(eng.env.trades)}")
         pg.phase("bot_real")
@@ -267,16 +367,25 @@ def main(argv=None) -> int:
             trades_by.setdefault(t.get("portfolio"), []).append(t)
         ports = []
         lookahead_from = datetime.fromisoformat("2026-10-01T22:24:00-03:00").timestamp()
+        js = client.stats.get("jev") or {}
+        jev_nodata = None
+        if jev_ready and js.get("lookups") and js.get("fail_closed", 0) / js["lookups"] > 0.05:
+            jev_nodata = (f"{js['fail_closed']}/{js['lookups']} decisões sem resposta (fail-closed → hold): "
+                          f"{js.get('last_error') or ('teto de chamadas' if client.jev_budget_hit else 'erro')}")
+            notes.append(f"Jev sem dados em parte da janela — {jev_nodata}; portfólios jev_* marcados 'sem dados'")
         for it in items:
             n = it["name"]
             rows = eng.rec.rows.get(n) or []
             if len(rows) < 3:
                 notes.append(f"{n}: sem série de equity")
                 continue
-            v = MET.verdict(n, dict(it["meta"], kind=it["kind"]), rows, trades_by.get(n, []), start, end)
+            v = MET.verdict(n, dict(it["meta"], kind=it["kind"]), rows, trades_by.get(n, []), start, end,
+                            grid=grid, block_s=blk_s, n_blocks=n_blk, need_blocks=need_blk)
             s = v["stats"]
             created = (it["meta"].get("created_brt") or "")
-            look = bool(it["is_fork"]) and created and datetime.fromisoformat(created).timestamp() >= lookahead_from
+            # look-ahead só se a janela inclui os dias com que o fork foi desenhado (2026-10-01 → 2026-10-06)
+            look = (bool(it["is_fork"]) and bool(created) and datetime.fromisoformat(created).timestamp() >= lookahead_from
+                    and end > lookahead_from)
             ports.append({
                 "name": n, "family": it["family"], "asset": it["asset"], "model": it["model"], "test_type": it["test_type"],
                 "profile": it["profile"], "parent": it["parent"], "is_fork": it["is_fork"], "label": it["label"],
@@ -288,7 +397,14 @@ def main(argv=None) -> int:
                 "weeks_beat_bh": v["weeks_beat_bh"], "verdict": v["verdict"], "verdict_reason": v["verdict_reason"],
                 "p_bh": REP._r(v["p_bh"]), "p_usdc": REP._r(v["p_usdc"]), "fees": REP._r(s["fees"]),
                 "cost_vs_mark": REP._r(s["cost_vs_mark"]), "look_ahead": look,
+                "blocks_beat_bh": v["blocks_beat_bh"], "block_unit": v["block_unit"],
             })
+            if long_run:
+                ports[-1]["months"] = v["blocks_pnl"]
+                ports[-1]["months_beat_bh"] = v["blocks_beat_bh"]
+            if it["model"] == "jev" and jev_nodata:
+                ports[-1]["no_data"] = True
+                ports[-1]["verdict_reason"] = f"sem dados (Jev: {jev_nodata}); " + ports[-1]["verdict_reason"]
             REP.write_equity(run_dir, n, rows)
             if trades_by.get(n):
                 REP.write_trades(run_dir, n, [REP.slim_trade(t) for t in trades_by[n]])
@@ -328,12 +444,15 @@ def main(argv=None) -> int:
         from backtest import validate as VAL
         live_t0 = max(start, int(lookahead_from))
         validation = {"overlap_brt": [datetime.fromtimestamp(live_t0, tz=BRT).isoformat(), datetime.fromtimestamp(end, tz=BRT).isoformat()]}
-        try:
-            validation["states"] = VAL.state_agreement(live_root, data, live_t0, end, syms)
-            validation["models"] = VAL.model_agreement(live_root, client, live_t0, end)
-            validation["trades_overlap"] = VAL.trade_counts(live_root, trades_by, live_t0, end, [p["name"] for p in ports])
-        except Exception as ex:
-            validation["error"] = f"{type(ex).__name__}: {ex}"
+        if live_t0 >= end:
+            validation = {"skipped": "a janela acaba antes do início do run ao vivo (2026-10-01 22:24): sem período comum"}
+        else:
+            try:
+                validation["states"] = VAL.state_agreement(live_root, data, live_t0, end, syms)
+                validation["models"] = VAL.model_agreement(live_root, client, live_t0, end)
+                validation["trades_overlap"] = VAL.trade_counts(live_root, trades_by, live_t0, end, [p["name"] for p in ports])
+            except Exception as ex:
+                validation["error"] = f"{type(ex).__name__}: {ex}"
         pg.log(f"validação: estados {validation.get('states')} modelos {validation.get('models')}")
 
         # ------------------------------------------------------------ resumo
@@ -369,8 +488,9 @@ def main(argv=None) -> int:
             f"({cfg['starting_balances'].get('sol_frac')} em SOL ao preço do início da janela); memecoins com "
             f"{memecoins.get('start_usdt_each')} USDT; bot real com 0.017392206 SOL + 50.00929 USDT. Forks e hipóteses começam "
             "com o capital da família no início da janela (não com o estado do pai).",
-            "Parâmetros: params.json + registry + overlay do run ao vivo (instantâneo em inputs/), resolvidos por bot/params.py; "
-            "nenhuma pausa do dashboard é aplicada.",
+            "Parâmetros: params.json + registry + overlay do run ao vivo (instantâneo em inputs/"
+            + (f", copiado do run {a.same_as} para manter o MESMO catálogo e os mesmos pressupostos" if a.same_as else "")
+            + "), resolvidos por bot/params.py; nenhuma pausa do dashboard é aplicada.",
             "Estado: palavras deep/quiet (profundidade/taxas) constantes, como em todas as decisões registadas ao vivo (as marcas "
             "Coinbase/Gate.io têm impacto 0). SOL: grelha de 10 s da Binance (ao vivo ~1 marca/10,4 s, sol_bot + rules_bot); "
             "memecoins: fecho de 1 m (ao vivo ~1 marca/60 s). Bot real: 16 fechos de 1 m da Binance; spread/profundidade/taxas "
@@ -378,7 +498,8 @@ def main(argv=None) -> int:
             "Preços: SOL Coinbase 1 m (fonte da marcação ao vivo); memecoins Bybit/KuCoin 1 m escolhidas pela correlação com a "
             "Gate.io (fonte ao vivo, só ~7 dias de 1 m disponíveis). Lacunas ≤ 5 min preenchidas com o último fecho.",
             "Fills: cotação sintética = marca × (1 ± custo por ativo), com o custo mediano dos fills reais (Jupiter/Raydium) do "
-            f"run ao vivo menos o extra de {cfg['fees'].get('extra_slippage_bps')} bps que o código soma: "
+            f"run ao vivo{' (os mesmos valores do ' + a.same_as + ')' if a.same_as else ''} menos o extra de "
+            f"{cfg['fees'].get('extra_slippage_bps')} bps que o código soma: "
             + ", ".join(f"{k} {v:.1f} bps" for k, v in slip.items()) + "; taxa de rede 5e-6 SOL. Bot real: 10 bps (paper_cost_bps).",
             "Ordens limite (H3): enchem quando a mínima (compra) ou máxima (venda) do minuto cruza o limite; saídas TP/SL/trailing "
             "avaliadas no fecho de cada minuto (ao vivo: na marca de cada ciclo).",
@@ -387,11 +508,26 @@ def main(argv=None) -> int:
             "Modelos: servidores próprios (portas 8865–8867, mesmos venvs/comandos do lab); cada par (critérios, estado) chamado "
             "uma vez e guardado em cache; falha → hold (fail-closed). Ensemble H2: janelas de percentil com o mesmo número de "
             "decisões que ao vivo (480 SOL / 200 memes), que a 60 s cobrem um período ~4× maior no SOL.",
-            "Veredito: regra do run ao vivo (≥30 round trips fechados; dias cumpridos pela janela; bate B&H com p<0,05 por "
-            "block-bootstrap, PnL acima da barra de 6%/a USDC, excesso positivo em ≥3 de 4 semanas). Semanas = 4 blocos de 7 dias "
-            "contados do fim da janela.",
-            "Look-ahead: forks criados a partir de 2026-10-03 usaram dados de 2026-10-01 a 2026-10-06 (fim desta janela).",
+            ("Veredito: regra do run ao vivo (≥30 round trips fechados; dias cumpridos pela janela; bate B&H com p<0,05 por "
+             "block-bootstrap, PnL acima da barra de 6%/a USDC, excesso positivo em ≥3 de 4 semanas). Semanas = 4 blocos de 7 dias "
+             "contados do fim da janela." if not long_run else
+             f"Veredito: a MESMA regra do run ao vivo (≥30 round trips fechados; bate B&H com p<0,05 por block-bootstrap; PnL "
+             f"acima da barra de 6%/a USDC), com a consistência semanal trocada por mensal: excesso vs B&H positivo em ≥ "
+             f"{need_blk} de {n_blk} blocos de 30 dias contados do fim da janela. Escala: equity gravada e métricas (exposição, "
+             "habilidade, timing com placebo, bootstrap) numa grelha de 1 h em vez de 5 min — o placebo é O(n²) e a 5 min "
+             "seriam 51 840 pontos por portfólio; o bootstrap usa blocos de 12 pontos (12 h). O MDD também é medido na "
+             "grelha de 1 h (pode subestimar quedas intra-hora). As 4 últimas semanas continuam no summary (weeks_*)."),
+            ("Look-ahead: forks criados a partir de 2026-10-03 usaram dados de 2026-10-01 a 2026-10-06 (fim desta janela)."
+             if end > lookahead_from else
+             "Sem look-ahead: a janela acaba antes de 2026-10-01; os forks (desenhados com 2026-10-01 → 2026-10-06) estão "
+             "fora da amostra."),
         ]
+        if long_run:
+            assumptions.append(f"Janela longa contínua: um único caminho de {a.days:g} dias com o capital inicial no início da "
+                               "janela (posições, cooldowns e janelas do ensemble herdados de mês para mês); chart.json com as "
+                               "curvas normalizadas (1000 = início).")
+        if any("cobertura insuficiente" in n_ for n_ in notes):
+            assumptions.append("Ativos com cobertura < 90% nesta janela ficam fora (ver Notas da execução).")
         if jev_ready:
             assumptions.append(f"Jev hospedado: só portfólios SOL; teto de {a.jev_max_calls} chamadas.")
         else:
@@ -402,15 +538,34 @@ def main(argv=None) -> int:
                        "days": a.days, "step_s": a.step},
             "assets": assets, "assumptions": assumptions, "models": models_out,
             "winner": {"by_skill": by_skill, "by_pnl": by_pnl, "by_verdict": by_verdict,
-                       "text": REP.winner_text(by_skill, by_pnl, by_verdict, ports, a.days)},
+                       "text": REP.winner_text(by_skill, by_pnl, by_verdict, ports, a.days,
+                                               unit="meses" if long_run else "semanas", need=need_blk, nblk=n_blk)},
             "families": REP.families(ports), "portfolios": ports, "realbot": realbot,
             "runtime": {"phases_at_s": pg.phases, "total_s": round(time.time() - pg.t0, 1), "engine": eng.counts,
                         "lab_criteria_calls": eng.lab.crit.stats},
             "inputs": snap, "notes": notes, "validation": validation,
+            "kind": H.run_kind(a.days), "same_as": a.same_as, "excluded_assets": unusable,
+            "consistency": {"unit": "meses" if long_run else "semanas", "n": n_blk, "need": need_blk,
+                            "block_days": blk_s / 86400},
+            "grid_s": grid, "eq_every_s": eq_every,
         }
+        if long_run:
+            try:
+                chart = build_chart_for_run(eng, data, ports, rb, trades_by, start, end, syms, grid)
+                (run_dir / "chart.json").write_text(json.dumps(chart, ensure_ascii=False, separators=(",", ":")))
+                summary["chart"] = "chart.json"
+                pg.log(f"chart.json: {len(chart['t'])} pontos, {len(chart['top'])} portfólios em destaque, "
+                       f"{len(chart['families'])} famílias, {len(chart['monthly'])} meses")
+            except Exception as ex:      # o gráfico não deve deitar fora um run longo já simulado
+                notes.append(f"chart.json falhou: {type(ex).__name__}: {ex}")
+                pg.log(f"chart.json falhou: {type(ex).__name__}: {ex}\n{traceback.format_exc()}")
         (run_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=1))
         (run_dir / "report.md").write_text(REP.report_md(summary, {"notes": notes}))
-        (out_root / "latest").write_text(run_id + "\n")
+        new_latest = H.latest_after(out_root, run_id, summary["kind"], summary["window"]["end_brt"])
+        if new_latest:
+            (out_root / "latest").write_text(new_latest + "\n")
+        idx = H.write_history(out_root, summary)
+        pg.log(f"index.json: {len(idx['runs'])} runs; latest → {new_latest}; history.md atualizado")
         pg.phase("fim", total_s=round(time.time() - pg.t0, 1))
         pg.log(f"pronto: {run_dir} ({len(ports)} portfólios + bot real A/B) em {time.time() - pg.t0:.0f}s")
         return 0

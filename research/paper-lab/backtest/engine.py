@@ -71,7 +71,7 @@ def bh_of(p, px):
 
 class Engine:
     def __init__(self, *, data, start, end, step, items, client, cfg, memecoins, slip_bps, crit_files, logf=None,
-                 jev_ready=False, progress=None, realbot_params=None, realbot_step=15):
+                 jev_ready=False, progress=None, realbot_params=None, realbot_step=15, eq_every=EQ_EVERY):
         import bot.lab_bot as LB
         import bot.rules_bot as RB
         from bot import lab_registry as R
@@ -88,6 +88,7 @@ class Engine:
         self.progress = progress
         self.realbot_params = realbot_params or {}
         self.realbot_step = realbot_step
+        self.eq_every = int(eq_every)      # grelha da equity gravada (5 min; 1 h nas janelas longas, por memória)
         self.clock = Clock(start)
         self.marks: dict = {}
         self.lowhigh: dict = {}
@@ -323,10 +324,10 @@ class Engine:
                 self.counts["rule_bars"] += 1
             else:
                 self.rules.exits_only(t)
-            if (t - self.start) % EQ_EVERY == 0 or k == n_steps:
+            if (t - self.start) % self.eq_every == 0 or k == n_steps:
                 self.record(t)
             self.counts["steps"] += 1
-            if self.progress and k % 1440 == 0:
+            if self.progress and k % (1440 * max(1, n_steps // 43200)) == 0:
                 el = _rt.time() - t0
                 self.progress(f"simulação {k}/{n_steps} passos ({k / n_steps * 100:.0f}%), {el:.0f}s, "
                               f"trades {len(self.env.trades)}")
@@ -378,7 +379,7 @@ class Engine:
                         n_exec += 1
                         _f, _r, book, _tr = JP._gate_fill(cfg, book, side=gate.action, confidence=model.confidence, px=p, t=ts)
                     n_dec += 1
-                    if (t - self.start) % EQ_EVERY == 0:
+                    if (t - self.start) % self.eq_every == 0:
                         eq.append({"ts": t, "equity": book.usdt + book.sol * p, "price": p,
                                    "bh_equity": ST.REAL_USDT_UI + ST.REAL_SOL_UI * p, "q": book.sol})
                 last_p = float(gf[(self.end - int(g[0])) // int(g[1] - g[0])])

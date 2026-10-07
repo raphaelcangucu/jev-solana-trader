@@ -113,7 +113,11 @@ def fetch_bybit_1m(symbol: str, start: int, end: int, progress=None) -> list[tup
         e = min(end, cur + 1000 * 60)
         url = (f"https://api.bybit.com/v5/market/kline?category=spot&symbol={symbol}&interval=1"
                f"&start={cur * 1000}&end={(e - 60) * 1000}&limit=1000")
-        d = get_json(url, host_gap=0.15)
+        for attempt in range(8):            # a Bybit devolve "internal error" intermitente (retCode ≠ 0): nova tentativa
+            d = get_json(url, host_gap=0.15)
+            if d.get("retCode") == 0 or "not supported" in str(d.get("retMsg")).lower() or "invalid" in str(d.get("retMsg")).lower():
+                break
+            time.sleep(min(30, 2 * (attempt + 1)))
         if d.get("retCode") != 0:
             raise RuntimeError(f"bybit {symbol}: {d.get('retMsg')}")
         for c in d["result"]["list"]:
@@ -132,7 +136,11 @@ def fetch_kucoin_1m(symbol: str, start: int, end: int, progress=None) -> list[tu
     while cur < end:
         e = min(end, cur + 1500 * 60)
         url = f"https://api.kucoin.com/api/v1/market/candles?type=1min&symbol={symbol}&startAt={cur}&endAt={e - 1}"
-        d = get_json(url, host_gap=0.35)
+        for attempt in range(6):
+            d = get_json(url, host_gap=0.35)
+            if str(d.get("code")) == "200000":
+                break
+            time.sleep(min(30, 2 * (attempt + 1)))
         if str(d.get("code")) != "200000":
             raise RuntimeError(f"kucoin {symbol}: {d.get('msg')}")
         for c in d["data"]:
@@ -169,27 +177,27 @@ def fetch_gate_1m(pair: str, start: int, end: int) -> list[tuple]:
 
 # ------------------------------------------------------------------ Binance 1 s → grelha de 5 s
 
-def _binance_day_rows(symbol: str, day: str, raw_dir: Path) -> list[tuple]:
-    """(open_s, close) das velas de 1 s de um dia (zip diário de data.binance.vision, guardado em raw_dir)."""
+def _binance_day_rows(symbol: str, day: str, raw_dir: Path) -> tuple[np.ndarray, np.ndarray]:
+    """(abertura_s, fecho) das velas de 1 s de um dia (zip diário de data.binance.vision, guardado em raw_dir)."""
     zp = raw_dir / f"{symbol}-1s-{day}.zip"
     if not zp.exists():
         blob = http_get(f"https://data.binance.vision/data/spot/daily/klines/{symbol}/1s/{symbol}-1s-{day}.zip",
                         host_gap=0.3)
         zp.write_bytes(blob)
-    out = []
+    ts, cl = [], []
     with zipfile.ZipFile(zp) as z:
         with z.open(z.namelist()[0]) as f:
             for line in io.TextIOWrapper(f):
-                p = line.split(",")
+                p = line.split(",", 5)
                 if not p or not p[0].strip().isdigit():
                     continue
                 t = int(p[0])
-                t = t // 1_000_000 if t > 10**14 else t // 1000   # µs (desde 2025) ou ms
-                out.append((t, float(p[4])))
-    return out
+                ts.append(t // 1_000_000 if t > 10**14 else t // 1000)   # µs (desde 2025) ou ms
+                cl.append(float(p[4]))
+    return np.array(ts, dtype=np.int64), np.array(cl, dtype=float)
 
 
-def _binance_api_1s(symbol: str, start: int, end: int) -> list[tuple]:
+def _binance_api_1s(symbol: str, start: int, end: int) -> tuple[np.ndarray, np.ndarray]:
     out = []
     cur = start
     while cur < end:
@@ -202,14 +210,15 @@ def _binance_api_1s(symbol: str, start: int, end: int) -> list[tuple]:
         for c in d:
             out.append((int(c[0]) // 1000, float(c[4])))
         cur = max(cur + 1, int(d[-1][0]) // 1000 + 1)
-    return out
+    return np.array([r[0] for r in out], dtype=np.int64), np.array([r[1] for r in out], dtype=float)
 
 
 def fetch_binance_grid(symbol: str, start: int, end: int, raw_dir: Path, grid: int = 5, logf=None) -> tuple[np.ndarray, np.ndarray]:
-    """Grelha de `grid` s: preço em T = fecho da última vela de 1 s com abertura < T. NaN sem negócio há > 120 s."""
+    """Grelha de `grid` s: preço em T = fecho da última vela de 1 s com abertura < T. NaN sem negócio há > 120 s.
+    Dia a dia em arrays numpy (6 meses de velas de 1 s cabem em ~300 MB; listas de tuplos não caberiam)."""
     raw_dir.mkdir(parents=True, exist_ok=True)
-    rows = []
-    d0 = datetime.fromtimestamp(start, tz=timezone.utc).date()
+    ts_parts, c_parts = [], []
+    d0 = datetime.fromtimestamp(start - 3600, tz=timezone.utc).date()
     d1 = datetime.fromtimestamp(end - 1, tz=timezone.utc).date()
     today = datetime.now(tz=timezone.utc).date()
     day = d0
@@ -218,16 +227,23 @@ def fetch_binance_grid(symbol: str, start: int, end: int, raw_dir: Path, grid: i
         try:
             if day >= today:
                 raise RuntimeError("dia corrente")
-            rows += _binance_day_rows(symbol, ds, raw_dir)
+            t, c = _binance_day_rows(symbol, ds, raw_dir)
         except RuntimeError as e:
             a = int(datetime(day.year, day.month, day.day, tzinfo=timezone.utc).timestamp())
             log(f"binance {symbol} {ds}: sem ficheiro diário ({str(e)[:60]}); API 1 s", logf)
-            rows += _binance_api_1s(symbol, max(a, start - 60), min(a + 86400, end))
+            t, c = _binance_api_1s(symbol, max(a, start - 3600), min(a + 86400, end))
+        sel = (t >= start - 3600) & (t < end)
+        ts_parts.append(t[sel]); c_parts.append(c[sel])
         day += timedelta(days=1)
-    rows = sorted(set(r for r in rows if start - 3600 <= r[0] < end))
-    t = np.array([r[0] for r in rows], dtype=np.int64)
-    c = np.array([r[1] for r in rows], dtype=float)
+    t = np.concatenate(ts_parts) if ts_parts else np.zeros(0, dtype=np.int64)
+    c = np.concatenate(c_parts) if c_parts else np.zeros(0)
+    order = np.argsort(t, kind="stable")
+    t, c = t[order], c[order]
+    t, first = np.unique(t, return_index=True)
+    c = c[first]
     g = np.arange(start, end + 1, grid, dtype=np.int64)
+    if len(t) == 0:
+        return g, np.full(len(g), np.nan)
     idx = np.searchsorted(t, g, side="left") - 1          # última vela com abertura < T
     px = np.where(idx >= 0, c[np.clip(idx, 0, None)], np.nan)
     age = g - np.where(idx >= 0, t[np.clip(idx, 0, None)], -10**9)
@@ -254,14 +270,43 @@ def load_rows(path: Path) -> list[tuple]:
 
 
 def cached(path: Path, meta_need: dict, fetch, logf=None):
-    """Lê `path` se o .meta.json cobrir o pedido; senão chama fetch() e grava."""
+    """Lê `path` se o .meta.json cobrir o pedido. Se cobrir só parte (mesma fonte), busca SÓ as partes em falta
+    (antes do início e/ou depois do fim da cache) com `fetch(a, b)`, junta, grava a união e devolve o pedido.
+    `fetch(a, b)` devolve as linhas (ts, o, h, l, c, v) com a ≤ ts < b."""
     mp = path.with_suffix(".meta.json")
+    a, b = int(meta_need["start"]), int(meta_need["end"])
+
+    def _fetch(lo, hi):
+        return list(fetch(lo, hi))
+
     if path.exists() and mp.exists():
         m = json.loads(mp.read_text())
-        if m.get("start") <= meta_need["start"] and m.get("end") >= meta_need["end"] and m.get("source") == meta_need.get("source"):
-            rows = [r for r in load_rows(path) if meta_need["start"] <= r[0] < meta_need["end"]]
-            return rows, True
-    rows = fetch()
+        if m.get("source") == meta_need.get("source"):
+            c0, c1 = int(m.get("start")), int(m.get("end"))
+            if c0 <= a and c1 >= b:
+                rows = [r for r in load_rows(path) if a <= r[0] < b]
+                return rows, True
+            # extensão: só as partes em falta (a cache fica contígua: o pedaço novo cola-se ao início ou ao fim)
+            old = load_rows(path)
+            new = []
+            parts = []
+            if a < c0:
+                parts.append((a, c0))
+            if b > c1:
+                parts.append((c1, b))
+            for lo, hi in parts:
+                got = _fetch(lo, hi)
+                log(f"{path.name}: extensão {_iso(lo)} → {_iso(hi)}: {len(got)} linhas novas", logf)
+                new += got
+            merged = {}
+            for r in old + new:
+                merged.setdefault(r[0], r)
+            rows_all = [merged[k] for k in sorted(merged)]
+            save_rows(path, rows_all)
+            mp.write_text(json.dumps(dict(meta_need, start=min(a, c0), end=max(b, c1), fetched_at=time.time(),
+                                          n=len(rows_all), extended=True)))
+            return [r for r in rows_all if a <= r[0] < b], False
+    rows = _fetch(a, b)
     save_rows(path, rows)
     mp.write_text(json.dumps(dict(meta_need, fetched_at=time.time(), n=len(rows))))
     return rows, False
@@ -347,9 +392,11 @@ def basis_check(a: MinuteSeries, b_rows: list[tuple]) -> dict | None:
 # ------------------------------------------------------------------ orquestração
 
 def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: int = 1440, warm_h: int = 30 * 24,
-              logf=None, binance_grid: int = 5) -> dict:
+              logf=None, binance_grid: int = 5, prefer: dict | None = None) -> dict:
     """Busca e guarda tudo o que o backtest precisa. Devolve {"minute": {SYM: MinuteSeries}, "hourly": {SYM: bars},
-    "sol_grid": (t, px), "coverage": {...}, "sources": {...}, "basis": {...}}."""
+    "sol_grid": (t, px), "coverage": {...}, "sources": {...}, "basis": {...}}.
+    `prefer` ({SYM: "bybit:BONKUSDT"}): fonte a usar se tiver cobertura suficiente (repetir a escolha de um run anterior;
+    a verificação contra a Gate.io só existe para os últimos ~7 dias)."""
     raw = out / "raw"
     raw.mkdir(parents=True, exist_ok=True)
     m0 = start - warm_min * 60
@@ -357,7 +404,7 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
     res = {"minute": {}, "hourly": {}, "coverage": {}, "sources": {}, "basis": {}, "rows": {}, "m0": m0}
 
     need = {"start": m0, "end": end, "source": "coinbase:SOL-USD"}
-    rows, hit = cached(raw / "SOL_1m.csv.gz", need, lambda: fetch_coinbase_1m("SOL-USD", m0, end), logf)
+    rows, hit = cached(raw / "SOL_1m.csv.gz", need, lambda a, b: fetch_coinbase_1m("SOL-USD", a, b), logf)
     log(f"SOL 1m coinbase: {len(rows)} velas{' (cache)' if hit else ''}", logf)
     res["rows"]["SOL"] = rows
     res["sources"]["SOL"] = "coinbase:SOL-USD 1m"
@@ -369,7 +416,7 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
         pair = f"{sym}_USDT"
         need = {"start": m0, "end": end, "source": f"gate:{pair}"}
         try:
-            gate_rows[sym], _ = cached(raw / f"{sym}_1m_gate_check.csv.gz", need, lambda pair=pair: fetch_gate_1m(pair, m0, end), logf)
+            gate_rows[sym], _ = cached(raw / f"{sym}_1m_gate_check.csv.gz", need, lambda a, b, pair=pair: fetch_gate_1m(pair, a, b), logf)
         except Exception as e:
             gate_rows[sym] = []
             res["basis"][sym] = {"error": str(e)[:120]}
@@ -382,7 +429,7 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
             need = {"start": m0, "end": end, "source": f"{src}:{inst}"}
             fn = {"bybit": fetch_bybit_1m, "kucoin": fetch_kucoin_1m}[src]
             try:
-                rows, hit = cached(raw / f"{sym}_1m_{src}.csv.gz", need, lambda fn=fn, inst=inst: fn(inst, m0, end), logf)
+                rows, hit = cached(raw / f"{sym}_1m_{src}.csv.gz", need, lambda a, b, fn=fn, inst=inst: fn(inst, a, b), logf)
             except Exception as e:
                 log(f"{sym} 1m {src}: erro {str(e)[:120]}", logf)
                 continue
@@ -399,6 +446,10 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
             continue
         # fonte com cobertura suficiente e retornos mais parecidos com os da Gate.io (marcação ao vivo)
         best = max(cands, key=lambda c: (c[0], c[1], c[2]))
+        want = (prefer or {}).get(sym)
+        for c in cands:
+            if want and f"{c[3]}:{c[4]}" == want and c[0]:
+                best = c
         res["rows"][sym] = best[5]
         res["sources"][sym] = f"{best[3]}:{best[4]} 1m"
         res["basis"][sym] = dict(best[6], vs="gate.io (fonte da marcação ao vivo)",
@@ -420,10 +471,17 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
         g, px = g[sel], px[sel]
         log(f"SOL grelha {binance_grid}s binance: {len(g)} pontos (cache)", logf)
     else:
-        g, px = fetch_binance_grid("SOLUSDT", m0, end, raw / "binance", grid=binance_grid, logf=logf)
+        # a grelha guardada passa a cobrir a UNIÃO do pedido com o que já estava (os zips diários ficam em cache,
+        # por isso só se descarregam os dias em falta)
+        u0 = int(min(m0, meta.get("start", m0))) if gp.exists() else m0
+        u1 = int(max(end, meta.get("end", end))) if gp.exists() else end
+        u0 -= (u0 - m0) % binance_grid
+        g, px = fetch_binance_grid("SOLUSDT", u0, u1, raw / "binance", grid=binance_grid, logf=logf)
         np.savez_compressed(gp, t=g, px=px)
-        gm.write_text(json.dumps({"start": m0, "end": end, "grid": binance_grid}))
-        log(f"SOL grelha {binance_grid}s binance: {len(g)} pontos, {int(np.isnan(px).sum())} NaN", logf)
+        gm.write_text(json.dumps({"start": u0, "end": u1, "grid": binance_grid}))
+        log(f"SOL grelha {binance_grid}s binance: {len(g)} pontos ({_iso(u0)} → {_iso(u1)}), {int(np.isnan(px).sum())} NaN", logf)
+        sel = (g >= m0) & (g <= end)
+        g, px = g[sel], px[sel]
     res["sol_grid"] = (g, px)
     sel = (g >= start) & (g < end)
     res["coverage"]["SOL_binance_grid"] = {"points": int(sel.sum()), "nan": int(np.isnan(px[sel]).sum()),
@@ -436,16 +494,16 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
     from bot.rules_engine import fetch_coinbase_sol_1h, fetch_gate_1h
     need = {"start": h0, "end": end, "source": "coinbase:SOL-USD:1h"}
     rows, _ = cached(raw / "SOL_1h.csv.gz", need,
-                     lambda: [(b["ts"], b["open"], b["high"], b["low"], b["close"], b["volume"])
-                              for b in fetch_coinbase_sol_1h(h0, end)], logf)
+                     lambda a, b_: [(b["ts"], b["open"], b["high"], b["low"], b["close"], b["volume"])
+                                    for b in fetch_coinbase_sol_1h(a, b_) if a <= b["ts"] < b_], logf)
     res["hourly"]["SOL"] = bars_from_rows(rows)
     for sym in symbols:
         if sym == "SOL":
             continue
         need = {"start": h0, "end": end, "source": f"gate:{sym}_USDT:1h"}
         rows, _ = cached(raw / f"{sym}_1h.csv.gz", need,
-                         lambda sym=sym: [(b["ts"], b["open"], b["high"], b["low"], b["close"], b["volume"])
-                                          for b in fetch_gate_1h(f"{sym}_USDT", h0, end)], logf)
+                         lambda a, b_, sym=sym: [(b["ts"], b["open"], b["high"], b["low"], b["close"], b["volume"])
+                                                 for b in fetch_gate_1h(f"{sym}_USDT", a, b_) if a <= b["ts"] < b_], logf)
         res["hourly"][sym] = bars_from_rows(rows)
     for sym, bars in res["hourly"].items():
         cov = coverage([(b["ts"],) for b in bars], start, end, step=3600)

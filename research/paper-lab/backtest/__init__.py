@@ -10,4 +10,5 @@ Só simulação: nunca assina, nunca envia, nunca lê chaves de carteira. Módul
 - `engine`   — réplica dos bots (sol_bot, meme_bot, rules_bot, lab_bot) e do bot real (livros A/B).
 - `metrics`  — métricas do analytics ao vivo sobre séries simuladas e veredito adaptado a 30 dias.
 - `report`   — summary.json, equity/, trades/, report.md.
+- `history`  — histórico dos runs: index.json, latest (run mensal mais recente), chart.json das janelas longas, history.md.
 """

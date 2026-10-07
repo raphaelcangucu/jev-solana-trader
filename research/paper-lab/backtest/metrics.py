@@ -9,6 +9,12 @@ Veredito (regra ao vivo, `analytics.verdict`, adaptada à janela do backtest): m
 dias ≥ 21 (≥ 28 para regras/regime/híbridos) — a janela de 30 dias cumpre os dias; vencedora = bate o B&H (excesso > 0
 com p < 0,05 por block-bootstrap dos incrementos de 5 min do excesso) E o PnL passa a barra de 6%/a em USDC E o excesso
 é positivo em ≥ 3 das 4 semanas; perdedora = excesso < 0 com p < 0,05; senão inconclusiva.
+
+Janelas longas (ex.: 180 dias): a MESMA regra e os mesmos algoritmos, com duas mudanças de escala documentadas no
+relatório: (1) a grelha das séries passa de 5 min para 1 h (`grid=3600`): o placebo do timing é O(n²) e a 5 min
+seriam 51 840 pontos por portfólio; o bootstrap usa blocos de 12 pontos (= 12 h, em vez de 1 h); (2) a consistência
+semanal passa a mensal: blocos de 30 dias contados do fim da janela e excesso positivo em ≥ 4 de 6 meses
+(`block_s=30 dias`, `need_blocks=4`). As 4 últimas semanas continuam a ser calculadas (campo `weeks_*`).
 """
 from __future__ import annotations
 
@@ -17,13 +23,14 @@ import numpy as np
 from bot import analytics as A
 
 WEEK = 7 * 86400
+MONTH = 30 * 86400
 
 
 def _rows_for_analytics(rows):
     return [{"ts": r["ts"], "equity": r["equity"], "price": r["price"], "bh_equity": r["bh_equity"], "sol": r["q"]} for r in rows]
 
 
-def window_stats_rows(rows, trades, t_a, t_b):
+def window_stats_rows(rows, trades, t_a, t_b, grid=300.0):
     """Espelho de analytics.window_stats para linhas em memória (ts, equity, price, bh_equity, q)."""
     rows = _rows_for_analytics(rows)
     out = {"from": t_a, "to": t_b}
@@ -42,7 +49,7 @@ def window_stats_rows(rows, trades, t_a, t_b):
     pk = np.maximum.accumulate(em)
     out.update(start_value=E0, end_value=E1, pnl=pnl, pnl_pct=pnl / E0 * 100 if E0 else 0.0, bh_pnl=BH1 - BH0,
                ex_bh=pnl - (BH1 - BH0), ex_usdt=pnl, mdd_pct=float(((em - pk) / pk).min() * 100), hours=(r1["ts"] - t_a) / 3600)
-    gs = A._grid_series(series, t_a, t_b)
+    gs = A._grid_series(series, t_a, t_b, step=grid)
     if gs:
         g, E, P, BH, Q = gs
         W = np.where(E > 0, Q * P / E, 0)
@@ -76,10 +83,10 @@ def window_stats_rows(rows, trades, t_a, t_b):
     return out
 
 
-def excess_increments(rows, t_a, t_b, usdc_apy=0.06):
-    """(tempos, incrementos de 5 min do excesso vs B&H, incrementos do excesso vs barra USDC)."""
+def excess_increments(rows, t_a, t_b, usdc_apy=0.06, grid=300.0):
+    """(tempos, incrementos (5 min, ou `grid` s) do excesso vs B&H, incrementos do excesso vs barra USDC)."""
     rows = _rows_for_analytics(rows)
-    g = A._grid_series(rows, t_a, t_b)
+    g = A._grid_series(rows, t_a, t_b, step=grid)
     if not g:
         return None, None, None
     gg, E, P, BH, Q = g
@@ -90,37 +97,53 @@ def excess_increments(rows, t_a, t_b, usdc_apy=0.06):
     return gg[1:], x_bh, x_usdc
 
 
-def verdict(name, meta, rows, trades, t_a, t_b, cfg=None):
-    c = dict(A.VERDICT_DEFAULTS)
-    c.update(cfg or {})
-    s = window_stats_rows(rows, trades, t_a, t_b)
-    closed = int(s.get("sells") or 0)
-    days = (t_b - t_a) / 86400
-    rr = A.is_rule_or_regime(name, meta)
-    need_days = c["min_days_rule_regime"] if rr else c["min_days"]
-    ts, x, xu = excess_increments(rows, t_a, t_b, c["usdc_apy"])
-    p_win, p_lose = A.block_boot_p(x, c["boot_block"], c["boot_n"])
-    pu_win, _pu_lose = A.block_boot_p(xu, c["boot_block"], c["boot_n"])
-    usdc_bar = s["start_value"] * c["usdc_apy"] * days / 365
-    weeks_pnl, weeks_pos, weeks = [], 0, 0
-    eq = {r["ts"]: r["equity"] for r in rows}
+def blocks(rows, ts, x, t_b, block_s, n_blocks):
+    """PnL % por bloco (do mais antigo ao mais recente) e quantos blocos têm excesso vs B&H > 0. Blocos de `block_s`
+    segundos contados do fim da janela."""
+    pnl, pos, n = [], 0, 0
     times = np.array([r["ts"] for r in rows])
     E = np.array([r["equity"] for r in rows])
-    for k in range(3, -1, -1):                    # semanas da mais antiga para a mais recente
-        b = t_b - WEEK * k
-        a = b - WEEK
+    for k in range(n_blocks - 1, -1, -1):
+        b = t_b - block_s * k
+        a = b - block_s
         ia = int(np.searchsorted(times, a, side="right")) - 1
         ib = int(np.searchsorted(times, b, side="right")) - 1
         if ia < 0:
             ia = 0
-        weeks_pnl.append(round(float((E[ib] - E[ia]) / E[ia] * 100), 4) if E[ia] else 0.0)
+        pnl.append(round(float((E[ib] - E[ia]) / E[ia] * 100), 4) if E[ia] else 0.0)
         if ts is not None:
             m = (ts > a) & (ts <= b)
             if m.sum() > 10:
-                weeks += 1
-                weeks_pos += 1 if x[m].sum() > 0 else 0
+                n += 1
+                pos += 1 if x[m].sum() > 0 else 0
+    return pnl, pos, n
+
+
+def verdict(name, meta, rows, trades, t_a, t_b, cfg=None, grid=300.0, block_s=WEEK, n_blocks=4, need_blocks=None):
+    """Veredito do run ao vivo. Consistência: blocos de `block_s` (semanas; meses nas janelas longas), excesso
+    positivo em ≥ `need_blocks` de `n_blocks` (padrão: a regra ao vivo, 3 de 4 semanas)."""
+    c = dict(A.VERDICT_DEFAULTS)
+    c.update(cfg or {})
+    need_blocks = c["weeks_consistent"][0] if need_blocks is None else int(need_blocks)
+    unit = "semanas" if block_s == WEEK else "meses"
+    s = window_stats_rows(rows, trades, t_a, t_b, grid=grid)
+    closed = int(s.get("sells") or 0)
+    days = (t_b - t_a) / 86400
+    rr = A.is_rule_or_regime(name, meta)
+    need_days = c["min_days_rule_regime"] if rr else c["min_days"]
+    ts, x, xu = excess_increments(rows, t_a, t_b, c["usdc_apy"], grid=grid)
+    p_win, p_lose = A.block_boot_p(x, c["boot_block"], c["boot_n"])
+    pu_win, _pu_lose = A.block_boot_p(xu, c["boot_block"], c["boot_n"])
+    usdc_bar = s["start_value"] * c["usdc_apy"] * days / 365
+    weeks_pnl, weeks_pos, weeks = blocks(rows, ts, x, t_b, WEEK, 4)
+    if block_s == WEEK and n_blocks == 4:
+        b_pnl, b_pos, b_n = weeks_pnl, weeks_pos, weeks
+    else:
+        b_pnl, b_pos, b_n = blocks(rows, ts, x, t_b, block_s, n_blocks)
     out = {"stats": s, "p_bh": p_win, "p_bh_lose": p_lose, "p_usdc": pu_win, "usdc_bar": usdc_bar, "weeks_pnl": weeks_pnl,
-           "weeks_beat_bh": weeks_pos, "weeks": weeks, "closed_rt": closed, "need_days": need_days, "days": days}
+           "weeks_beat_bh": weeks_pos, "weeks": weeks, "closed_rt": closed, "need_days": need_days, "days": days,
+           "blocks_pnl": b_pnl, "blocks_beat_bh": b_pos, "blocks": b_n, "block_unit": unit, "need_blocks": need_blocks,
+           "n_blocks": n_blocks}
     minimums = closed >= c["min_closed_rt"] and days >= need_days
     if not minimums:
         why = []
@@ -130,9 +153,9 @@ def verdict(name, meta, rows, trades, t_a, t_b, cfg=None):
             why.append(f"{days:.1f}/{need_days} dias")
         out.update(verdict="inconclusiva", verdict_reason="mínimos não atingidos: " + ", ".join(why))
     elif (s["ex_bh"] > 0 and s["pnl"] > usdc_bar and p_win is not None and p_win < c["p_max"]
-          and weeks_pos >= c["weeks_consistent"][0]):
+          and b_pos >= need_blocks):
         out.update(verdict="vencedora", verdict_reason="bate o B&H e a barra de 6%/a em USDC, p<0,05 líquido de custos, "
-                                                       f"excesso positivo em {weeks_pos} de 4 semanas")
+                                                       f"excesso positivo em {b_pos} de {n_blocks} {unit}")
     elif s["ex_bh"] < 0 and p_lose is not None and p_lose < c["p_max"]:
         out.update(verdict="perdedora", verdict_reason="pior que o B&H com p<0,05")
     else:
@@ -143,8 +166,8 @@ def verdict(name, meta, rows, trades, t_a, t_b, cfg=None):
             bits.append(f"bate o B&H sem significância (p={p_win if p_win is None else round(p_win, 3)})")
         if s["pnl"] <= usdc_bar:
             bits.append("abaixo da barra USDC")
-        if weeks_pos < c["weeks_consistent"][0]:
-            bits.append(f"excesso positivo só em {weeks_pos} de 4 semanas")
+        if b_pos < need_blocks:
+            bits.append(f"excesso positivo só em {b_pos} de {n_blocks} {unit}")
         out.update(verdict="inconclusiva", verdict_reason="mínimos atingidos, mas " + "; ".join(bits or ["sem significância"]))
     return out
 

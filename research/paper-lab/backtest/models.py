@@ -78,6 +78,7 @@ def server_env(jev_alts: Path) -> dict:
     env.update({"VON_DEVICE": "cpu", "HF_HOME": str(jev_alts / "hf-cache"), "TRANSFORMERS_CACHE": str(jev_alts / "hf-cache"),
                 "HF_HUB_CACHE": str(jev_alts / "hf-cache" / "hub"), "TOKENIZERS_PARALLELISM": "false",
                 "JEV_ALTS_ROOT": str(jev_alts), "OMP_NUM_THREADS": "2", "MKL_NUM_THREADS": "2",
+                "OPENBLAS_NUM_THREADS": "2", "VECLIB_MAXIMUM_THREADS": "2", "NUMEXPR_NUM_THREADS": "2",
                 "LAYA_PORT": str(PORTS["laya"]), "POORJEV_PORT": str(PORTS["poorjev"])})
     env.pop("JEV_API_KEY", None)
     return env
@@ -208,7 +209,20 @@ class ModelClient:
         self.lock = threading.Lock()
         self.jev_budget_hit = False
         self.guard = None          # callable → True se o run ao vivo está saudável (prefetch espera se False)
-        self.chunk = 40
+        self.chunk = 10            # o guarda é consultado a cada `chunk` chamadas por modelo
+        self.guard_paused_s = 0.0
+
+    def wait_guard(self, max_wait: float = 1800.0) -> float:
+        """Espera (até max_wait s) enquanto o guarda disser que o run ao vivo está lento. Devolve os segundos parados."""
+        if self.guard is None:
+            return 0.0
+        w0 = time.time()
+        while not self.guard() and time.time() - w0 < max_wait:
+            time.sleep(15)
+        dt = time.time() - w0
+        with self.lock:
+            self.guard_paused_s += dt
+        return dt
 
     def register(self, cid: str, criteria: dict, model_field: str | None = None) -> str:
         csha = crit_sha(criteria, model_field or "")
@@ -239,12 +253,14 @@ class ModelClient:
                 st = self._st(model)
                 st["errors"] += 1
                 st["last_error"] = str((r or {}).get("error"))[:120]
-                # disjuntor do Jev: muitos erros seguidos sem nenhuma resposta válida → pára de chamar
-                if model == "jev" and st["errors"] >= 50 and st.get("ok", 0) == 0:
+                st["consec_errors"] = st.get("consec_errors", 0) + 1
+                # disjuntor do Jev: muitos erros sem nenhuma resposta válida, ou 50 seguidos (chave expirada a meio)
+                if model == "jev" and ((st["errors"] >= 50 and st.get("ok", 0) == 0) or st["consec_errors"] >= 50):
                     self.jev_budget_hit = True
             return None
         with self.lock:
             self._st(model)["ok"] = self._st(model).get("ok", 0) + 1
+            self._st(model)["consec_errors"] = 0
         return _slim(r)
 
     def get(self, model: str, cid: str, state: str) -> dict:
@@ -262,6 +278,8 @@ class ModelClient:
             st["fail_closed"] += 1
             st["budget_skipped"] += 1
             return dict(FAIL)
+        if model != "jev":
+            self.wait_guard()      # chamadas síncronas (fora da pré-busca) também respeitam o guarda do run ao vivo
         r = None
         for attempt in range(3):
             r = self._call(model, cid, state)
@@ -302,11 +320,9 @@ class ModelClient:
             with ThreadPoolExecutor(max_workers=min(self.workers, WORKERS.get(m, 1))) as ex:
                 for i in range(0, len(js), self.chunk):
                     if self.guard is not None:
-                        w0 = time.time()
-                        while not self.guard() and time.time() - w0 < 1800:
-                            time.sleep(15)
+                        dt = self.wait_guard()
                         with lock:
-                            prog["paused"] += time.time() - w0
+                            prog["paused"] += dt
                     futs = {ex.submit(self._call_retry, mm, cid, s): (mm, cid, s, key) for (mm, cid, s, key) in js[i:i + self.chunk]}
                     for f in as_completed(futs):
                         mm, cid, s, key = futs[f]
@@ -344,8 +360,9 @@ class ModelClient:
         return None
 
 
-def live_guard(live_root: Path, max_wall_ms: float = 5000.0, max_age_s: float = 90.0, log=None):
-    """Guarda do run ao vivo (só leitura de status.json): saudável se o último ciclo do sol_bot é recente e rápido."""
+def live_guard(live_root: Path, max_wall_ms: float = 5000.0, max_age_s: float = 60.0, log=None):
+    """Guarda do run ao vivo (só leitura de status.json): saudável se o último ciclo do sol_bot é recente (batimento
+    ≤ 60 s) e rápido (wall ≤ 5 s). Fora disso a pré-busca (e qualquer chamada síncrona a um servidor local) pára."""
     state = {"last": None}
 
     def ok():
