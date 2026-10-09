@@ -48,6 +48,14 @@ ensure() {
   if [[ -f $statusfile ]] && grep -q '"finished": true' "$statusfile" 2>/dev/null; then
     echo "$(date -Iseconds) $name finished; not restarting" >>"$LOG"; return 0
   fi
+  # Já há um processo deste script (pidfile perdido/desatualizado)? Adotar em vez de lançar um duplicado.
+  local live
+  live=$(pgrep -f "$script" 2>/dev/null | head -1)
+  if [[ -n "$live" ]]; then
+    echo "$live" >"$pidfile"
+    echo "$(date -Iseconds) $name já a correr (pid=$live); pidfile atualizado" >>"$LOG"
+    return 0
+  fi
   echo "$(date -Iseconds) starting $name" >>"$LOG"
   nohup "$PY" "$script" >>"$logfile" 2>&1 &
   echo $! >"$pidfile"
