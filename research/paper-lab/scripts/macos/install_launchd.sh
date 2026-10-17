@@ -6,6 +6,7 @@
 #   bash scripts/macos/install_launchd.sh --install-night | --uninstall-night | --kick-night   # só a revisão noturna
 #   bash scripts/macos/install_launchd.sh --install-trader-b | --uninstall-trader-b   # só o livro B do bot real (opcional)
 #   bash scripts/macos/install_launchd.sh --install-tunnel | --uninstall-tunnel       # túnel cloudflared para o painel (opcional)
+#   bash scripts/macos/install_launchd.sh --install-disk-guard | --uninstall-disk-guard # limpa caches de build se o disco < 30 GB (opcional)
 # Agentes: com.jev.paperlab (supervisor do lab), com.jev.trader-paper (bot real, dry-run), com.jev.caffeinate,
 # com.jev.night-claude (revisão noturna autónoma com o Claude Code, todos os dias à hora de config.json
 # claude_night.run_at, padrão 01:30 local; sem RunAtLoad nem KeepAlive).
@@ -20,7 +21,8 @@ LOGS="$PAPER_LAB_ROOT/logs"
 LABELS=(com.jev.paperlab com.jev.trader-paper com.jev.caffeinate com.jev.night-claude)
 TRADER_B=com.jev.trader-paper-exits
 TUNNEL=com.jev.tunnel
-ALL_LABELS=("${LABELS[@]}" "$TRADER_B" "$TUNNEL")
+DISK_GUARD=com.jev.disk-guard
+ALL_LABELS=("${LABELS[@]}" "$TRADER_B" "$TUNNEL" "$DISK_GUARD")
 # bash 3.2 do macOS: sem arrays associativos.
 script_for() {
   case "$1" in
@@ -30,6 +32,7 @@ script_for() {
     com.jev.night-claude) echo "$LAB/scripts/macos/night_claude.sh" ;;
     com.jev.trader-paper-exits) echo "$LAB/scripts/macos/trader_service.sh" ;;
     com.jev.tunnel) echo "$LAB/scripts/macos/tunnel_service.sh" ;;
+    com.jev.disk-guard) echo "$LAB/scripts/macos/disk_guard.sh" ;;
   esac
 }
 
@@ -59,7 +62,11 @@ PY
 
 # Serviços contínuos: RunAtLoad + relançar se cair. Revisão noturna: só à hora marcada, nunca relançada.
 schedule() {
-  if [[ "$1" == "com.jev.night-claude" ]]; then
+  if [[ "$1" == "com.jev.disk-guard" ]]; then
+    # Guarda do disco: a cada 10 min, também ao carregar; sai sempre com 0 (não é relançado).
+    printf '  <key>RunAtLoad</key><true/>\n'
+    printf '  <key>StartInterval</key><integer>600</integer>\n'
+  elif [[ "$1" == "com.jev.night-claude" ]]; then
     local h m
     read -r h m <<<"$(night_at)"
     printf '  <key>RunAtLoad</key><false/>\n'
@@ -117,13 +124,14 @@ case "${1:-install}" in
       fi
     done
     ;;
-  install|--install|--install-night|--install-trader-b|--install-tunnel)
+  install|--install|--install-night|--install-trader-b|--install-tunnel|--install-disk-guard)
     # --install-night: só o agente da revisão noturna (não reinicia o lab nem o bot real que já correm).
     # --install-trader-b: só o livro B do bot real (não toca no livro A nem no lab).
     TARGETS=("${LABELS[@]}")
     if [[ "${1:-install}" == "--install-night" ]]; then TARGETS=(com.jev.night-claude); fi
     if [[ "${1:-install}" == "--install-trader-b" ]]; then TARGETS=("$TRADER_B"); mkdir -p "$REPO/logs/paper_b"; fi
     if [[ "${1:-install}" == "--install-tunnel" ]]; then TARGETS=("$TUNNEL"); fi
+    if [[ "${1:-install}" == "--install-disk-guard" ]]; then TARGETS=("$DISK_GUARD"); fi
     mkdir -p "$AGENTS" "$LOGS"
     for l in "${TARGETS[@]}"; do
       chmod +x "$(script_for "$l")"
@@ -147,9 +155,13 @@ case "${1:-install}" in
     launchctl bootout "$DOMAIN/$TUNNEL" 2>/dev/null && echo "parado $TUNNEL" || echo "$TUNNEL não estava carregado"
     rm -f "$AGENTS/$TUNNEL.plist" "$PAPER_LAB_ROOT/dashboard/url.txt" "$PAPER_LAB_ROOT/run/tunnel.pid"
     ;;
+  --uninstall-disk-guard)
+    launchctl bootout "$DOMAIN/$DISK_GUARD" 2>/dev/null && echo "parado $DISK_GUARD" || echo "$DISK_GUARD não estava carregado"
+    rm -f "$AGENTS/$DISK_GUARD.plist"
+    ;;
   --kick-night)
     # Corre a revisão noturna agora (primeira corrida supervisionada); log em logs/claude_night_<dia>.log.
     launchctl kickstart "$DOMAIN/com.jev.night-claude" && echo "com.jev.night-claude lançado; log: $LOGS/claude_night_*.log"
     ;;
-  *) echo "uso: $0 [--install|--install-night|--install-trader-b|--status|--uninstall|--uninstall-night|--uninstall-trader-b|--install-tunnel|--uninstall-tunnel|--kick-night]" >&2; exit 2 ;;
+  *) echo "uso: $0 [--install|--install-night|--install-trader-b|--status|--uninstall|--uninstall-night|--uninstall-trader-b|--install-tunnel|--uninstall-tunnel|--install-disk-guard|--uninstall-disk-guard|--kick-night]" >&2; exit 2 ;;
 esac
