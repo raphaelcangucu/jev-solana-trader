@@ -9,6 +9,8 @@
 - `chart.json` (só nas janelas longas): curvas normalizadas a 1000 no início da janela (benchmarks, mediana por
   família, os portfólios em destaque, bot real A/B) com ≤ 1500 pontos, e os vencedores de cada bloco de 30 dias.
 - `history.md`: comparação dos runs mensais lado a lado, consistência entre meses e o resumo dos 6 meses.
+- `tag` (ex.: "moedas_novas"): runs de estudo à parte (outro catálogo, ex.: moedas fora do run ao vivo). Ficam no
+  índice com a etiqueta, mas não entram na comparação mensal nem no resumo longo do history.md e nunca movem `latest`.
 
 Só lê summaries/equity já escritos (nada de rede, chaves ou ordens).
 """
@@ -83,6 +85,7 @@ def index_entry(summary: dict) -> dict:
                     for b in summary.get("realbot") or []],
         "assets": {s: a.get("ret_pct") for s, a in (summary.get("assets") or {}).items()},
         "look_ahead_forks": [p["name"] for p in ports if p.get("look_ahead")],
+        "tag": summary.get("tag") or None,
     }
 
 
@@ -139,15 +142,15 @@ def update_index(base: Path, summary: dict | None = None) -> dict:
     return out
 
 
-def latest_after(base: Path, run_id: str, kind: str, end_brt: str) -> str | None:
+def latest_after(base: Path, run_id: str, kind: str, end_brt: str, tag: str | None = None) -> str | None:
     """Para onde deve apontar `latest` depois deste run: o run mensal mais recente pelo fim da janela.
-    Um run que não é mensal, ou mais antigo que o atual, deixa `latest` como está."""
+    Um run que não é mensal, mais antigo que o atual, ou marcado com `tag` (estudo à parte), deixa `latest` como está."""
     base = Path(base)
     try:
         cur = (base / "latest").read_text().strip()
     except Exception:
         cur = ""
-    if kind != "30d":
+    if kind != "30d" or tag:
         return cur or None
     cur_s = None
     if cur and (base / cur / "summary.json").is_file():
@@ -219,7 +222,7 @@ def chart_top_names(ports: list[dict]) -> list[str]:
 
 
 def build_chart(*, start: int, end: int, equity: dict, ports: list[dict], prices: dict, realbot: dict,
-                months: list[dict], max_points: int = MAX_CHART_POINTS) -> dict:
+                months: list[dict], max_points: int = MAX_CHART_POINTS, memes: list[str] | None = None) -> dict:
     """chart.json. equity: {nome: (ts, equity)}; ports: linhas do summary (name, family, pnl_pct, skill);
     prices: {SYM: (ts, preço)} (SOL e memecoins); realbot: {"A": (ts, equity), ...}; months: linhas já calculadas
     ({month, start_brt, end_brt, top_by_pnl, top_by_skill, sol_ret, memes_ret}). Tudo normalizado: 1000 = início."""
@@ -228,7 +231,7 @@ def build_chart(*, start: int, end: int, equity: dict, ports: list[dict], prices
            "benchmarks": {}, "families": {}, "top": {}, "realbot": {}, "monthly": months}
     if "SOL" in prices:
         out["benchmarks"]["sol_bh"] = _rl(norm1000(sample_at(*prices["SOL"], t)))
-    memes = [s for s in MEMES if s in prices]
+    memes = [s for s in (memes if memes is not None else MEMES) if s in prices]
     if memes:
         basket = sum(norm1000(sample_at(*prices[s], t)) / len(memes) for s in memes)
         out["benchmarks"]["memes_bh"] = _rl(basket)
@@ -302,9 +305,11 @@ def history_md(base: Path, index: dict | None = None) -> str:
     base = Path(base)
     index = index or update_index(base)
     runs = index["runs"]
-    monthly_e = sorted([e for e in runs if e["kind"] == "30d"], key=_end_key)
+    tagged = [e for e in runs if e.get("tag")]
+    main = [e for e in runs if not e.get("tag")]          # estudos à parte (tag) não se misturam com os meses
+    monthly_e = sorted([e for e in main if e["kind"] == "30d"], key=_end_key)
     monthly = _load_summaries(base, monthly_e)
-    longs = [e for e in runs if e["kind"] != "30d" and (e.get("days") or 0) >= 60]
+    longs = [e for e in main if e["kind"] != "30d" and (e.get("days") or 0) >= 60]
     L = ["# Histórico das simulações retroativas", "",
          f"Atualizado (BRT): {datetime.now(tz=BRT).isoformat(timespec='seconds')} · runs no índice: {len(runs)} "
          f"({len(monthly)} mensais, {len(longs)} longo(s)). Fonte: `data/backtest/index.json` e os `summary.json` de cada "
@@ -312,6 +317,9 @@ def history_md(base: Path, index: dict | None = None) -> str:
          "Todos os runs usam o MESMO catálogo e os mesmos pressupostos (instantâneo `inputs/` do run "
          "bt30_2026-10-06: registry, params, overlay, critérios, models.json; custos de execução por ativo medidos nos "
          "fills reais do run ao vivo). Cada run começa com o capital inicial no início da sua janela (não herda posições).", ""]
+    if tagged:
+        L += ["Estudos à parte (etiqueta `tag`, outro catálogo; não entram nas comparações abaixo): " + ", ".join(
+            f"{e['run_id']} ({e['tag']}, {e['kind']})" for e in sorted(tagged, key=lambda e: e["run_id"])) + ".", ""]
     if monthly:
         hdr = "| | " + " | ".join(f"**{s['run_id']}**" for s in monthly) + " |"
         sep = "|---|" + "---|" * len(monthly)

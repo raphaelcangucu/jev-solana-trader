@@ -27,13 +27,15 @@ export interface RunPill { run_id: string; kind: BtIndexRun['kind']; label: stri
 export function runPill(r: BtIndexRun): RunPill {
   const a = brt(r.start_brt), b = brt(r.end_brt)
   const sub = a && b ? `${dm(a)} → ${dm(b)}` : r.run_id
+  // estudo à parte (tag, ex.: moedas_novas): a etiqueta entra no nome do botão
+  const tag = r.tag ? ` · ${r.tag.replace(/_/g, ' ')}` : ''
   if (r.kind === '180d') {
     const months = r.days ? Math.round(r.days / 30.4) : 6
-    return { run_id: r.run_id, kind: r.kind, label: `${months} meses`, sub, title: `${months} meses, ${sub}` }
+    return { run_id: r.run_id, kind: r.kind, label: `${months} meses${tag}`, sub, title: `${months} meses${tag}, ${sub}` }
   }
   // o mês que cobre a maior parte da janela: o do meio dela
   const mid = a && b ? new Date((a.getTime() + b.getTime()) / 2) : a
-  const label = mid ? cap(MONTHS[mid.getUTCMonth()]) : r.run_id
+  const label = (mid ? cap(MONTHS[mid.getUTCMonth()]) : r.run_id) + tag
   return { run_id: r.run_id, kind: r.kind, label, sub, title: `${label}: ${sub}` }
 }
 
@@ -47,7 +49,7 @@ export function orderRuns(idx: BtIndex | null | undefined): BtIndexRun[] {
 
 /** Os `n` meses de 30 dias mais recentes, em ordem cronológica (mais antigo à esquerda). */
 export function monthlyRuns(idx: BtIndex | null | undefined, n = 3): BtIndexRun[] {
-  return (idx?.runs ?? []).filter(r => r.kind === '30d' && r.available !== false).sort(byEndDesc).slice(0, n).reverse()
+  return (idx?.runs ?? []).filter(r => r.kind === '30d' && r.available !== false && !r.tag).sort(byEndDesc).slice(0, n).reverse()
 }
 
 /** Variação média da cesta de memecoins (todos os ativos menos SOL). */
@@ -214,6 +216,6 @@ export function monthShort(m: string, withYear = false): string {
 export function runForMonth(idx: BtIndex | null | undefined, start: string | null | undefined): string | null {
   const a = start ? Date.parse(start) : NaN
   if (!Number.isFinite(a)) return null
-  const r = (idx?.runs ?? []).find(r => r.kind === '30d' && r.available !== false && r.start_brt && Math.abs(Date.parse(r.start_brt) - a) < 4 * 86400_000)
+  const r = (idx?.runs ?? []).find(r => r.kind === '30d' && r.available !== false && !r.tag && r.start_brt && Math.abs(Date.parse(r.start_brt) - a) < 4 * 86400_000)
   return r?.run_id ?? null
 }

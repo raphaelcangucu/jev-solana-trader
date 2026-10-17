@@ -8,7 +8,9 @@ Fontes (todas públicas, com pausas e novas tentativas):
   bot real, que lê as velas de 1 m da Binance.
 - Memecoins 1 m: Bybit spot (BONK, WIF, POPCAT, PNUT, MEW, GOAT) e KuCoin (FARTCOIN, que não existe na Bybit spot);
   a Gate.io (fonte da marcação ao vivo) só guarda 10 000 pontos de 1 m (~7 dias), por isso fica como verificação de base
-  na parte final da janela.
+  na parte final da janela. Ativos extra (backtest/assets_extra.json) trazem as suas fontes candidatas (Bybit, KuCoin,
+  Binance spot, OKX); quando a janela acaba antes dos ~7 dias de 1 m da Gate.io, a escolha usa a correlação dos
+  retornos de 1 h com as barras de 1 h da Gate.io dentro da janela (`basis_check_1h`).
 - 1 h: os mesmos fetchers do rules_bot (`rules_engine.fetch_coinbase_sol_1h`, `fetch_gate_1h`).
 
 Velas: `ts` = início da vela (epoch s, UTC). O preço "agora" num instante T é o fecho da vela que começa em T − 60.
@@ -152,6 +154,59 @@ def fetch_kucoin_1m(symbol: str, start: int, end: int, progress=None) -> list[tu
         if progress:
             progress(cur)
     return rows
+
+
+def fetch_binance_1m(symbol: str, start: int, end: int, progress=None) -> list[tuple]:
+    """Binance spot (data-api.binance.vision, público): [abertura ms, o, h, l, c, v, ...], 1000 por pedido."""
+    rows = []
+    cur = start
+    while cur < end:
+        e = min(end, cur + 1000 * 60)
+        url = (f"https://data-api.binance.vision/api/v3/klines?symbol={symbol}&interval=1m"
+               f"&startTime={cur * 1000}&endTime={(e - 60) * 1000}&limit=1000")
+        d = get_json(url, host_gap=0.12)
+        if not isinstance(d, list):
+            raise RuntimeError(f"binance {symbol}: {str(d)[:120]}")
+        for c in d:
+            t = int(c[0]) // 1000
+            if start <= t < end:
+                rows.append((t, float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5])))
+        cur = e
+        if progress:
+            progress(cur)
+    return rows
+
+
+def fetch_okx_1m(inst: str, start: int, end: int, progress=None) -> list[tuple]:
+    """OKX history-candles (público): 100 velas por pedido, do fim para o início (`after` = mais antigas que ts)."""
+    rows = []
+    cur = end
+    while cur > start:
+        url = f"https://www.okx.com/api/v5/market/history-candles?instId={inst}&bar=1m&after={cur * 1000}&limit=100"
+        for attempt in range(6):
+            d = get_json(url, host_gap=0.12)
+            if str(d.get("code")) == "0":
+                break
+            time.sleep(min(30, 2 * (attempt + 1)))
+        if str(d.get("code")) != "0":
+            raise RuntimeError(f"okx {inst}: {d.get('msg')}")
+        data = d.get("data") or []
+        if not data:
+            break
+        for c in data:
+            t = int(c[0]) // 1000
+            if start <= t < end:
+                rows.append((t, float(c[1]), float(c[2]), float(c[3]), float(c[4]), float(c[5])))
+        oldest = min(int(c[0]) // 1000 for c in data)
+        if oldest >= cur:
+            break
+        cur = oldest
+        if progress:
+            progress(cur)
+    return sorted(rows)
+
+
+FETCHERS_1M = {"bybit": fetch_bybit_1m, "kucoin": fetch_kucoin_1m, "binance": fetch_binance_1m, "okx": fetch_okx_1m}
 
 
 def fetch_gate_1m(pair: str, start: int, end: int) -> list[tuple]:
@@ -389,14 +444,48 @@ def basis_check(a: MinuteSeries, b_rows: list[tuple]) -> dict | None:
             "corr_ret_5m": None if corr is None else round(corr, 4)}
 
 
+def basis_check_1h(a: MinuteSeries, bars: list[dict], start: int, end: int) -> dict | None:
+    """Correlação dos retornos de 1 h entre a série principal (fecho do minuto que acaba no fim da barra) e as barras de
+    1 h da Gate.io dentro da janela. Serve para escolher a fonte quando a janela acaba antes dos ~7 dias de 1 m da Gate."""
+    ts = [int(b["ts"]) for b in bars if start <= int(b["ts"]) and int(b["ts"]) + 3600 <= end]
+    if len(ts) < 48:
+        return None
+    gb = {int(b["ts"]): float(b["close"]) for b in bars}
+    xa = np.array([a.close_at(t + 3600) for t in ts])
+    xb = np.array([gb[t] for t in ts])
+    ra, rb = xa[1:] / xa[:-1] - 1, xb[1:] / xb[:-1] - 1
+    m = ~np.isnan(ra) & ~np.isnan(rb)
+    if m.sum() < 48:
+        return None
+    ok = ~np.isnan(xa) & (xb > 0)
+    rel = np.abs(xa[ok] / xb[ok] - 1)
+    return {"n_1h": int(m.sum()), "corr_ret_1h": round(float(np.corrcoef(ra[m], rb[m])[0, 1]), 4),
+            "median_abs_basis_bps_1h": round(float(np.median(rel) * 1e4), 2)}
+
+
+def _gate_1h(raw: Path, sym: str, h0: int, end: int, logf=None, pair: str | None = None):
+    from bot.rules_engine import fetch_gate_1h
+    pair = pair or f"{sym}_USDT"
+    need = {"start": h0, "end": end, "source": f"gate:{pair}:1h"}
+    rows, _ = cached(raw / f"{sym}_1h.csv.gz", need,
+                     lambda a, b_: [(b["ts"], b["open"], b["high"], b["low"], b["close"], b["volume"])
+                                    for b in fetch_gate_1h(pair, a, b_) if a <= b["ts"] < b_], logf)
+    return bars_from_rows(rows)
+
+
 # ------------------------------------------------------------------ orquestração
 
 def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: int = 1440, warm_h: int = 30 * 24,
-              logf=None, binance_grid: int = 5, prefer: dict | None = None) -> dict:
+              logf=None, binance_grid: int = 5, prefer: dict | None = None, sources: dict | None = None,
+              gate_pairs: dict | None = None) -> dict:
     """Busca e guarda tudo o que o backtest precisa. Devolve {"minute": {SYM: MinuteSeries}, "hourly": {SYM: bars},
     "sol_grid": (t, px), "coverage": {...}, "sources": {...}, "basis": {...}}.
     `prefer` ({SYM: "bybit:BONKUSDT"}): fonte a usar se tiver cobertura suficiente (repetir a escolha de um run anterior;
-    a verificação contra a Gate.io só existe para os últimos ~7 dias)."""
+    a verificação contra a Gate.io só existe para os últimos ~7 dias).
+    `sources` ({SYM: [(fonte, instrumento), ...]}) acrescenta/substitui as fontes candidatas de 1 m (ativos extra);
+    `gate_pairs` ({SYM: "JUP_USDT"}) o par da Gate.io (1 m de verificação e 1 h)."""
+    srcs_of = dict(MEME_SOURCES, **(sources or {}))
+    gp_of = gate_pairs or {}
     raw = out / "raw"
     raw.mkdir(parents=True, exist_ok=True)
     m0 = start - warm_min * 60
@@ -413,7 +502,7 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
     for sym in symbols:
         if sym == "SOL":
             continue
-        pair = f"{sym}_USDT"
+        pair = gp_of.get(sym) or f"{sym}_USDT"
         need = {"start": m0, "end": end, "source": f"gate:{pair}"}
         try:
             gate_rows[sym], _ = cached(raw / f"{sym}_1m_gate_check.csv.gz", need, lambda a, b, pair=pair: fetch_gate_1m(pair, a, b), logf)
@@ -425,9 +514,16 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
         if sym == "SOL":
             continue
         cands = []
-        for src, inst in MEME_SOURCES[sym]:
+        hourly_g = None
+        if not gate_rows.get(sym):
+            # sem 1 m da Gate.io na janela (só ~7 dias): a correlação de 1 h dentro da janela decide a fonte
+            try:
+                hourly_g = _gate_1h(raw, sym, h0, end, logf, pair=gp_of.get(sym))
+            except Exception as e:
+                log(f"{sym} 1h gate: erro {str(e)[:120]}", logf)
+        for src, inst in srcs_of[sym]:
             need = {"start": m0, "end": end, "source": f"{src}:{inst}"}
-            fn = {"bybit": fetch_bybit_1m, "kucoin": fetch_kucoin_1m}[src]
+            fn = FETCHERS_1M[src]
             try:
                 rows, hit = cached(raw / f"{sym}_1m_{src}.csv.gz", need, lambda a, b, fn=fn, inst=inst: fn(inst, a, b), logf)
             except Exception as e:
@@ -436,10 +532,14 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
             cov = coverage(rows, start, end)
             if not rows:
                 continue
-            b = basis_check(MinuteSeries(rows, m0, end), gate_rows.get(sym) or []) or {}
+            ms_c = MinuteSeries(rows, m0, end)
+            b = basis_check(ms_c, gate_rows.get(sym) or []) or {}
+            if b.get("corr_ret_5m") is None and hourly_g:
+                b.update(basis_check_1h(ms_c, hourly_g, start, end) or {})
+            corr = b.get("corr_ret_5m") if b.get("corr_ret_5m") is not None else b.get("corr_ret_1h")
             log(f"{sym} 1m {src}:{inst}: {len(rows)} velas, cobertura {cov['coverage']:.4f}, "
-                f"corr 5m vs gate {b.get('corr_ret_5m')}{' (cache)' if hit else ''}", logf)
-            cands.append((cov["coverage"] >= MIN_COVERAGE, b.get("corr_ret_5m") or 0.0, cov["coverage"], src, inst, rows, b))
+                f"corr 5m vs gate {b.get('corr_ret_5m')}, corr 1h vs gate {b.get('corr_ret_1h')}{' (cache)' if hit else ''}", logf)
+            cands.append((cov["coverage"] >= MIN_COVERAGE, corr or 0.0, cov["coverage"], src, inst, rows, b))
         if not cands:
             res["rows"][sym] = []
             res["sources"][sym] = None
@@ -453,7 +553,9 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
         res["rows"][sym] = best[5]
         res["sources"][sym] = f"{best[3]}:{best[4]} 1m"
         res["basis"][sym] = dict(best[6], vs="gate.io (fonte da marcação ao vivo)",
-                                 candidates={f"{c[3]}:{c[4]}": {"coverage": c[2], "corr_ret_5m": c[1]} for c in cands})
+                                 candidates={f"{c[3]}:{c[4]}": {"coverage": c[2], "corr": c[1],
+                                                                 "corr_ret_5m": c[6].get("corr_ret_5m"),
+                                                                 "corr_ret_1h": c[6].get("corr_ret_1h")} for c in cands})
 
     for sym, rows in res["rows"].items():
         res["coverage"][sym] = coverage(rows, start, end)
@@ -491,7 +593,7 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
     b_rows = [(int(t) - 60, p, p, p, p, 0.0) for t, p in zip(gmin, pmin) if not np.isnan(p)]
     res["basis"]["SOL"] = dict(basis_check(res["minute"]["SOL"], b_rows) or {}, vs="binance SOLUSDT (estado e bot real)")
 
-    from bot.rules_engine import fetch_coinbase_sol_1h, fetch_gate_1h
+    from bot.rules_engine import fetch_coinbase_sol_1h
     need = {"start": h0, "end": end, "source": "coinbase:SOL-USD:1h"}
     rows, _ = cached(raw / "SOL_1h.csv.gz", need,
                      lambda a, b_: [(b["ts"], b["open"], b["high"], b["low"], b["close"], b["volume"])
@@ -500,11 +602,7 @@ def fetch_all(out: Path, start: int, end: int, symbols: list[str], *, warm_min: 
     for sym in symbols:
         if sym == "SOL":
             continue
-        need = {"start": h0, "end": end, "source": f"gate:{sym}_USDT:1h"}
-        rows, _ = cached(raw / f"{sym}_1h.csv.gz", need,
-                         lambda a, b_, sym=sym: [(b["ts"], b["open"], b["high"], b["low"], b["close"], b["volume"])
-                                                 for b in fetch_gate_1h(f"{sym}_USDT", a, b_) if a <= b["ts"] < b_], logf)
-        res["hourly"][sym] = bars_from_rows(rows)
+        res["hourly"][sym] = _gate_1h(raw, sym, h0, end, logf, pair=gp_of.get(sym))
     for sym, bars in res["hourly"].items():
         cov = coverage([(b["ts"],) for b in bars], start, end, step=3600)
         res["coverage"].setdefault(sym, {})["hourly_coverage"] = cov["coverage"]

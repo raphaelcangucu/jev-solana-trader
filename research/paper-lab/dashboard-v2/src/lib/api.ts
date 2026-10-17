@@ -217,6 +217,8 @@ export interface BtIndexRun {
   assets?: Record<string, number | null> | null; look_ahead_forks?: string[] | null
   /** false quando o índice cita um run cuja pasta não existe (mais) em disco */
   available?: boolean
+  /** estudo à parte (ex.: "moedas_novas"): outro catálogo, fora da comparação mensal */
+  tag?: string | null
 }
 export interface BtIndex { runs: BtIndexRun[]; source?: 'index' | 'runs'; latest?: string | null; has_history?: boolean }
 export interface BtMonth { month: string; start_brt?: string | null; end_brt?: string | null; top_by_pnl?: string | null; top_by_skill?: string | null; sol_ret?: number | null; memes_ret?: number | null }

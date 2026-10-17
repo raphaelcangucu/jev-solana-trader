@@ -132,8 +132,13 @@ def report_md(summary, extra) -> str:
          "trades/h, fração de compra, teto de exposição, saídas TP/SL/trailing e reentrada, horas, ensemble por percentil, "
          "filtro de regime, ordens limite, regras em barras de 1 h), trocando só o relógio, os ficheiros e as cotações "
          "(backtest/simenv.py). Os modelos (von, Laya, poorjev; Jev hospedado nos portfólios SOL) respondem a cada estado "
-         "de 12 adjetivos reconstruído do histórico; cada par (critérios, estado) é chamado uma vez e guardado em cache.", "",
-         "## Pressupostos", ""]
+         "de 12 adjetivos reconstruído do histórico; cada par (critérios, estado) é chamado uma vez e guardado em cache.", ""]
+    if S.get("assets_extra") or S.get("only_assets"):
+        L += ["**Âmbito deste run" + (f" (`{S['tag']}`)" if S.get("tag") else "") + ":** só as moedas "
+              + ", ".join(S.get("only_assets") or S.get("assets_extra") or []) + " (fora do run ao vivo; overlay só do backtest, "
+              "backtest/assets_extra.json), com os portfólios listados nos Pressupostos e o \"só segurar\" de cada moeda. "
+              "Sem portfólios SOL, sem bot real e sem validação contra o run ao vivo (estas moedas não têm decisões ao vivo).", ""]
+    L += ["## Pressupostos", ""]
     L += [f"- {a}" for a in S["assumptions"]]
     L += ["", "## Dados", "", "| Ativo | Fonte | Cobertura | Início | Fim | Retorno |", "|---|---|---:|---:|---:|---:|"]
     for sym, a in S["assets"].items():
@@ -165,9 +170,10 @@ def report_md(summary, extra) -> str:
     for f in S["families"]:
         L.append(f"| {f['family']} | {f['n']} | {fmt(f['median_pnl_pct'], 2, True)} | {fmt(f.get('median_skill'), 2, True)} | "
                  f"{f['beat_bh']}/{f['n']} | {f['best']} | {f['worst']} |")
-    L += ["", "## Bot real: livro A × livro B", "",
-          "| Livro | Perfil | Valor ini. | Valor fim | PnL $ | PnL % | vs segurar $ | Acerto 15 min | MDD % | Trades | Saídas |",
-          "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|"]
+    if S["realbot"]:
+        L += ["", "## Bot real: livro A × livro B", "",
+              "| Livro | Perfil | Valor ini. | Valor fim | PnL $ | PnL % | vs segurar $ | Acerto 15 min | MDD % | Trades | Saídas |",
+              "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|"]
     for b in S["realbot"]:
         ex = ", ".join(f"{k}:{v}" for k, v in (b.get("exits") or {}).items()) or "–"
         L.append(f"| {b['book']} | {b['profile']} | {b['start_value']:.4f} | {b['end_value']:.4f} | {b['pnl']:+.4f} | "

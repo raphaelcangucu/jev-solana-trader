@@ -33,6 +33,20 @@ DUMMY = Path("/nonexistent/backtest/never-written.json")
 EQ_EVERY = 300
 
 
+def rotation_syms(syms, t, start, period=None):
+    """Moedas que decidem no minuto t. Ao vivo o meme_bot roda uma moeda por minuto (cada moeda a cada N min, N = número
+    de moedas). `period` (min) fixa a cadência por moeda noutra rotação (ex.: 8 moedas novas com a cadência de 7 min do
+    run ao vivo): a moeda i decide quando (minuto mod period) = i mod period. period = N repete a rotação ao vivo."""
+    n = len(syms)
+    if not n:
+        return []
+    k = (int(t) - int(start)) // 60
+    per = int(period or n)
+    if per == n:
+        return [syms[k % n]]
+    return [s for i, s in enumerate(syms) if k % per == i % per]
+
+
 def _iso(ts: float) -> str:
     return datetime.fromtimestamp(ts, tz=BRT).isoformat(timespec="seconds")
 
@@ -71,7 +85,8 @@ def bh_of(p, px):
 
 class Engine:
     def __init__(self, *, data, start, end, step, items, client, cfg, memecoins, slip_bps, crit_files, logf=None,
-                 jev_ready=False, progress=None, realbot_params=None, realbot_step=15, eq_every=EQ_EVERY):
+                 jev_ready=False, progress=None, realbot_params=None, realbot_step=15, eq_every=EQ_EVERY,
+                 meme_period_min=None):
         import bot.lab_bot as LB
         import bot.rules_bot as RB
         from bot import lab_registry as R
@@ -89,6 +104,7 @@ class Engine:
         self.realbot_params = realbot_params or {}
         self.realbot_step = realbot_step
         self.eq_every = int(eq_every)      # grelha da equity gravada (5 min; 1 h nas janelas longas, por memória)
+        self.meme_period_min = meme_period_min   # cadência por moeda (None = número de moedas, como ao vivo)
         self.clock = Clock(start)
         self.marks: dict = {}
         self.lowhigh: dict = {}
@@ -176,8 +192,9 @@ class Engine:
             ports = [p for p in (b.get("sol_portfolios") or []) if p in self.ports]
             if ports:
                 self.sol_extra[mid] = ports
+        # modelos extra chamados no passo meme: os que têm algum portfólio (baseline ou relaxed) no catálogo
         self.meme_extra = [m for m in ("laya", "poorjev")
-                           if any(f"{s}_{m}_baseline" in self.ports for s in self.syms)]
+                           if any(f"{s}_{m}_{prof}" in self.ports for s in self.syms for prof in ("baseline", "relaxed"))]
         self.trade_counts_at_start = 0
         return self
 
@@ -288,7 +305,6 @@ class Engine:
     def run(self):
         t0 = _rt.time()
         n_steps = (self.end - self.start) // self.step
-        nsym = len(self.syms)
         self.clock.now = self.start
         for s in ["SOL"] + self.syms:
             self.marks[s] = self._px(s, self.start)
@@ -313,9 +329,9 @@ class Engine:
             if "SOL" in self.marks:
                 sol_rows = self.sol_step(t, self.marks["SOL"])
             if t % 60 == 0:
-                sym = self.syms[((t - self.start) // 60) % nsym]
-                if sym in self.marks:
-                    meme_rows = self.meme_step(t, sym, self.marks[sym])
+                for sym in rotation_syms(self.syms, t, self.start, self.meme_period_min):
+                    if sym in self.marks:
+                        meme_rows += self.meme_step(t, sym, self.marks[sym])
             self.lab.feed(sol_rows, meme_rows)
             self.lab.cycle()
             self.counts["lab_cycles"] += 1

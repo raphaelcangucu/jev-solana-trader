@@ -1,0 +1,187 @@
+{
+  "note": "Só backtest (paper). Moedas candidatas a um fork von relaxed, fora do run ao vivo: NÃO é o memecoins.json do lab (que fica intocado). O backtest junta estas moedas ao instantâneo inputs/ do run (scripts/backtest_30d.py --assets-extra/--only-assets).",
+  "tag": "moedas_novas",
+  "verified_brt": "2026-10-17T19:05:00-03:00",
+  "mint_sources": "Cada mint conferido em 3 fontes públicas: Jupiter tokens v2 (lite-api.jup.ag/tokens/v2/search: isVerified, decimals, tokenProgram), CoinGecko (/coins/<id>: platforms.solana e detail_platforms.solana.decimal_place) e DexScreener (/token-pairs/v1/solana/<mint>: baseToken.address dos pares).",
+  "rotation_period_min": 7,
+  "rotation_note": "Cada moeda decide a cada 7 min, a mesma cadência das 7 memecoins do run ao vivo (o meme_bot roda 1 moeda por minuto). Com 8 moedas e período 7, JUP e MOODENG decidem no mesmo minuto (backtest/engine.rotation_syms).",
+  "portfolios": [
+    "meme_{SYM}_baseline",
+    "meme_{SYM}_relaxed",
+    "{SYM}_poorjev_relaxed",
+    "h1_exits_{SYM}_poorjev_relaxed"
+  ],
+  "buy_hold": true,
+  "slippage_policy": "Sem fills ao vivo destas moedas. Custo sobre a marca (antes do extra de 5 bps que o código soma) = mediana do custo medido nas 7 memecoins atuais (bt30_2026-10-06: BONK 1,4 · FARTCOIN 5,8 · WIF 8,5 · POPCAT 12,7 · MEW 24,3 · GOAT 29,8 · PNUT 32,8 → 12,7 bps). Moedas com liquidez on-chain (DexScreener, soma dos pares Solana; a API devolve no máximo 30 pares, por isso é um limite inferior) abaixo da da PNUT (~3,1 M US$, a mais cara das atuais) ficam com o custo da PNUT, 32,8 bps (conservador): PYTH e MOODENG.",
+  "tokens": [
+    {
+      "symbol": "JUP",
+      "mint": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+      "decimals": 6,
+      "coingecko_id": "jupiter-exchange-solana",
+      "gate_pair": "JUP_USDT",
+      "class": "defi",
+      "sources": [
+        [
+          "bybit",
+          "JUPUSDT"
+        ],
+        [
+          "kucoin",
+          "JUP-USDT"
+        ]
+      ],
+      "dex_liquidity_usd": 16060090,
+      "quote_slippage_bps": 12.7,
+      "slippage_basis": "mediana das 7 memecoins atuais"
+    },
+    {
+      "symbol": "JTO",
+      "mint": "jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL",
+      "decimals": 9,
+      "coingecko_id": "jito-governance-token",
+      "gate_pair": "JTO_USDT",
+      "class": "defi",
+      "sources": [
+        [
+          "bybit",
+          "JTOUSDT"
+        ],
+        [
+          "kucoin",
+          "JTO-USDT"
+        ]
+      ],
+      "dex_liquidity_usd": 11857420,
+      "quote_slippage_bps": 12.7,
+      "slippage_basis": "mediana das 7 memecoins atuais"
+    },
+    {
+      "symbol": "PYTH",
+      "mint": "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3",
+      "decimals": 6,
+      "coingecko_id": "pyth-network",
+      "gate_pair": "PYTH_USDT",
+      "class": "defi",
+      "sources": [
+        [
+          "bybit",
+          "PYTHUSDT"
+        ],
+        [
+          "kucoin",
+          "PYTH-USDT"
+        ]
+      ],
+      "dex_liquidity_usd": 683998,
+      "quote_slippage_bps": 32.8,
+      "slippage_basis": "liquidez on-chain < PNUT: custo da PNUT (o mais alto das atuais)"
+    },
+    {
+      "symbol": "RAY",
+      "mint": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+      "decimals": 6,
+      "coingecko_id": "raydium",
+      "gate_pair": "RAY_USDT",
+      "class": "defi",
+      "sources": [
+        [
+          "kucoin",
+          "RAY-USDT"
+        ],
+        [
+          "okx",
+          "RAY-USDT"
+        ]
+      ],
+      "dex_liquidity_usd": 15954264,
+      "quote_slippage_bps": 12.7,
+      "slippage_basis": "mediana das 7 memecoins atuais"
+    },
+    {
+      "symbol": "BOME",
+      "mint": "ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82",
+      "decimals": 6,
+      "coingecko_id": "book-of-meme",
+      "gate_pair": "BOME_USDT",
+      "class": "meme",
+      "sources": [
+        [
+          "bybit",
+          "BOMEUSDT"
+        ],
+        [
+          "kucoin",
+          "BOME-USDT"
+        ]
+      ],
+      "dex_liquidity_usd": 13334184,
+      "quote_slippage_bps": 12.7,
+      "slippage_basis": "mediana das 7 memecoins atuais"
+    },
+    {
+      "symbol": "PENGU",
+      "mint": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
+      "decimals": 6,
+      "coingecko_id": "pudgy-penguins",
+      "gate_pair": "PENGU_USDT",
+      "class": "meme",
+      "sources": [
+        [
+          "bybit",
+          "PENGUUSDT"
+        ],
+        [
+          "kucoin",
+          "PENGU-USDT"
+        ]
+      ],
+      "dex_liquidity_usd": 7984002,
+      "quote_slippage_bps": 12.7,
+      "slippage_basis": "mediana das 7 memecoins atuais"
+    },
+    {
+      "symbol": "TRUMP",
+      "mint": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+      "decimals": 6,
+      "coingecko_id": "official-trump",
+      "gate_pair": "TRUMP_USDT",
+      "class": "meme",
+      "sources": [
+        [
+          "bybit",
+          "TRUMPUSDT"
+        ],
+        [
+          "kucoin",
+          "TRUMP-USDT"
+        ]
+      ],
+      "dex_liquidity_usd": 21535509,
+      "quote_slippage_bps": 12.7,
+      "slippage_basis": "mediana das 7 memecoins atuais"
+    },
+    {
+      "symbol": "MOODENG",
+      "mint": "ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY",
+      "decimals": 6,
+      "coingecko_id": "moo-deng",
+      "gate_pair": "MOODENG_USDT",
+      "class": "meme",
+      "sources": [
+        [
+          "kucoin",
+          "MOODENG-USDT"
+        ],
+        [
+          "okx",
+          "MOODENG-USDT"
+        ]
+      ],
+      "dex_liquidity_usd": 2533058,
+      "quote_slippage_bps": 32.8,
+      "slippage_basis": "liquidez on-chain < PNUT: custo da PNUT (o mais alto das atuais)"
+    }
+  ],
+  "sources_note": "Candidatas de 1 m: Bybit e KuCoin (as fontes das memecoins atuais); OKX onde a Bybit spot não tem o par (RAY, MOODENG). Binance spot existe para 7 das 8 (não MOODENG) mas ficou fora: a API pública de velas respondeu a ~4 s por pedido a partir desta máquina (~2 h só para descarregar), e 2 candidatas por moeda chegam para a escolha por cobertura e correlação."
+}

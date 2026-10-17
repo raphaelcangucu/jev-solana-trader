@@ -257,6 +257,7 @@ def index_entry(run_id: str, s: dict) -> dict:
                     for b in (s.get("realbot") or []) if isinstance(b, dict)],
         "assets": {str(k): _f((v or {}).get("ret_pct")) if isinstance(v, dict) else _f(v) for k, v in (s.get("assets") or {}).items()},
         "look_ahead_forks": [p["name"] for p in ports if p.get("look_ahead")],
+        "tag": s.get("tag") or None,
     }
 
 

@@ -38,6 +38,15 @@ test('monthly runs for the comparison are the last three, oldest on the left', (
   assert.deepEqual(monthlyRuns(index, 2).map(r => r.run_id), ['bt30_2026-09-06', '20261006-0300'])
 })
 
+test('tagged study runs (moedas_novas) keep their pill but stay out of the monthly comparison', () => {
+  const tagged = R({ run_id: 'bt30x_2026-10-06', tag: 'moedas_novas', start_brt: '2026-09-06T09:00:00-03:00', end_brt: '2026-10-06T09:00:00-03:00', generated_brt: '2099-01-01' })
+  const idx = { runs: [tagged, ...index.runs] }
+  assert.deepEqual(monthlyRuns(idx).map(r => r.run_id), monthlyRuns(index).map(r => r.run_id))
+  assert.notEqual(runForMonth(idx, '2026-09-06T09:00:00-03:00'), 'bt30x_2026-10-06')
+  assert.equal(runPill(tagged).label, 'Set · moedas novas')
+  assert.ok(orderRuns(idx).some(r => r.run_id === 'bt30x_2026-10-06'))
+})
+
 test('memes basket is the mean of every asset but SOL', () => {
   assert.equal(memesRet({ SOL: 10, WIF: 4, BONK: -2, GOAT: null }), 1)
   assert.equal(memesRet({ SOL: 5 }), null)

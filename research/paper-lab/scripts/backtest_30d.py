@@ -9,7 +9,13 @@ Uso:
     python research/paper-lab/scripts/backtest_30d.py [--days 30] [--end 2026-10-06T09:00-03:00] [--step 60]
         [--jev-max-calls 20000] [--no-jev] [--live-root ~/jev-lab/code/research/paper-lab] [--keep-servers]
         [--same-as bt30_2026-10-06] [--run-id ID] [--eq-every 300]
+        [--assets-extra research/paper-lab/backtest/assets_extra.json --only-assets extra --tag moedas_novas]
     python research/paper-lab/scripts/backtest_30d.py --index-only      # só reconstrói index.json e history.md
+
+Moedas novas (só backtest): `--assets-extra FICHEIRO` junta ao instantâneo do run as moedas desse ficheiro (o
+memecoins.json do lab não muda) e `--only-assets extra|SYM,SYM` limita o run a essas moedas (portfólios dos modelos
+`portfolios` do ficheiro + um "só segurar" por moeda; sem SOL, sem bot real, sem validação contra o run ao vivo).
+`--tag` marca o run no index.json: runs marcados não entram na comparação mensal do history.md nem movem `latest`.
 
 Histórico: cada run fica na sua pasta `<run_id>/` (padrão bt{dias}_{data do fim em BRT}); no fim de cada run o CLI
 atualiza `index.json` e `history.md` (backtest/history.py). `latest` aponta sempre para o run mensal mais recente.
@@ -59,6 +65,10 @@ def parse_args(argv=None):
     ap.add_argument("--eq-every", type=int, default=None, help="grelha da equity em s (padrão: 300; 3600 se > 45 dias)")
     ap.add_argument("--bg-servers", action="store_true", help="servidores de modelos em QoS de fundo (taskpolicy -b)")
     ap.add_argument("--index-only", action="store_true", help="só reconstrói index.json e history.md")
+    ap.add_argument("--assets-extra", default=None, help="moedas extra só do backtest (ex.: backtest/assets_extra.json)")
+    ap.add_argument("--only-assets", default=None, help="'extra' ou lista SYM,SYM: só estes ativos no catálogo")
+    ap.add_argument("--tag", default=None, help="etiqueta do run no index.json (ex.: moedas_novas)")
+    ap.add_argument("--models", default=None, help="servidores a arrancar (padrão: os que o catálogo usa)")
     return ap.parse_args(argv)
 
 
@@ -159,7 +169,8 @@ def build_chart_for_run(eng, data, ports, rb, trades_by, start, end, syms, grid)
                        "top_by_pnl": best_p[0] if best_p else None, "top_by_pnl_pct": REP._r(best_p[1]) if best_p else None,
                        "top_by_skill": best_s[0] if best_s else None, "top_by_skill_usd": REP._r(best_s[1]) if best_s else None,
                        "sol_ret": REP._r(ret("SOL")), "memes_ret": REP._r(sum(mr) / len(mr)) if mr else None})
-    return H.build_chart(start=start, end=end, equity=equity, ports=ports, prices=prices, realbot=realbot, months=months)
+    return H.build_chart(start=start, end=end, equity=equity, ports=ports, prices=prices, realbot=realbot, months=months,
+                         memes=memes)
 
 
 def main(argv=None) -> int:
@@ -218,6 +229,18 @@ def main(argv=None) -> int:
         if not rb_cfg_src.exists():
             rb_cfg_src = REPO / "config" / "params.json"
         shutil.copy2(rb_cfg_src, inputs / "realbot_params.json")
+    from backtest import extra_assets as XA
+    xdoc = XA.load(Path(a.assets_extra).expanduser()) if a.assets_extra else None
+    base_mem = json.loads((inputs / "memecoins.json").read_text())
+    only = XA.parse_only(a.only_assets, xdoc, [t["symbol"] for t in base_mem["tokens"]])
+    if xdoc is not None or only is not None:
+        # overlay só no instantâneo do run (o memecoins.json do lab fica intocado); escrito ANTES de importar bot.*
+        shutil.copy2(inputs / "memecoins.json", inputs / "memecoins_base.json")
+        (inputs / "memecoins.json").write_text(json.dumps(XA.merged_memecoins(base_mem, xdoc, only), ensure_ascii=False, indent=1))
+        if xdoc is not None:
+            (inputs / "assets_extra.json").write_text(json.dumps(xdoc, ensure_ascii=False, indent=1))
+            snap["_assets_extra"] = hashlib.sha256((inputs / "assets_extra.json").read_bytes()).hexdigest()[:16]
+        pg.log(f"moedas: overlay {XA.symbols(xdoc) if xdoc else []}, só {only}")
     os.environ["PAPER_LAB_ROOT"] = str(inputs)
     os.environ.pop("LIVE_TRADING", None)
 
@@ -228,6 +251,16 @@ def main(argv=None) -> int:
     memecoins = json.loads((inputs / "memecoins.json").read_text())
     models_cfg = load_models_cfg()
     syms = ["SOL"] + [t["symbol"] for t in memecoins["tokens"]]
+    xsyms = [s_ for s_ in (XA.symbols(xdoc) if xdoc else []) if s_ in syms]
+    xtok = {t["symbol"]: t for t in (xdoc or {}).get("tokens") or []}
+    if xsyms:
+        XA.patch_symbols(xsyms, {s_: xtok[s_].get("gate_pair") for s_ in xsyms},
+                         tokens=[t for t in memecoins["tokens"] if t["symbol"] in xsyms])
+        made = XA.seed_hypotheses(inputs / "data" / "lab" / "registry.json", xsyms,
+                                  datetime.now(tz=BRT).isoformat(timespec="seconds"))
+        P.STORE.refresh(force=True)
+        pg.log(f"moedas extra no catálogo: {xsyms}; hipóteses semeadas no instantâneo: {made}")
+    sol_in_run = only is None or "SOL" in only
     notes = []
     servers = cache_dir / "servers"
     started_servers = False
@@ -238,7 +271,9 @@ def main(argv=None) -> int:
         if ref_dir is not None:
             prefer = {s_: (v.get("source") or "").replace(" 1m", "")
                       for s_, v in json.loads((ref_dir / "summary.json").read_text())["assets"].items()}
-        data = D.fetch_all(cache_dir, start, end, syms, logf=pg.logf, prefer=prefer)
+        data = D.fetch_all(cache_dir, start, end, syms, logf=pg.logf, prefer=prefer,
+                           sources={s_: [tuple(x) for x in xtok[s_]["sources"]] for s_ in xsyms},
+                           gate_pairs={s_: xtok[s_].get("gate_pair") for s_ in xsyms if xtok[s_].get("gate_pair")})
         unusable = []
         for s_ in syms:
             cv = data["coverage"][s_]
@@ -248,7 +283,8 @@ def main(argv=None) -> int:
                 notes.append(f"{s_}: cobertura insuficiente nesta janela (1 m {cv.get('coverage', 0) * 100:.1f}%, 1 h "
                              f"{(hc or 0) * 100:.1f}%; mínimo {D.MIN_COVERAGE * 100:.0f}%; ex.: moeda ainda não listada no início "
                              "da janela) — os portfólios deste ativo ficam fora deste run")
-        if data["coverage"].get("SOL_binance_grid", {}).get("coverage", 0) < D.MIN_COVERAGE and "SOL" not in unusable:
+        if (sol_in_run and data["coverage"].get("SOL_binance_grid", {}).get("coverage", 0) < D.MIN_COVERAGE
+                and "SOL" not in unusable):
             unusable.append("SOL")
             notes.append("SOL: grelha Binance de 1 s com cobertura < 90% — portfólios SOL e bot real fora deste run")
         pg.log(f"cobertura: " + ", ".join(f"{s_} {data['coverage'][s_].get('coverage', 0) * 100:.2f}%/1h "
@@ -258,10 +294,15 @@ def main(argv=None) -> int:
             # custos de execução por ativo = os do run de referência (mesmos pressupostos; os fills ao vivo só começam
             # em setembro, por isso uma janela antiga cairia nos valores de recurso)
             ref_assets = json.loads((ref_dir / "summary.json").read_text())["assets"]
-            slip = {s_: float((ref_assets[s_].get("slippage") or {}).get("quote_slippage_bps")) for s_ in syms}
-            slip_info = {s_: dict(ref_assets[s_].get("slippage") or {}, from_run=a.same_as) for s_ in syms}
+            slip = {s_: float((ref_assets[s_].get("slippage") or {}).get("quote_slippage_bps")) for s_ in syms if s_ in ref_assets}
+            slip_info = {s_: dict(ref_assets[s_].get("slippage") or {}, from_run=a.same_as) for s_ in syms if s_ in ref_assets}
         else:
             slip, slip_info = slippage_from_live(live_root, float(cfg["fees"].get("extra_slippage_bps", 5)), memecoins, end)
+        for s_ in xsyms:
+            # moedas extra: sem fills ao vivo → custo assumido no ficheiro extra (política em slippage_policy)
+            slip[s_] = float(xtok[s_]["quote_slippage_bps"])
+            slip_info[s_] = {"n_fills": 0, "quote_slippage_bps": slip[s_], "assumed": True,
+                             "basis": xtok[s_].get("slippage_basis"), "policy": (xdoc or {}).get("slippage_policy")}
         pg.log(f"slippage por ativo (bps sobre a marca, antes do extra de {cfg['fees'].get('extra_slippage_bps')} bps): {slip}")
 
         # ------------------------------------------------------------ catálogo
@@ -271,12 +312,23 @@ def main(argv=None) -> int:
         jev_ready = (not a.no_jev) and bool(jcfg.get("enabled")) and bool((os.environ.get(jcfg.get("api_key_env") or "JEV_API_KEY") or "").strip())
         items = CAT.build(models_cfg, jev_ready)
         items = [it for it in items if it["asset"] not in unusable]
+        items = XA.filter_items(items, only, XA.wanted_names(xdoc, xsyms) if xsyms else None)
+        bh_items = [XA.buy_hold_item(s_) for s_ in xsyms if s_ not in unusable] if (xdoc or {}).get("buy_hold") else []
         pg.log(f"catálogo: {len(items)} portfólios (+ bot real A/B); Jev {'ligado' if jev_ready else 'desligado'}"
                f"{' (segredos: ' + ','.join(jev_names) + ')' if jev_names else ''}")
 
         # ------------------------------------------------------------ modelos
         pg.phase("modelos")
-        M.start_servers(servers, Path(a.jev_alts).expanduser(), logf=pg.logf, background=a.bg_servers)
+        used = {"von"}
+        for it in items:
+            m_ = (it.get("model") or "").split("+")[0]
+            if m_ in M.PORTS:
+                used.add(m_)
+            if it["kind"] == "ensemble":
+                used |= set(M.PORTS)
+        models_run = tuple(m_ for m_ in M.PORTS if m_ in (set(a.models.split(",")) if a.models else used))
+        pg.log(f"servidores do backtest: {models_run}")
+        M.start_servers(servers, Path(a.jev_alts).expanduser(), models=models_run, logf=pg.logf, background=a.bg_servers)
         started_servers = True
         cache = M.ModelCache(cache_dir / "model_answers.sqlite")
         client = M.ModelClient(cache, jev_cfg=jcfg, jev_max_calls=a.jev_max_calls, workers=4, logf=pg.logf)
@@ -312,25 +364,28 @@ def main(argv=None) -> int:
         V_SOL = [("held", "neutral"), ("sold", "neutral"), ("sold", "buoyed"), ("sold", "stung")]
         V_MEME = [("flat", "neutral"), ("held", "neutral"), ("sold", "neutral"), ("sold", "buoyed"), ("sold", "stung")]
         sol_keys, meme_keys = set(), {s: set() for s in syms[1:]}
+        meme_period = (xdoc or {}).get("rotation_period_min") if xsyms else None
+        has_sol = any(it["asset"] == "SOL" for it in items)
         for t in range(start + a.step, end + 1, a.step):
-            mk = sol_ms.at(t)
-            if mk:
-                sol_keys.add(mk)
-            if t % 60 == 0:
-                s = syms[1:][((t - start) // 60) % (len(syms) - 1)]
-                mk = meme_ms[s].at(t)
+            if has_sol:
+                mk = sol_ms.at(t)
                 if mk:
-                    meme_keys[s].add(mk)
+                    sol_keys.add(mk)
+            if t % 60 == 0:
+                for s in EN.rotation_syms(syms[1:], t, start, meme_period):
+                    mk = meme_ms[s].at(t)
+                    if mk:
+                        meme_keys[s].add(mk)
         sol_states = sorted({ST.compose(mk, p, m) for mk in sol_keys for p, m in V_SOL})
         meme_states = {s: sorted({ST.compose(mk, p, m) for mk in ks for p, m in V_MEME}) for s, ks in meme_keys.items()}
         all_meme = sorted({x for v in meme_states.values() for x in v})
         pg.log(f"estados: SOL {len(sol_keys)} chaves de mercado → {len(sol_states)} estados; memecoins {sum(map(len, meme_keys.values()))} "
                f"chaves → {len(all_meme)} estados")
         jobs = [(m, c, s) for m, c in (("von", "lab_baseline"), ("von", "lab_v2"), ("laya", "lab_baseline"), ("poorjev", "lab_baseline"))
-                for s in sol_states]
-        jobs += [(m, "lab_baseline", s) for m in ("von", "laya", "poorjev") for s in all_meme]
+                for s in sol_states if m in models_run]
+        jobs += [(m, "lab_baseline", s) for m in ("von", "laya", "poorjev") for s in all_meme if m in models_run]
         for n, m, asset, cid in crit_forks:
-            if m in M.PORTS:
+            if m in M.PORTS and m in models_run:
                 jobs += [(m, cid, s) for s in (sol_states if asset == "SOL" else meme_states.get(asset, []))]
         pg.log(f"pré-busca local: {len(jobs)} pares (antes da cache)")
         r = client.prefetch(jobs, label="local")
@@ -352,11 +407,11 @@ def main(argv=None) -> int:
                 notes.append(f"bot real {prof}: {errs}")
         eng = EN.Engine(data=data, start=start, end=end, step=a.step, items=items, client=client, cfg=cfg,
                         memecoins=memecoins, slip_bps=slip, crit_files={}, logf=pg.logf, jev_ready=jev_ready,
-                        progress=pg.log, realbot_params=rb_vals, eq_every=eq_every).setup()
+                        progress=pg.log, realbot_params=rb_vals, eq_every=eq_every, meme_period_min=meme_period).setup()
         eng.run()
         pg.log(f"simulação: {eng.counts}, trades {len(eng.env.trades)}")
         pg.phase("bot_real")
-        rb = eng.run_realbot({"A": "relaxed_paper", "B": "relaxed_exits_paper"})
+        rb = eng.run_realbot({"A": "relaxed_paper", "B": "relaxed_exits_paper"}) if sol_in_run else {}
         client.cache.commit()
         eng.env.uninstall()
 
@@ -373,7 +428,11 @@ def main(argv=None) -> int:
             jev_nodata = (f"{js['fail_closed']}/{js['lookups']} decisões sem resposta (fail-closed → hold): "
                           f"{js.get('last_error') or ('teto de chamadas' if client.jev_budget_hit else 'erro')}")
             notes.append(f"Jev sem dados em parte da janela — {jev_nodata}; portfólios jev_* marcados 'sem dados'")
-        for it in items:
+        for it in bh_items:
+            src_rows = eng.rec.rows.get(f"meme_{it['asset']}_baseline") or []
+            if src_rows:
+                eng.rec.rows[it["name"]] = XA.buy_hold_rows(src_rows)
+        for it in items + bh_items:
             n = it["name"]
             rows = eng.rec.rows.get(n) or []
             if len(rows) < 3:
@@ -446,6 +505,8 @@ def main(argv=None) -> int:
         validation = {"overlap_brt": [datetime.fromtimestamp(live_t0, tz=BRT).isoformat(), datetime.fromtimestamp(end, tz=BRT).isoformat()]}
         if live_t0 >= end:
             validation = {"skipped": "a janela acaba antes do início do run ao vivo (2026-10-01 22:24): sem período comum"}
+        elif only is not None:
+            validation = {"skipped": "run limitado a ativos fora do run ao vivo (--only-assets): sem decisões ao vivo para comparar"}
         else:
             try:
                 validation["states"] = VAL.state_agreement(live_root, data, live_t0, end, syms)
@@ -476,9 +537,10 @@ def main(argv=None) -> int:
         for m, n_ in client.cache.db.execute("SELECT model, COUNT(*) FROM answers GROUP BY model"):
             if m in models_out:
                 models_out[m]["cached_total"] = n_    # respostas únicas na cache (todas as execuções)
-        traded = [p for p in ports if p["trades"] > 0] or ports
+        strat = [p for p in ports if p.get("test_type") != "buy_hold"] or ports   # o "só segurar" não é vencedor
+        traded = [p for p in strat if p["trades"] > 0] or strat
         by_skill = max(traded, key=lambda p: p["skill"] if p["skill"] is not None else -1e18)["name"]
-        by_pnl = max(ports, key=lambda p: p["pnl_pct"])["name"]
+        by_pnl = max(strat, key=lambda p: p["pnl_pct"])["name"]
         winners = [p for p in ports if p["verdict"] == "vencedora"]
         by_verdict = max(winners, key=lambda p: p["skill"] or 0)["name"] if winners else None
         assumptions = [
@@ -528,6 +590,18 @@ def main(argv=None) -> int:
                                "curvas normalizadas (1000 = início).")
         if any("cobertura insuficiente" in n_ for n_ in notes):
             assumptions.append("Ativos com cobertura < 90% nesta janela ficam fora (ver Notas da execução).")
+        if xsyms:
+            assumptions.append(
+                f"Moedas novas (só backtest, backtest/assets_extra.json; o memecoins.json do lab não muda): {', '.join(xsyms)}. "
+                "Mesmos parâmetros das famílias meme (params.json + overlay do instantâneo, resolvidos com asset=<SYM>; nenhuma "
+                "camada por moeda), mesmo capital e o mesmo estado partilhado a partir de meme_<SYM>_baseline. Rotação "
+                f"{'com cadência de ' + str(meme_period) + ' min por moeda (a das 7 memecoins ao vivo)' if meme_period else 'de uma moeda por minuto'}"
+                ". Fontes de 1 m escolhidas pela cobertura e pela correlação com a Gate.io (fonte da marcação ao vivo): como a "
+                "Gate.io só guarda ~7 dias de 1 m (depois do fim da janela), a correlação usada é a dos retornos de 1 h com as "
+                "barras de 1 h da Gate.io dentro da janela. Custos sem fills ao vivo: " + str((xdoc or {}).get("slippage_policy")))
+            assumptions.append("Portfólios por moeda: " + ", ".join((xdoc or {}).get("portfolios") or []) +
+                               (" + {SYM}_buy_hold (só segurar: 100% na moeda no início da janela, sem custos; é o B&H "
+                                "contra o qual os outros são medidos)" if bh_items else "") + ". Sem SOL e sem bot real neste run.")
         if jev_ready:
             assumptions.append(f"Jev hospedado: só portfólios SOL; teto de {a.jev_max_calls} chamadas.")
         else:
@@ -545,6 +619,8 @@ def main(argv=None) -> int:
                         "lab_criteria_calls": eng.lab.crit.stats},
             "inputs": snap, "notes": notes, "validation": validation,
             "kind": H.run_kind(a.days), "same_as": a.same_as, "excluded_assets": unusable,
+            "tag": a.tag, "only_assets": only, "assets_extra": xsyms or None,
+            "rotation_period_min": meme_period,
             "consistency": {"unit": "meses" if long_run else "semanas", "n": n_blk, "need": need_blk,
                             "block_days": blk_s / 86400},
             "grid_s": grid, "eq_every_s": eq_every,
@@ -561,13 +637,13 @@ def main(argv=None) -> int:
                 pg.log(f"chart.json falhou: {type(ex).__name__}: {ex}\n{traceback.format_exc()}")
         (run_dir / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=1))
         (run_dir / "report.md").write_text(REP.report_md(summary, {"notes": notes}))
-        new_latest = H.latest_after(out_root, run_id, summary["kind"], summary["window"]["end_brt"])
+        new_latest = H.latest_after(out_root, run_id, summary["kind"], summary["window"]["end_brt"], tag=a.tag)
         if new_latest:
             (out_root / "latest").write_text(new_latest + "\n")
         idx = H.write_history(out_root, summary)
         pg.log(f"index.json: {len(idx['runs'])} runs; latest → {new_latest}; history.md atualizado")
         pg.phase("fim", total_s=round(time.time() - pg.t0, 1))
-        pg.log(f"pronto: {run_dir} ({len(ports)} portfólios + bot real A/B) em {time.time() - pg.t0:.0f}s")
+        pg.log(f"pronto: {run_dir} ({len(ports)} portfólios{' + bot real A/B' if rb else ''}) em {time.time() - pg.t0:.0f}s")
         return 0
     except Exception as ex:
         pg.log(f"ERRO: {type(ex).__name__}: {ex}\n{traceback.format_exc()}")
