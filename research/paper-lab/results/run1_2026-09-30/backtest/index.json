@@ -1,0 +1,583 @@
+{
+ "updated_brt": "2026-10-17T20:45:41-03:00",
+ "runs": [
+  {
+   "run_id": "bt30x_2026-10-06",
+   "kind": "30d",
+   "start_brt": "2026-09-06T09:00:00-03:00",
+   "end_brt": "2026-10-06T09:00:00-03:00",
+   "days": 30.0,
+   "generated_brt": "2026-10-17T20:45:41-03:00",
+   "n_portfolios": 40,
+   "n_winners": 0,
+   "n_losers": 5,
+   "n_inconclusive": 35,
+   "winner": {
+    "by_skill": "RAY_poorjev_relaxed",
+    "by_pnl": "RAY_poorjev_relaxed",
+    "by_verdict": null
+   },
+   "top_skill": [
+    {
+     "name": "RAY_buy_hold",
+     "skill": 125.3166,
+     "pnl_pct": 90.8422
+    },
+    {
+     "name": "RAY_poorjev_relaxed",
+     "skill": 51.5149,
+     "pnl_pct": 83.2362
+    },
+    {
+     "name": "PYTH_buy_hold",
+     "skill": 13.9579,
+     "pnl_pct": 43.6031
+    },
+    {
+     "name": "PYTH_poorjev_relaxed",
+     "skill": 9.7307,
+     "pnl_pct": 43.0375
+    },
+    {
+     "name": "meme_JUP_baseline",
+     "skill": 0.0,
+     "pnl_pct": 0.0
+    }
+   ],
+   "top_pnl": [
+    {
+     "name": "RAY_buy_hold",
+     "skill": 125.3166,
+     "pnl_pct": 90.8422
+    },
+    {
+     "name": "RAY_poorjev_relaxed",
+     "skill": 51.5149,
+     "pnl_pct": 83.2362
+    },
+    {
+     "name": "h1_exits_RAY_poorjev_relaxed",
+     "skill": -158.2398,
+     "pnl_pct": 51.7506
+    },
+    {
+     "name": "PYTH_buy_hold",
+     "skill": 13.9579,
+     "pnl_pct": 43.6031
+    },
+    {
+     "name": "PYTH_poorjev_relaxed",
+     "skill": 9.7307,
+     "pnl_pct": 43.0375
+    }
+   ],
+   "realbot": [],
+   "assets": {
+    "SOL": 13.019,
+    "JUP": 28.8086,
+    "JTO": 26.0965,
+    "PYTH": 43.6031,
+    "RAY": 90.8422,
+    "BOME": 9.3121,
+    "PENGU": 8.7582,
+    "TRUMP": -14.1889,
+    "MOODENG": 4.177
+   },
+   "look_ahead_forks": [],
+   "tag": "moedas_novas"
+  },
+  {
+   "run_id": "bt180x_2026-10-06",
+   "kind": "180d",
+   "start_brt": "2026-04-09T09:00:00-03:00",
+   "end_brt": "2026-10-06T09:00:00-03:00",
+   "days": 180.0,
+   "generated_brt": "2026-10-17T20:34:26-03:00",
+   "n_portfolios": 40,
+   "n_winners": 0,
+   "n_losers": 7,
+   "n_inconclusive": 33,
+   "winner": {
+    "by_skill": "RAY_poorjev_relaxed",
+    "by_pnl": "RAY_poorjev_relaxed",
+    "by_verdict": null
+   },
+   "top_skill": [
+    {
+     "name": "RAY_buy_hold",
+     "skill": 980.4641,
+     "pnl_pct": 253.9005
+    },
+    {
+     "name": "RAY_poorjev_relaxed",
+     "skill": 971.345,
+     "pnl_pct": 252.5406
+    },
+    {
+     "name": "JUP_buy_hold",
+     "skill": 166.8585,
+     "pnl_pct": 119.4846
+    },
+    {
+     "name": "BOME_buy_hold",
+     "skill": 164.8592,
+     "pnl_pct": 160.0206
+    },
+    {
+     "name": "JUP_poorjev_relaxed",
+     "skill": 164.5492,
+     "pnl_pct": 118.9725
+    }
+   ],
+   "top_pnl": [
+    {
+     "name": "RAY_buy_hold",
+     "skill": 980.4641,
+     "pnl_pct": 253.9005
+    },
+    {
+     "name": "RAY_poorjev_relaxed",
+     "skill": 971.345,
+     "pnl_pct": 252.5406
+    },
+    {
+     "name": "BOME_buy_hold",
+     "skill": 164.8592,
+     "pnl_pct": 160.0206
+    },
+    {
+     "name": "BOME_poorjev_relaxed",
+     "skill": 154.5973,
+     "pnl_pct": 158.6465
+    },
+    {
+     "name": "JUP_buy_hold",
+     "skill": 166.8585,
+     "pnl_pct": 119.4846
+    }
+   ],
+   "realbot": [],
+   "assets": {
+    "SOL": 46.4103,
+    "JUP": 119.4846,
+    "JTO": 107.5812,
+    "PYTH": 81.3917,
+    "RAY": 253.9005,
+    "BOME": 160.0206,
+    "PENGU": 51.213,
+    "TRUMP": -30.5689,
+    "MOODENG": -3.2332
+   },
+   "look_ahead_forks": [],
+   "tag": "moedas_novas"
+  },
+  {
+   "run_id": "bt180_2026-10-06",
+   "kind": "180d",
+   "start_brt": "2026-04-09T09:00:00-03:00",
+   "end_brt": "2026-10-06T09:00:00-03:00",
+   "days": 180.0,
+   "generated_brt": "2026-10-07T01:27:09-03:00",
+   "n_portfolios": 127,
+   "n_winners": 0,
+   "n_losers": 15,
+   "n_inconclusive": 112,
+   "winner": {
+    "by_skill": "h4_hours_poorjev_relaxed",
+    "by_pnl": "h4_hours_poorjev_relaxed",
+    "by_verdict": null
+   },
+   "top_skill": [
+    {
+     "name": "h4_hours_poorjev_relaxed",
+     "skill": 279.9554,
+     "pnl_pct": 61.4019
+    },
+    {
+     "name": "FARTCOIN_rule_regime_full",
+     "skill": 267.6368,
+     "pnl_pct": 43.478
+    },
+    {
+     "name": "BONK_rule_regime_full",
+     "skill": 134.1442,
+     "pnl_pct": 3.1609
+    },
+    {
+     "name": "h3_limit_hybrid_von_cap2",
+     "skill": 119.0107,
+     "pnl_pct": 50.7341
+    },
+    {
+     "name": "hybrid_von_relaxed_cap2",
+     "skill": 92.0897,
+     "pnl_pct": 48.322
+    }
+   ],
+   "top_pnl": [
+    {
+     "name": "h4_hours_poorjev_relaxed",
+     "skill": 279.9554,
+     "pnl_pct": 61.4019
+    },
+    {
+     "name": "h3_limit_hybrid_von_cap2",
+     "skill": 119.0107,
+     "pnl_pct": 50.7341
+    },
+    {
+     "name": "hybrid_von_relaxed_cap2",
+     "skill": 92.0897,
+     "pnl_pct": 48.322
+    },
+    {
+     "name": "h4_hours_von_relaxed",
+     "skill": -7.5989,
+     "pnl_pct": 44.5352
+    },
+    {
+     "name": "FARTCOIN_rule_regime_full",
+     "skill": 267.6368,
+     "pnl_pct": 43.478
+    }
+   ],
+   "realbot": [
+    {
+     "book": "A",
+     "pnl_pct": 45.7271,
+     "vs_hold": 22.857868
+    },
+    {
+     "book": "B",
+     "pnl_pct": -42.5344,
+     "vs_hold": -22.54259
+    }
+   ],
+   "assets": {
+    "SOL": 46.4103,
+    "BONK": -34.2311,
+    "WIF": 32.774,
+    "POPCAT": 7.6204,
+    "FARTCOIN": -1.5686,
+    "PNUT": 31.2006,
+    "MEW": -8.0035,
+    "GOAT": 10.6061
+   },
+   "look_ahead_forks": [
+    "relaxed__fork1",
+    "poorjev_relaxed__fork1",
+    "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+    "h2_ensemble_FARTCOIN__fork1",
+    "h2_ensemble_WIF__fork1",
+    "relaxed_expcap50__fork1",
+    "laya_relaxed__fork1",
+    "FARTCOIN_laya_relaxed__fork1",
+    "h1_exits_von_relaxed__fork1",
+    "h1_exits_WIF_poorjev_relaxed__fork1",
+    "h1_exits_BONK_poorjev_relaxed__fork1",
+    "h1_exits_MEW_poorjev_relaxed__fork1",
+    "laya_relaxed__fork2",
+    "FARTCOIN_laya_relaxed__fork2",
+    "h1_exits_WIF_poorjev_relaxed__fork2"
+   ]
+  },
+  {
+   "run_id": "bt30_2026-10-06",
+   "kind": "30d",
+   "start_brt": "2026-09-06T09:00:00-03:00",
+   "end_brt": "2026-10-06T09:00:00-03:00",
+   "days": 30.0,
+   "generated_brt": "2026-10-06T15:54:06-03:00",
+   "n_portfolios": 127,
+   "n_winners": 0,
+   "n_losers": 10,
+   "n_inconclusive": 117,
+   "winner": {
+    "by_skill": "poorjev_baseline",
+    "by_pnl": "MEW_poorjev_baseline",
+    "by_verdict": null
+   },
+   "top_skill": [
+    {
+     "name": "poorjev_baseline",
+     "skill": 83.9615,
+     "pnl_pct": 19.2088
+    },
+    {
+     "name": "poorjev_relaxed",
+     "skill": 83.9615,
+     "pnl_pct": 19.2088
+    },
+    {
+     "name": "h3_limit_poorjev_relaxed",
+     "skill": 81.463,
+     "pnl_pct": 18.5869
+    },
+    {
+     "name": "GOAT_rule_donch_regime_full",
+     "skill": 78.6668,
+     "pnl_pct": 14.0384
+    },
+    {
+     "name": "rsi_sol_1h",
+     "skill": 56.3286,
+     "pnl_pct": 7.6947
+    }
+   ],
+   "top_pnl": [
+    {
+     "name": "MEW_poorjev_baseline",
+     "skill": -22.7322,
+     "pnl_pct": 20.009
+    },
+    {
+     "name": "MEW_poorjev_relaxed",
+     "skill": -22.7322,
+     "pnl_pct": 20.009
+    },
+    {
+     "name": "MEW_hybrid_poorjev_regime",
+     "skill": -22.7322,
+     "pnl_pct": 20.009
+    },
+    {
+     "name": "poorjev_baseline",
+     "skill": 83.9615,
+     "pnl_pct": 19.2088
+    },
+    {
+     "name": "poorjev_relaxed",
+     "skill": 83.9615,
+     "pnl_pct": 19.2088
+    }
+   ],
+   "realbot": [
+    {
+     "book": "A",
+     "pnl_pct": 12.495,
+     "vs_hold": 6.238947
+    },
+    {
+     "book": "B",
+     "pnl_pct": -4.2737,
+     "vs_hold": -2.457436
+    }
+   ],
+   "assets": {
+    "SOL": 13.019,
+    "BONK": 14.4196,
+    "WIF": 17.0596,
+    "POPCAT": 1.3871,
+    "FARTCOIN": -4.9242,
+    "PNUT": 7.3319,
+    "MEW": 20.3988,
+    "GOAT": 17.0882
+   },
+   "look_ahead_forks": [
+    "relaxed__fork1",
+    "poorjev_relaxed__fork1",
+    "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+    "h2_ensemble_FARTCOIN__fork1",
+    "h2_ensemble_WIF__fork1",
+    "relaxed_expcap50__fork1",
+    "laya_relaxed__fork1",
+    "FARTCOIN_laya_relaxed__fork1",
+    "h1_exits_von_relaxed__fork1",
+    "h1_exits_WIF_poorjev_relaxed__fork1",
+    "h1_exits_BONK_poorjev_relaxed__fork1",
+    "h1_exits_MEW_poorjev_relaxed__fork1",
+    "laya_relaxed__fork2",
+    "FARTCOIN_laya_relaxed__fork2",
+    "h1_exits_WIF_poorjev_relaxed__fork2"
+   ]
+  },
+  {
+   "run_id": "bt30_2026-09-06",
+   "kind": "30d",
+   "start_brt": "2026-08-06T09:00:00-03:00",
+   "end_brt": "2026-09-06T09:00:00-03:00",
+   "days": 31.0,
+   "generated_brt": "2026-10-07T00:42:21-03:00",
+   "n_portfolios": 127,
+   "n_winners": 0,
+   "n_losers": 7,
+   "n_inconclusive": 120,
+   "winner": {
+    "by_skill": "h3_limit_hybrid_von_cap2",
+    "by_pnl": "h1_exits_FARTCOIN_poorjev_relaxed",
+    "by_verdict": null
+   },
+   "top_skill": [
+    {
+     "name": "h3_limit_hybrid_von_cap2",
+     "skill": 155.8785,
+     "pnl_pct": 49.6821
+    },
+    {
+     "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+     "skill": 153.3717,
+     "pnl_pct": 55.9372
+    },
+    {
+     "name": "hybrid_von_relaxed_cap2",
+     "skill": 151.3298,
+     "pnl_pct": 49.5766
+    },
+    {
+     "name": "h2_ensemble_sol",
+     "skill": 138.8558,
+     "pnl_pct": 50.9
+    },
+    {
+     "name": "BONK_hybrid_poorjev_regime",
+     "skill": 121.9015,
+     "pnl_pct": 34.0105
+    }
+   ],
+   "top_pnl": [
+    {
+     "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+     "skill": 153.3717,
+     "pnl_pct": 55.9372
+    },
+    {
+     "name": "WIF_hybrid_poorjev_regime",
+     "skill": 87.457,
+     "pnl_pct": 55.4201
+    },
+    {
+     "name": "WIF_poorjev_baseline",
+     "skill": 66.1117,
+     "pnl_pct": 54.9137
+    },
+    {
+     "name": "WIF_poorjev_relaxed",
+     "skill": 66.1117,
+     "pnl_pct": 54.9137
+    },
+    {
+     "name": "h2_ensemble_sol",
+     "skill": 138.8558,
+     "pnl_pct": 50.9
+    }
+   ],
+   "realbot": [
+    {
+     "book": "A",
+     "pnl_pct": 45.1838,
+     "vs_hold": 22.599272
+    },
+    {
+     "book": "B",
+     "pnl_pct": 0.3344,
+     "vs_hold": -0.40261
+    }
+   ],
+   "assets": {
+    "SOL": 45.0804,
+    "BONK": 18.9928,
+    "WIF": 55.2764,
+    "POPCAT": 22.6155,
+    "FARTCOIN": 42.1538,
+    "PNUT": 31.0637,
+    "MEW": 32.5737,
+    "GOAT": 23.27
+   },
+   "look_ahead_forks": []
+  },
+  {
+   "run_id": "bt30_2026-08-06",
+   "kind": "30d",
+   "start_brt": "2026-07-07T09:00:00-03:00",
+   "end_brt": "2026-08-06T09:00:00-03:00",
+   "days": 30.0,
+   "generated_brt": "2026-10-07T01:28:58-03:00",
+   "n_portfolios": 127,
+   "n_winners": 0,
+   "n_losers": 5,
+   "n_inconclusive": 122,
+   "winner": {
+    "by_skill": "FARTCOIN_rule_donch_regime_full",
+    "by_pnl": "FARTCOIN_rule_donch_regime_full",
+    "by_verdict": null
+   },
+   "top_skill": [
+    {
+     "name": "FARTCOIN_rule_donch_regime_full",
+     "skill": 69.1222,
+     "pnl_pct": 1.1685
+    },
+    {
+     "name": "h1_exits_BONK_poorjev_relaxed",
+     "skill": 57.0346,
+     "pnl_pct": -32.4206
+    },
+    {
+     "name": "BONK_hybrid_poorjev_regime",
+     "skill": 48.9093,
+     "pnl_pct": -34.8234
+    },
+    {
+     "name": "BONK_poorjev_baseline",
+     "skill": 45.5633,
+     "pnl_pct": -35.2188
+    },
+    {
+     "name": "BONK_poorjev_relaxed",
+     "skill": 45.5633,
+     "pnl_pct": -35.2188
+    }
+   ],
+   "top_pnl": [
+    {
+     "name": "FARTCOIN_rule_donch_regime_full",
+     "skill": 69.1222,
+     "pnl_pct": 1.1685
+    },
+    {
+     "name": "rsi_sol_1h",
+     "skill": 35.0792,
+     "pnl_pct": 0.8308
+    },
+    {
+     "name": "FARTCOIN_rule_donch_regime",
+     "skill": 17.7482,
+     "pnl_pct": 0.3212
+    },
+    {
+     "name": "relaxed_expcap50__fork1",
+     "skill": 0.2287,
+     "pnl_pct": 0.0226
+    },
+    {
+     "name": "meme_BONK_baseline",
+     "skill": 0.0,
+     "pnl_pct": 0.0
+    }
+   ],
+   "realbot": [
+    {
+     "book": "A",
+     "pnl_pct": -9.6064,
+     "vs_hold": -4.803272
+    },
+    {
+     "book": "B",
+     "pnl_pct": -11.1963,
+     "vs_hold": -5.620847
+    }
+   ],
+   "assets": {
+    "SOL": -9.6862,
+    "BONK": -34.9555,
+    "WIF": -17.4274,
+    "POPCAT": -11.6548,
+    "FARTCOIN": -20.0983,
+    "PNUT": -12.9696,
+    "MEW": -14.0507,
+    "GOAT": -11.9813
+   },
+   "look_ahead_forks": []
+  }
+ ]
+}

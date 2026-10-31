@@ -1,0 +1,590 @@
+<title>Trinta Dias de Papel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Diário de 30 dias de um laboratório de trading com IA em papel: 189 estratégias em Solana e memecoins, vereditos, parecer técnico e veredito financeiro.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: caderno de laboratório em papel milimetrado; coluna de leitura de ~68ch, blocos de dados alargam até 1120px. */
+:root{
+  --paper:#f2f4f7; --sheet:#ffffff; --ink:#101a2b; --ink-2:#44506a; --ink-3:#69748c; --rule:#d7dde7; --grid:rgba(16,26,43,.055);
+  --mark:#ffe45c; --mark-ink:#101a2b; --acc:#2552c4; --up:#17774a; --down:#c0352e; --zero:#c9d0db;
+  --s1:#2a78d6; --s2:#eb6834; --hold:#69748c;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Literata",Georgia,"Times New Roman",serif;
+  --f-data:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --measure:68ch; --wide:1120px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0b111b; --sheet:#111a27; --ink:#e7ecf4; --ink-2:#b3bdcd; --ink-3:#8590a6; --rule:#253145; --grid:rgba(231,236,244,.045);
+  --mark:#e6c93a; --mark-ink:#0b111b; --acc:#8cadff; --up:#45c483; --down:#f2766e; --zero:#35425a;
+  --s1:#3987e5; --s2:#d95926; --hold:#8590a6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0b111b; --sheet:#111a27; --ink:#e7ecf4; --ink-2:#b3bdcd; --ink-3:#8590a6; --rule:#253145; --grid:rgba(231,236,244,.045);
+  --mark:#e6c93a; --mark-ink:#0b111b; --acc:#8cadff; --up:#45c483; --down:#f2766e; --zero:#35425a;
+  --s1:#3987e5; --s2:#d95926; --hold:#8590a6; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 18px/1.62 var(--f-body);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;-webkit-font-smoothing:antialiased}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.col{max-width:var(--measure);margin-inline:auto}
+.wide{max-width:var(--wide);margin-inline:auto}
+a{color:var(--acc);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:3px}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.08;letter-spacing:-.01em}
+h2{font-size:clamp(28px,4.2vw,40px);font-weight:800;font-stretch:115%;margin-bottom:18px}
+h3{font-size:21px;font-weight:750;font-stretch:108%}
+p{margin:0 0 1em}
+code{font-family:var(--f-data);font-size:.8em;background:color-mix(in srgb,var(--ink) 7%,transparent);padding:.08em .35em;border-radius:3px;word-break:break-word}
+.eyebrow{font:600 12px/1.2 var(--f-data);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.hl{background:linear-gradient(transparent 12%,var(--mark) 12%,var(--mark) 88%,transparent 88%);color:var(--mark-ink);padding:0 .18em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.num{font-family:var(--f-data);font-variant-numeric:tabular-nums}
+.up{color:var(--up);font-style:normal}.down{color:var(--down);font-style:normal}
+
+/* abertura */
+.top{padding-block:clamp(40px,8vw,88px) 28px}
+.kicker{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;margin-bottom:26px}
+.stamp{font:600 11px/1 var(--f-data);letter-spacing:.14em;text-transform:uppercase;border:1.5px solid var(--ink);padding:6px 8px;border-radius:3px;transform:rotate(-2deg)}
+h1{font-size:clamp(46px,10vw,112px);font-weight:900;font-stretch:125%;letter-spacing:-.025em;line-height:.92}
+h1 .hl{padding:0 .08em}
+.dek{font-size:clamp(20px,2.6vw,25px);line-height:1.45;color:var(--ink-2);max-width:40ch;margin-top:26px}
+.byline{margin-top:28px;display:flex;flex-wrap:wrap;gap:6px 16px;font:500 14px/1.4 var(--f-display);color:var(--ink-2)}
+.byline b{color:var(--ink);font-weight:750}
+.ledger{margin-top:44px;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+.ledger div{padding:16px 16px 18px 0;min-width:0}
+.ledger div+div{padding-left:16px;border-left:1px solid var(--rule)}
+.ledger .v{font:800 clamp(28px,3.6vw,38px)/1 var(--f-display);font-stretch:112%;font-variant-numeric:tabular-nums;display:block}
+.ledger .l{font:500 13px/1.35 var(--f-display);color:var(--ink-2);display:block;margin-top:8px}
+
+/* blocos */
+section.block{padding-block:56px 8px}
+.lead{font-size:20px;line-height:1.6}
+.verdict-box{background:var(--sheet);border:1.5px solid var(--ink);border-radius:6px;padding:24px clamp(18px,3vw,30px);box-shadow:6px 6px 0 var(--ink)}
+.verdict-box p:last-child{margin:0}
+.verdict-box .eyebrow{display:block;margin-bottom:10px}
+.verdict-box .big{font:750 clamp(22px,2.8vw,28px)/1.25 var(--f-display);font-stretch:106%;margin-bottom:14px}
+.defs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin:22px 0 8px}
+.def{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:16px 18px;min-width:0}
+.def b{font:750 16px/1.2 var(--f-display);display:block;margin-bottom:6px}
+.def span{font-size:15px;line-height:1.5;color:var(--ink-2)}
+figure{margin:0}
+figcaption{font:400 14px/1.5 var(--f-display);color:var(--ink-2);margin-top:10px}
+.video{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px}
+.video video{display:block;width:100%;height:auto;border-radius:4px;background:#0b111b;aspect-ratio:16/9}
+
+/* gráficos */
+.chart-card{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:20px clamp(14px,2.4vw,24px) 14px;margin-top:22px}
+.chart-card h3{margin-bottom:4px}
+.chart-card .sub{font:400 14px/1.45 var(--f-display);color:var(--ink-2);margin:0 0 10px;max-width:70ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font:500 13px/1.3 var(--f-display);color:var(--ink-2);margin-bottom:6px}
+.legend i{display:inline-block;width:18px;height:0;border-top:2.5px solid;vertical-align:middle;margin-right:6px}
+.legend i.dash{border-top-style:dashed}
+.legend i.sq{width:10px;height:10px;border:0;border-radius:2px}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;overflow:visible}
+.chart text{font-family:var(--f-data);font-size:11px;fill:var(--ink-3)}
+.chart .lbl{font-family:var(--f-display);font-size:12px;font-weight:650;fill:var(--ink)}
+.chart .ann{font-family:var(--f-display);font-size:11.5px;fill:var(--ink-2)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--paper);font:500 12.5px/1.45 var(--f-display);padding:8px 10px;border-radius:5px;white-space:nowrap;transform:translate(-50%,-100%);opacity:0;transition:opacity .12s;z-index:2}
+.tip b{font-weight:750}
+.tip .row{display:flex;gap:8px;align-items:center}
+.tip .row i{width:8px;height:8px;border-radius:50%;display:inline-block}
+details.data{margin-top:8px;font:400 13px/1.4 var(--f-display);color:var(--ink-2)}
+details.data summary{cursor:pointer;width:max-content}
+.tscroll{overflow-x:auto;margin-top:8px}
+
+/* tabelas */
+table{border-collapse:collapse;width:100%;font:400 14px/1.35 var(--f-display);font-variant-numeric:tabular-nums}
+th{font:600 11.5px/1.2 var(--f-data);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:10px 10px;border-bottom:1.5px solid var(--ink);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.n,th.n{text-align:right;white-space:nowrap}
+td .id{display:block;font:400 11.5px/1.3 var(--f-data);color:var(--ink-3);margin-top:3px;word-break:break-all}
+td .nm{font-weight:650}
+.tbl-card{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:6px clamp(8px,1.6vw,16px) 4px;margin-top:22px}
+.tbl-card h3{padding:14px 10px 2px}
+.tbl-card .sub{font:400 14px/1.45 var(--f-display);color:var(--ink-2);padding:0 10px;margin:4px 0 4px}
+tr.loser td{background:color-mix(in srgb,var(--down) 6%,transparent)}
+.pill{display:inline-block;font:600 10.5px/1 var(--f-data);letter-spacing:.06em;text-transform:uppercase;padding:4px 6px;border-radius:3px;border:1px solid currentColor;white-space:nowrap}
+.pill.lose{color:var(--down)}.pill.inc{color:var(--ink-3)}
+
+/* diário */
+.week{margin-top:40px}
+.week header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+.wk{font:600 12px/1 var(--f-data);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.week ol{list-style:none;margin:0;padding:0}
+.day{display:grid;grid-template-columns:130px minmax(0,1fr);gap:18px;padding:18px 0;border-bottom:1px solid var(--rule)}
+.when{font:600 14px/1.3 var(--f-display);min-width:0}
+.when time{display:block}
+.dn{display:inline-block;margin-top:6px;font:600 11px/1 var(--f-data);color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.what{min-width:0}
+.what h4{font-size:18px;font-weight:750;margin-bottom:6px}
+.what p{font-size:16.5px;line-height:1.58;margin-bottom:10px}
+.breadth{display:flex;gap:2px;height:7px;max-width:420px;margin:2px 0 8px}
+.breadth span{border-radius:2px;min-width:0}
+.bp{background:var(--up)}.bn{background:var(--down)}.bz{background:var(--zero)}
+.meta{display:flex;flex-wrap:wrap;gap:4px 14px;font:400 12.5px/1.45 var(--f-display);color:var(--ink-3)}
+.meta b{color:var(--ink-2);font-weight:650}
+.meta code{font-size:11px}
+@media (max-width:620px){.day{grid-template-columns:1fr;gap:6px}.when{display:flex;gap:10px;align-items:baseline}.dn{margin:0}}
+
+/* cartões dos candidatos */
+.cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px}
+.cand{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.cand h3{font-size:19px}
+.cand .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-block:1px solid var(--rule);padding-block:10px}
+.cand .stats b{display:block;font:750 19px/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.cand .stats span{font:500 11.5px/1.3 var(--f-display);color:var(--ink-3)}
+.cand p{font-size:15.5px;line-height:1.55;margin:0;color:var(--ink-2)}
+.cand .caveat{font:500 13px/1.45 var(--f-display);color:var(--ink)}
+
+/* galeria */
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;margin-top:22px}
+.gallery button{all:unset;cursor:zoom-in;display:block;border-radius:6px;overflow:hidden;border:1px solid var(--rule);background:var(--sheet)}
+.gallery button:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.gallery img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top}
+.gallery .tall img{aspect-ratio:auto;max-height:520px;object-fit:cover}
+dialog.lb{border:0;padding:0;background:transparent;max-width:min(1400px,96vw);max-height:94vh}
+dialog.lb::backdrop{background:rgba(5,9,15,.82)}
+dialog.lb img{display:block;max-width:100%;max-height:88vh;border-radius:6px}
+dialog.lb p{color:#e7ecf4;font:400 14px/1.4 var(--f-display);margin:10px 2px 0}
+dialog.lb button{position:absolute;top:8px;right:8px;background:#101a2b;color:#fff;border:0;border-radius:4px;font:600 13px var(--f-display);padding:8px 10px;cursor:pointer}
+
+/* parecer */
+.memo{background:var(--sheet);border:1.5px solid var(--ink);border-radius:6px;padding:clamp(20px,4vw,40px);margin-top:10px}
+.memo h3{font-size:22px;margin:28px 0 12px}
+.memo h3:first-of-type{margin-top:6px}
+.memo ol{padding-left:1.3em;margin:0}
+.memo li{margin-bottom:12px;font-size:16.5px;line-height:1.58}
+.memo li::marker{font-family:var(--f-data);font-weight:600;color:var(--ink-3)}
+.memo .ruling{border-top:2px solid var(--ink);margin-top:28px;padding-top:20px}
+.memo .ruling .big{font:800 clamp(24px,3.4vw,34px)/1.15 var(--f-display);font-stretch:112%;margin-bottom:14px}
+.sign{margin-top:36px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px;align-items:flex-end}
+.sign .name{font:italic 400 34px/1 var(--f-body);letter-spacing:-.01em;border-bottom:1.5px solid var(--ink);padding:0 30px 8px 0}
+.sign .role{font:500 13px/1.4 var(--f-display);color:var(--ink-2);margin-top:8px}
+.sign .date{font:500 13px/1.4 var(--f-data);color:var(--ink-3)}
+.foot{padding-block:48px 64px;font:400 13.5px/1.55 var(--f-display);color:var(--ink-3)}
+.foot p{max-width:80ch}
+ul.plain{padding-left:1.1em;margin:0 0 1em}
+ul.plain li{margin-bottom:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top wide">
+  <div class="kicker">
+    <span class="stamp">Só papel · nenhum dólar real</span>
+    <span class="eyebrow">Diário de experimento · 30 set a 30 out 2026</span>
+  </div>
+  <h1>Trinta dias<br>de <span class="hl">papel</span></h1>
+  <p class="dek">Um mês, 189 estratégias de trading com IA em Solana e memecoins, 30 mil operações simuladas. Nenhuma ganhou. Este é o diário de como chegamos lá e do que isso ensina.</p>
+  <div class="byline"><span>Por <b>Dale Hanson</b></span><span>31 de outubro de 2026</span><span>leitura de 15 min</span></div>
+  <div class="ledger" role="list">
+    <div role="listitem"><span class="v num">189</span><span class="l">estratégias rodando em paralelo</span></div>
+    <div role="listitem"><span class="v num">30.055</span><span class="l">operações de papel no laboratório</span></div>
+    <div role="listitem"><span class="v num">0</span><span class="l">vencedoras pelo critério estatístico</span></div>
+    <div role="listitem"><span class="v num down">−19,0%</span><span class="l">SOL no período (119,31 → 96,66)</span></div>
+    <div role="listitem"><span class="v num up">+0,71%</span><span class="l">maior lucro, em 16 dias e 5 operações</span></div>
+  </div>
+</header>
+
+<section class="block col" aria-labelledby="tldr">
+  <div class="verdict-box">
+    <span class="eyebrow" id="tldr">O veredito em um parágrafo</span>
+    <p class="big">Num mês em que a Solana caiu 19% e as memecoins de 13% a 31%, nenhuma das 189 estratégias ganhou dinheiro de forma relevante, e nenhuma passou no teste estatístico de vencedora.</p>
+    <p>O que separou as perdas pequenas das grandes foi limitar quanto dinheiro ficava exposto e sair a tempo. Acertar a direção não fez a diferença. O bot real com saídas mecânicas perdeu metade do bot sem elas (−9,4% contra −19,4%). Mas o retroativo de 6 meses mostra o outro lado: num mercado que sobe, as mesmas saídas custaram caro. A recomendação é não colocar dinheiro real em nenhuma delas e continuar três linhas em papel.</p>
+  </div>
+</section>
+
+<section class="block col" aria-labelledby="s-ideia">
+  <span class="eyebrow">1 · A pergunta</span>
+  <h2 id="s-ideia">Um modelo que lê o mercado em doze adjetivos</h2>
+  <p class="lead">A ideia vinha de um artigo sobre o loop System One. A cada 15 segundos, o preço da SOL vira um estado descrito em doze palavras, como <code>deep quiet flat calm night gray wide soft late mid quiet held</code>. Um modelo de linguagem pequeno lê esse estado e responde comprar, vender ou segurar, com uma confiança.</p>
+  <p>Testamos quatro leitores diferentes. O <b>von</b> e a <b>Laya</b> são classificadores locais, o <b>poorjev</b> é uma versão barata e o <b>Jev</b> é o modelo hospedado, ligado a partir do dia 3. Em volta deles montamos portões de confiança (o do artigo, um relaxado e um v2), regras clássicas sem modelo (grade, RSI de 1 hora, regime, Donchian), híbridos e quatro hipóteses: saídas mecânicas (H1), ensemble (H2), ordens limite (H3) e janelas de horário (H4). Tudo isso em SOL e em sete memecoins: BONK, WIF, POPCAT, FARTCOIN, PNUT, MEW e GOAT.</p>
+  <p>As regras do jogo foram fixadas no primeiro dia e nunca mudaram. Tudo roda em papel, com <code>LIVE_TRADING</code> desligado. Nenhuma chave privada foi pedida nem gravada. Mudanças passam por branch e pull request, nunca direto na main.</p>
+</section>
+
+<section class="block col" aria-labelledby="s-medir">
+  <span class="eyebrow">2 · A régua</span>
+  <h2 id="s-medir">Lucro não basta: separar sorte de habilidade</h2>
+  <p>Num mês de queda, quem fica fora do mercado parece gênio. Num mês de alta, quem só compra parece gênio. Por isso o placar tem quatro números, e o veredito usa os mais exigentes.</p>
+  <div class="defs">
+    <div class="def"><b>Lucro</b><span>Quanto a carteira rendeu desde o início dela, em US$ e em %.</span></div>
+    <div class="def"><b>Contra segurar</b><span>A diferença para quem comprou o mesmo livro inicial e não fez nada.</span></div>
+    <div class="def"><b>Habilidade</b><span>Lucro menos a exposição média vezes o retorno do ativo. É o que sobra quando se desconta o beta, a parte que o mercado deu de graça.</span></div>
+    <div class="def"><b>Veredito</b><span>Vencedora só com 30 operações fechadas, 21 dias (28 para regras), bater segurar e o USDC a 6% ao ano com p &lt; 0,05 por bootstrap em blocos e consistência em 3 das últimas 4 semanas.</span></div>
+  </div>
+</section>
+
+<section class="block wide" aria-labelledby="s-video">
+  <div class="col">
+    <span class="eyebrow">3 · O painel</span>
+    <h2 id="s-video">O laboratório, de ponta a ponta</h2>
+    <p>Todo o experimento foi acompanhado por um painel local, aberto também no celular por um túnel. O vídeo percorre o painel no fechamento do run: placar, detalhe de um teste, busca, famílias, o retroativo de 6 meses, a comparação entre meses, a carteira real com os livros A e B, controles e saúde.</p>
+  </div>
+  <figure class="video" style="margin-top:18px">
+    <video controls playsinline muted preload="metadata" poster="media/poster.jpg">
+      <source src="media/painel-e2e.mp4" type="video/mp4">
+    </video>
+    <figcaption>Gravação do painel em 31/10, depois do fim do run (67 s, sem som). O indicador “12 parado” no topo é esperado: os bots já tinham sido desligados.</figcaption>
+  </figure>
+</section>
+
+<section class="block wide" aria-labelledby="s-mercado">
+  <div class="col">
+    <span class="eyebrow">4 · O mês</span>
+    <h2 id="s-mercado">Trinta dias de ladeira abaixo</h2>
+    <p>A SOL abriu o experimento a 119,31 e fechou a 96,66. Houve respiros, mas a direção nunca mudou. O segundo gráfico mostra quantos testes fecharam cada dia no positivo e no negativo. É o termômetro do laboratório.</p>
+  </div>
+  <div class="chart-card">
+    <h3>Preço da SOL no fechamento de cada dia</h3>
+    <p class="sub">US$, horário de Brasília. As marcas indicam os momentos que mudaram o experimento.</p>
+    <div class="chart" id="c-sol" data-h="300"></div>
+    <details class="data"><summary>Ver os valores em tabela</summary><div class="tscroll" id="t-sol"></div></details>
+  </div>
+  <div class="chart-card">
+    <h3>Testes no positivo e no negativo, por dia</h3>
+    <p class="sub">Cada barra é um dia. Para cima, quantos testes fecharam o dia com lucro; para baixo, com prejuízo. Os testes parados no dia não entram.</p>
+    <div class="legend"><span><i class="sq" style="background:var(--up)"></i>com lucro no dia</span><span><i class="sq" style="background:var(--down)"></i>com prejuízo no dia</span></div>
+    <div class="chart" id="c-breadth" data-h="260"></div>
+    <details class="data"><summary>Ver os valores em tabela</summary><div class="tscroll" id="t-breadth"></div></details>
+  </div>
+</section>
+
+<section class="block col" aria-labelledby="s-diario">
+  <span class="eyebrow">5 · Diário</span>
+  <h2 id="s-diario">Dia a dia</h2>
+  <p>Cada entrada traz o fechamento da SOL, a proporção de testes positivos e negativos no dia, o melhor e o pior do dia, e o que aconteceu no código ou na operação. Os números do laboratório vêm dos relatórios diários gerados à meia-noite.</p>
+  <section class="week"><header><span class="wk">Semana 0</span><h3>Montar a casa</h3></header><ol><li class="day" id="d2026-09-29"><div class="when"><time datetime="2026-09-29">ter, 29 set</time></div><div class="what"><h4>Passagem de bastão</h4><p>A sessão na nuvem tinha deixado um handoff com quatro de seis etapas feitas. O branch dela se perdeu. Decisão: refazer tudo a partir do snapshot local e começar o experimento do zero, só em papel.</p><div class="meta"></div></div></li><li class="day" id="d2026-09-30"><div class="when"><time datetime="2026-09-30">qua, 30 set</time></div><div class="what"><h4>Dia zero</h4><p>Entram paper trading, placar e a revisão noturna por percentil no bot real. O livro de papel nasce às 00:50 com 0,0174 SOL e 50,01 USDT (cerca de US$ 52), com SOL a 119,31. Nos logs reais, a barra fixa de confiança 0,8 nunca dispara no von e na Laya e dispara em 100% das chamadas do poorjev; o percentil P90 marca cerca de 10% das chamadas em qualquer escala. Logo depois, a instalação dos modelos locais lota o disco. Tudo para, e começa uma faxina de dezenas de GB: Docker, dumps de banco, apps, modelos antigos.</p><div class="meta"></div></div></li><li class="day" id="d2026-10-01"><div class="when"><time datetime="2026-10-01">qui, 1 out</time><span class="dn">dia 1</span></div><div class="what"><h4>O laboratório liga</h4><p>Às 22:24 sobe o laboratório sob launchd e caffeinate, com 109 portfólios e parâmetros em camadas por tipo de teste (perfil, tipo, variante, modelo, ativo, portfólio, fork). O bot real faz a primeira compra de papel às 23:12.</p><div class="breadth" role="img" aria-label="56 positivos, 47 neutros, 6 negativos"><span class="bp" style="flex:56"></span><span class="bz" style="flex:47"></span><span class="bn" style="flex:6"></span></div><div class="meta"><span class="m">SOL <b>120,03</b> <i class="up">+0,6%</i></span><span class="m"><b>56</b> positivos · <b>6</b> negativos de 109</span><span class="m">melhor <code>h1_exits_FARTCOIN_poorjev_relaxed</code> +1,04%</span><span class="m">pior <code>GOAT_hybrid_poorjev_regime</code> −0,43%</span></div></div></li></ol></section>
+<section class="week"><header><span class="wk">Semana 1</span><h3>Tudo ligado, tudo caindo</h3></header><ol><li class="day" id="d2026-10-02"><div class="when"><time datetime="2026-10-02">sex, 2 out</time><span class="dn">dia 2</span></div><div class="what"><h4>Primeiro tombo</h4><p>SOL vai a 123,66 e cai a 117,21 no mesmo dia; 70 de 109 testes fecham no vermelho. Um bot de regras cai com um sleep negativo e é corrigido. O painel ganha login, nasce o resumo a cada 4 horas e os dois PRs entram em dev.</p><div class="breadth" role="img" aria-label="16 positivos, 23 neutros, 70 negativos"><span class="bp" style="flex:16"></span><span class="bz" style="flex:23"></span><span class="bn" style="flex:70"></span></div><div class="meta"><span class="m">SOL <b>118,89</b> <i class="down">−1,0%</i></span><span class="m"><b>16</b> positivos · <b>70</b> negativos de 109</span><span class="m">melhor <code>MEW_poorjev_baseline</code> +6,19%</span><span class="m">pior <code>WIF_rule_donch_regime_full</code> −11,96%</span></div></div></li><li class="day" id="d2026-10-03"><div class="when"><time datetime="2026-10-03">sáb, 3 out</time><span class="dn">dia 3</span></div><div class="what"><h4>O dia mais denso</h4><p>Painel v2 redesenhado como um caderno de laboratório. Entra o Claude Code noturno, autônomo e só em papel, que cria forks com hipótese, critério de confirmação e critério de refutação. Na primeira noite ele pega um erro meu: os forks com saídas não tinham as saídas ligadas. Também entram o livro B do bot real (take profit 2,5%, stop loss 1,5%, trailing 1% e no máximo 50% do livro em SOL), o Jev hospedado em papel e o túnel para abrir o painel no celular.</p><div class="breadth" role="img" aria-label="47 positivos, 31 neutros, 39 negativos"><span class="bp" style="flex:47"></span><span class="bz" style="flex:31"></span><span class="bn" style="flex:39"></span></div><div class="meta"><span class="m">SOL <b>120,38</b> <i class="up">+1,3%</i></span><span class="m"><b>47</b> positivos · <b>39</b> negativos de 117</span><span class="m">melhor <code>BONK_hybrid_poorjev_regime</code> +5,06%</span><span class="m">pior <code>FARTCOIN_rule_regime_full</code> −2,24%</span></div></div></li><li class="day" id="d2026-10-04"><div class="when"><time datetime="2026-10-04">dom, 4 out</time><span class="dn">dia 4</span></div><div class="what"><h4>Dia verde</h4><p>69 testes positivos. As saídas mecânicas em FARTCOIN (hipótese H1) lideram o dia com +6,95%.</p><div class="breadth" role="img" aria-label="69 positivos, 28 neutros, 22 negativos"><span class="bp" style="flex:69"></span><span class="bz" style="flex:28"></span><span class="bn" style="flex:22"></span></div><div class="meta"><span class="m">SOL <b>121,25</b> <i class="up">+0,7%</i></span><span class="m"><b>69</b> positivos · <b>22</b> negativos de 119</span><span class="m">melhor <code>h1_exits_FARTCOIN_poorjev_relaxed</code> +6,95%</span><span class="m">pior <code>MEW_rule_donch_regime_full</code> −2,65%</span></div></div></li><li class="day" id="d2026-10-05"><div class="when"><time datetime="2026-10-05">seg, 5 out</time><span class="dn">dia 5</span></div><div class="what"><h4>Não perseguir</h4><p>O vermelho volta (78 negativos). O Claude noturno anota que nada se repetiu três dias seguidos e transforma a ideia de não perseguir o preço num parâmetro: pausa de 120 minutos depois de cada saída, em BONK e MEW, para separar efeito de moeda de efeito de mecanismo.</p><div class="breadth" role="img" aria-label="16 positivos, 27 neutros, 78 negativos"><span class="bp" style="flex:16"></span><span class="bz" style="flex:27"></span><span class="bn" style="flex:78"></span></div><div class="meta"><span class="m">SOL <b>120,19</b> <i class="down">−0,9%</i></span><span class="m"><b>16</b> positivos · <b>78</b> negativos de 121</span><span class="m">melhor <code>h2_ensemble_WIF</code> +1,68%</span><span class="m">pior <code>h1_exits_BONK_poorjev_relaxed__fork1</code> −6,75%</span></div></div></li><li class="day" id="d2026-10-06"><div class="when"><time datetime="2026-10-06">ter, 6 out</time><span class="dn">dia 6</span></div><div class="what"><h4>Nasce o retroativo</h4><p>Só 3 de 124 testes no positivo. Para ganhar perspectiva, o mesmo código do ao vivo passa a rodar sobre 30 dias passados, em velas de 1 minuto.</p><div class="breadth" role="img" aria-label="3 positivos, 35 neutros, 86 negativos"><span class="bp" style="flex:3"></span><span class="bz" style="flex:35"></span><span class="bn" style="flex:86"></span></div><div class="meta"><span class="m">SOL <b>118,28</b> <i class="down">−1,6%</i></span><span class="m"><b>3</b> positivos · <b>86</b> negativos de 124</span><span class="m">melhor <code>meme_FARTCOIN_relaxed</code> +0,16%</span><span class="m">pior <code>FARTCOIN_hybrid_poorjev_regime</code> −8,74%</span></div></div></li><li class="day" id="d2026-10-07"><div class="when"><time datetime="2026-10-07">qua, 7 out</time><span class="dn">dia 7</span></div><div class="what"><h4>Seis meses para trás</h4><p>O retroativo vira histórico: julho, agosto, setembro e uma corrida de 6 meses. À noite, um pidfile velho faz o supervisor lançar um segundo bot de regras, e saem 4 trades duplicados em dois portfólios.</p><div class="breadth" role="img" aria-label="1 positivos, 53 neutros, 72 negativos"><span class="bp" style="flex:1"></span><span class="bz" style="flex:53"></span><span class="bn" style="flex:72"></span></div><div class="meta"><span class="m">SOL <b>116,40</b> <i class="down">−1,6%</i></span><span class="m"><b>1</b> positivos · <b>72</b> negativos de 126</span><span class="m">melhor <code>h2_ensemble_BONK</code> +0,35%</span><span class="m">pior <code>h1_exits_GOAT_poorjev_relaxed</code> −4,16%</span></div></div></li><li class="day" id="d2026-10-08"><div class="when"><time datetime="2026-10-08">qui, 8 out</time><span class="dn">dia 8</span></div><div class="what"><h4>Lead fork</h4><p>SOL perde 5% e fecha a 110,23. O Claude noturno marca o relaxed__fork1 (von com saídas e exposição de no máximo 50%) como lead fork: à frente do pai em 100% de 4 dias.</p><div class="breadth" role="img" aria-label="10 positivos, 52 neutros, 66 negativos"><span class="bp" style="flex:10"></span><span class="bz" style="flex:52"></span><span class="bn" style="flex:66"></span></div><div class="meta"><span class="m">SOL <b>110,23</b> <i class="down">−5,3%</i></span><span class="m"><b>10</b> positivos · <b>66</b> negativos de 128</span><span class="m">melhor <code>h2_ensemble_FARTCOIN__fork1</code> +1,37%</span><span class="m">pior <code>WIF_poorjev_baseline</code> −7,57%</span></div></div></li></ol></section>
+<section class="week"><header><span class="wk">Semana 2</span><h3>Os forks assumem</h3></header><ol><li class="day" id="d2026-10-09"><div class="when"><time datetime="2026-10-09">sex, 9 out</time><span class="dn">dia 9</span></div><div class="what"><h4>Doze forks numa noite</h4><p>O supervisor passa a adotar processos já vivos em vez de duplicar. O tuner noturno cria 12 forks de uma vez. As saídas em memecoins acumulam +134,7 US$ de habilidade.</p><div class="breadth" role="img" aria-label="46 positivos, 59 neutros, 37 negativos"><span class="bp" style="flex:46"></span><span class="bz" style="flex:59"></span><span class="bn" style="flex:37"></span></div><div class="meta"><span class="m">SOL <b>109,83</b> <i class="down">−0,4%</i></span><span class="m"><b>46</b> positivos · <b>37</b> negativos de 142</span><span class="m">melhor <code>WIF_hybrid_poorjev_regime</code> +4,61%</span><span class="m">pior <code>h2_ensemble_WIF</code> −1,86%</span></div></div></li><li class="day" id="d2026-10-10"><div class="when"><time datetime="2026-10-10">sáb, 10 out</time><span class="dn">dia 10</span></div><div class="what"><h4>O pesquisador sai de cena</h4><p>A sessão OAuth do Claude noturno expira. A revisão autônoma fica parada até o fim do run, e o tuner determinístico segue sozinho.</p><div class="breadth" role="img" aria-label="33 positivos, 49 neutros, 62 negativos"><span class="bp" style="flex:33"></span><span class="bz" style="flex:49"></span><span class="bn" style="flex:62"></span></div><div class="meta"><span class="m">SOL <b>109,91</b> <i class="up">+0,1%</i></span><span class="m"><b>33</b> positivos · <b>62</b> negativos de 144</span><span class="m">melhor <code>FARTCOIN_hybrid_poorjev_regime</code> +0,68%</span><span class="m">pior <code>h1_exits_WIF_poorjev_relaxed__fork3</code> −2,95%</span></div></div></li><li class="day" id="d2026-10-11"><div class="when"><time datetime="2026-10-11">dom, 11 out</time><span class="dn">dia 11</span></div><div class="what"><h4>Respiro</h4><p>68 testes positivos; SOL volta a 111,86.</p><div class="breadth" role="img" aria-label="68 positivos, 50 neutros, 28 negativos"><span class="bp" style="flex:68"></span><span class="bz" style="flex:50"></span><span class="bn" style="flex:28"></span></div><div class="meta"><span class="m">SOL <b>111,86</b> <i class="up">+1,8%</i></span><span class="m"><b>68</b> positivos · <b>28</b> negativos de 146</span><span class="m">melhor <code>h1_exits_WIF_poorjev_relaxed__fork2</code> +3,79%</span><span class="m">pior <code>POPCAT_rule_regime_full</code> −2,27%</span></div></div></li><li class="day" id="d2026-10-12"><div class="when"><time datetime="2026-10-12">seg, 12 out</time><span class="dn">dia 12</span></div><div class="what"><h4>Pior dia até então</h4><p>92 de 146 testes no vermelho, soma de −3.862 US$ no dia. SOL a 106,65.</p><div class="breadth" role="img" aria-label="3 positivos, 51 neutros, 92 negativos"><span class="bp" style="flex:3"></span><span class="bz" style="flex:51"></span><span class="bn" style="flex:92"></span></div><div class="meta"><span class="m">SOL <b>106,65</b> <i class="down">−4,7%</i></span><span class="m"><b>3</b> positivos · <b>92</b> negativos de 146</span><span class="m">melhor <code>h1_exits_von_relaxed__fork1</code> +2,90%</span><span class="m">pior <code>h1_exits_PNUT_poorjev_relaxed</code> −10,29%</span></div></div></li><li class="day" id="d2026-10-13"><div class="when"><time datetime="2026-10-13">ter, 13 out</time><span class="dn">dia 13</span></div><div class="what"><h4>Rebote</h4><p>71 testes positivos.</p><div class="breadth" role="img" aria-label="71 positivos, 66 neutros, 11 negativos"><span class="bp" style="flex:71"></span><span class="bz" style="flex:66"></span><span class="bn" style="flex:11"></span></div><div class="meta"><span class="m">SOL <b>107,66</b> <i class="up">+0,9%</i></span><span class="m"><b>71</b> positivos · <b>11</b> negativos de 148</span><span class="m">melhor <code>h1_exits_FARTCOIN_poorjev_relaxed__fork2</code> +3,32%</span><span class="m">pior <code>h2_ensemble_POPCAT</code> −2,38%</span></div></div></li><li class="day" id="d2026-10-14"><div class="when"><time datetime="2026-10-14">qua, 14 out</time><span class="dn">dia 14</span></div><div class="what"><h4>Abaixo de 104</h4><p>SOL fecha a 103,23. Só 2 testes positivos no dia.</p><div class="breadth" role="img" aria-label="2 positivos, 65 neutros, 81 negativos"><span class="bp" style="flex:2"></span><span class="bz" style="flex:65"></span><span class="bn" style="flex:81"></span></div><div class="meta"><span class="m">SOL <b>103,23</b> <i class="down">−4,1%</i></span><span class="m"><b>2</b> positivos · <b>81</b> negativos de 148</span><span class="m">melhor <code>h2_ensemble_MEW</code> +0,16%</span><span class="m">pior <code>h1_exits_FARTCOIN_poorjev_relaxed</code> −9,77%</span></div></div></li><li class="day" id="d2026-10-15"><div class="when"><time datetime="2026-10-15">qui, 15 out</time><span class="dn">dia 15</span></div><div class="what"><h4>Nasce o futuro líder</h4><p>O tuner cria o rsi_sol_1h__fork1, a regra RSI de 1 hora com período 17. Ele terminaria o mês em primeiro por lucro.</p><div class="breadth" role="img" aria-label="71 positivos, 45 neutros, 37 negativos"><span class="bp" style="flex:71"></span><span class="bz" style="flex:45"></span><span class="bn" style="flex:37"></span></div><div class="meta"><span class="m">SOL <b>105,22</b> <i class="up">+1,9%</i></span><span class="m"><b>71</b> positivos · <b>37</b> negativos de 153</span><span class="m">melhor <code>h1_exits_POPCAT_poorjev_relaxed__fork1</code> +7,76%</span><span class="m">pior <code>h1_exits_GOAT_poorjev_relaxed</code> −8,17%</span></div></div></li></ol></section>
+<section class="week"><header><span class="wk">Semana 3</span><h3>Disco, moedas novas e o melhor dia</h3></header><ol><li class="day" id="d2026-10-16"><div class="when"><time datetime="2026-10-16">sex, 16 out</time><span class="dn">dia 16</span></div><div class="what"><h4>Recorde de forks</h4><p>16 forks criados numa noite, o máximo do mês.</p><div class="breadth" role="img" aria-label="17 positivos, 52 neutros, 100 negativos"><span class="bp" style="flex:17"></span><span class="bz" style="flex:52"></span><span class="bn" style="flex:100"></span></div><div class="meta"><span class="m">SOL <b>104,44</b> <i class="down">−0,7%</i></span><span class="m"><b>17</b> positivos · <b>100</b> negativos de 169</span><span class="m">melhor <code>h1_exits_WIF_poorjev_relaxed__fork3</code> +2,87%</span><span class="m">pior <code>h1_exits_FARTCOIN_poorjev_relaxed__fork1</code> −3,66%</span></div></div></li><li class="day" id="d2026-10-17"><div class="when"><time datetime="2026-10-17">sáb, 17 out</time><span class="dn">dia 17</span></div><div class="what"><h4>O disco de novo</h4><p>Outros projetos enchem o disco com caches de build Go (111 GB num dia). Entra a guarda do disco, que limpa caches de build sempre que sobram menos de 30 GB.</p><div class="breadth" role="img" aria-label="6 positivos, 56 neutros, 112 negativos"><span class="bp" style="flex:6"></span><span class="bz" style="flex:56"></span><span class="bn" style="flex:112"></span></div><div class="meta"><span class="m">SOL <b>103,84</b> <i class="down">−0,6%</i></span><span class="m"><b>6</b> positivos · <b>112</b> negativos de 174</span><span class="m">melhor <code>h2_ensemble_WIF</code> +0,49%</span><span class="m">pior <code>h1_exits_PNUT_poorjev_relaxed__fork2</code> −6,87%</span></div></div></li><li class="day" id="d2026-10-18"><div class="when"><time datetime="2026-10-18">dom, 18 out</time><span class="dn">dia 18</span></div><div class="what"><h4>Moedas novas</h4><p>Teste pedido: o von relaxado em 8 moedas novas (JUP, JTO, PYTH, RAY, BOME, PENGU, TRUMP, MOODENG), em 30 dias e em 6 meses de retroativo. Falha em todas, como já tinha falhado nas 7 memecoins.</p><div class="breadth" role="img" aria-label="71 positivos, 57 neutros, 48 negativos"><span class="bp" style="flex:71"></span><span class="bz" style="flex:57"></span><span class="bn" style="flex:48"></span></div><div class="meta"><span class="m">SOL <b>105,34</b> <i class="up">+1,4%</i></span><span class="m"><b>71</b> positivos · <b>48</b> negativos de 176</span><span class="m">melhor <code>FARTCOIN_laya_relaxed__fork2</code> +2,66%</span><span class="m">pior <code>h1_exits_POPCAT_poorjev_relaxed</code> −4,03%</span></div></div></li><li class="day" id="d2026-10-19"><div class="when"><time datetime="2026-10-19">seg, 19 out</time><span class="dn">dia 19</span></div><div class="what"><h4>Lateral</h4><p>Dia sem direção; 86 testes no vermelho por custos e pequenas perdas.</p><div class="breadth" role="img" aria-label="39 positivos, 51 neutros, 86 negativos"><span class="bp" style="flex:39"></span><span class="bz" style="flex:51"></span><span class="bn" style="flex:86"></span></div><div class="meta"><span class="m">SOL <b>105,02</b> <i class="down">−0,3%</i></span><span class="m"><b>39</b> positivos · <b>86</b> negativos de 176</span><span class="m">melhor <code>GOAT_rule_regime_full</code> +1,04%</span><span class="m">pior <code>h1_exits_FARTCOIN_poorjev_relaxed__fork1</code> −2,72%</span></div></div></li><li class="day" id="d2026-10-20"><div class="when"><time datetime="2026-10-20">ter, 20 out</time><span class="dn">dia 20</span></div><div class="what"><h4>Melhor dia do mês</h4><p>101 de 179 testes positivos, +2.803 US$ somados. O híbrido poorjev com regime em MEW sobe 25% no dia.</p><div class="breadth" role="img" aria-label="101 positivos, 45 neutros, 33 negativos"><span class="bp" style="flex:101"></span><span class="bz" style="flex:45"></span><span class="bn" style="flex:33"></span></div><div class="meta"><span class="m">SOL <b>106,18</b> <i class="up">+1,1%</i></span><span class="m"><b>101</b> positivos · <b>33</b> negativos de 179</span><span class="m">melhor <code>MEW_hybrid_poorjev_regime</code> +25,00%</span><span class="m">pior <code>PNUT_rule_donch_regime_full</code> −4,87%</span></div></div></li><li class="day" id="d2026-10-21"><div class="when"><time datetime="2026-10-21">qua, 21 out</time><span class="dn">dia 21</span></div><div class="what"><h4>Vereditos liberados</h4><p>Dia 21, o primeiro em que um veredito é possível. A regra pede 30 operações fechadas e bater tanto segurar quanto a barra de 6% ao ano do USDC, com p &lt; 0,05 e consistência em 3 das últimas 4 semanas.</p><div class="breadth" role="img" aria-label="45 positivos, 48 neutros, 87 negativos"><span class="bp" style="flex:45"></span><span class="bz" style="flex:48"></span><span class="bn" style="flex:87"></span></div><div class="meta"><span class="m">SOL <b>106,06</b> <i class="down">−0,1%</i></span><span class="m"><b>45</b> positivos · <b>87</b> negativos de 180</span><span class="m">melhor <code>BONK_rule_regime_full__fork1</code> +3,45%</span><span class="m">pior <code>MEW_hybrid_poorjev_regime</code> −13,24%</span></div></div></li><li class="day" id="d2026-10-22"><div class="when"><time datetime="2026-10-22">qui, 22 out</time><span class="dn">dia 22</span></div><div class="what"><h4>O fork paciente</h4><p>O tuner cria o poorjev_relaxed__fork4: pausa de 54 minutos entre compras, 20% do caixa por compra, TP 3%, SL 1,8%, trailing 0,8%. Em 9 dias ele seria o teste de SOL com mais habilidade e lucro.</p><div class="breadth" role="img" aria-label="21 positivos, 54 neutros, 107 negativos"><span class="bp" style="flex:21"></span><span class="bz" style="flex:54"></span><span class="bn" style="flex:107"></span></div><div class="meta"><span class="m">SOL <b>104,52</b> <i class="down">−1,5%</i></span><span class="m"><b>21</b> positivos · <b>107</b> negativos de 182</span><span class="m">melhor <code>MEW_hybrid_poorjev_regime</code> +15,99%</span><span class="m">pior <code>FARTCOIN_rule_donch_regime_full</code> −4,84%</span></div></div></li></ol></section>
+<section class="week"><header><span class="wk">Semana 4</span><h3>O fundo e o fim</h3></header><ol><li class="day" id="d2026-10-23"><div class="when"><time datetime="2026-10-23">sex, 23 out</time><span class="dn">dia 23</span></div><div class="what"><h4>Lotação máxima</h4><p>O laboratório chega a 189 portfólios; 102 deles fecham o dia no vermelho.</p><div class="breadth" role="img" aria-label="3 positivos, 84 neutros, 102 negativos"><span class="bp" style="flex:3"></span><span class="bz" style="flex:84"></span><span class="bn" style="flex:102"></span></div><div class="meta"><span class="m">SOL <b>102,56</b> <i class="down">−1,9%</i></span><span class="m"><b>3</b> positivos · <b>102</b> negativos de 189</span><span class="m">melhor <code>FARTCOIN_laya_relaxed__fork2</code> +0,89%</span><span class="m">pior <code>h1_exits_MEW_poorjev_relaxed</code> −11,67%</span></div></div></li><li class="day" id="d2026-10-24"><div class="when"><time datetime="2026-10-24">sáb, 24 out</time><span class="dn">dia 24</span></div><div class="what"><h4>Deslizando</h4><p>SOL a 102,32.</p><div class="breadth" role="img" aria-label="16 positivos, 85 neutros, 88 negativos"><span class="bp" style="flex:16"></span><span class="bz" style="flex:85"></span><span class="bn" style="flex:88"></span></div><div class="meta"><span class="m">SOL <b>102,32</b> <i class="down">−0,2%</i></span><span class="m"><b>16</b> positivos · <b>88</b> negativos de 189</span><span class="m">melhor <code>h1_exits_BONK_poorjev_relaxed__fork1</code> +1,88%</span><span class="m">pior <code>FARTCOIN_hybrid_poorjev_regime</code> −6,49%</span></div></div></li><li class="day" id="d2026-10-25"><div class="when"><time datetime="2026-10-25">dom, 25 out</time><span class="dn">dia 25</span></div><div class="what"><h4>Deslizando</h4><p>SOL a 100,50; 104 testes negativos.</p><div class="breadth" role="img" aria-label="2 positivos, 83 neutros, 104 negativos"><span class="bp" style="flex:2"></span><span class="bz" style="flex:83"></span><span class="bn" style="flex:104"></span></div><div class="meta"><span class="m">SOL <b>100,50</b> <i class="down">−1,8%</i></span><span class="m"><b>2</b> positivos · <b>104</b> negativos de 189</span><span class="m">melhor <code>FARTCOIN_laya_relaxed__fork3</code> +0,35%</span><span class="m">pior <code>h1_exits_MEW_poorjev_relaxed__fork1</code> −7,04%</span></div></div></li><li class="day" id="d2026-10-26"><div class="when"><time datetime="2026-10-26">seg, 26 out</time><span class="dn">dia 26</span></div><div class="what"><h4>Deslizando</h4><p>SOL a 100,10.</p><div class="breadth" role="img" aria-label="40 positivos, 54 neutros, 95 negativos"><span class="bp" style="flex:40"></span><span class="bz" style="flex:54"></span><span class="bn" style="flex:95"></span></div><div class="meta"><span class="m">SOL <b>100,10</b> <i class="down">−0,4%</i></span><span class="m"><b>40</b> positivos · <b>95</b> negativos de 189</span><span class="m">melhor <code>FARTCOIN_hybrid_poorjev_regime</code> +3,65%</span><span class="m">pior <code>h1_exits_MEW_poorjev_relaxed__fork1</code> −5,63%</span></div></div></li><li class="day" id="d2026-10-27"><div class="when"><time datetime="2026-10-27">ter, 27 out</time><span class="dn">dia 27</span></div><div class="what"><h4>Rebote curto</h4><p>97 testes positivos.</p><div class="breadth" role="img" aria-label="97 positivos, 53 neutros, 39 negativos"><span class="bp" style="flex:97"></span><span class="bz" style="flex:53"></span><span class="bn" style="flex:39"></span></div><div class="meta"><span class="m">SOL <b>101,55</b> <i class="up">+1,4%</i></span><span class="m"><b>97</b> positivos · <b>39</b> negativos de 189</span><span class="m">melhor <code>h1_exits_FARTCOIN_poorjev_relaxed__fork1</code> +3,79%</span><span class="m">pior <code>h2_ensemble_PNUT</code> −1,23%</span></div></div></li><li class="day" id="d2026-10-28"><div class="when"><time datetime="2026-10-28">qua, 28 out</time><span class="dn">dia 28</span></div><div class="what"><h4>Abaixo de 100</h4><p>SOL fecha a 99,91.</p><div class="breadth" role="img" aria-label="13 positivos, 50 neutros, 126 negativos"><span class="bp" style="flex:13"></span><span class="bz" style="flex:50"></span><span class="bn" style="flex:126"></span></div><div class="meta"><span class="m">SOL <b>99,91</b> <i class="down">−1,6%</i></span><span class="m"><b>13</b> positivos · <b>126</b> negativos de 189</span><span class="m">melhor <code>h1_exits_von_relaxed__fork1</code> +2,14%</span><span class="m">pior <code>GOAT_rule_donch_regime_full</code> −5,35%</span></div></div></li><li class="day" id="d2026-10-29"><div class="when"><time datetime="2026-10-29">qui, 29 out</time><span class="dn">dia 29</span></div><div class="what"><h4>O fundo</h4><p>Pior dia do mês: SOL a 95,23, 123 testes no vermelho e −4.220 US$ somados. O livro A do bot real bate o fundo às 21:23, com queda máxima de 25,4%.</p><div class="breadth" role="img" aria-label="8 positivos, 58 neutros, 123 negativos"><span class="bp" style="flex:8"></span><span class="bz" style="flex:58"></span><span class="bn" style="flex:123"></span></div><div class="meta"><span class="m">SOL <b>95,22</b> <i class="down">−4,7%</i></span><span class="m"><b>8</b> positivos · <b>123</b> negativos de 189</span><span class="m">melhor <code>h1_exits_von_relaxed__fork1</code> +2,43%</span><span class="m">pior <code>h1_exits_BONK_poorjev_relaxed__fork1</code> −12,31%</span></div></div></li><li class="day" id="d2026-10-30"><div class="when"><time datetime="2026-10-30">sex, 30 out</time><span class="dn">dia 30</span></div><div class="what"><h4>Último dia</h4><p>Rebote com 85 testes positivos. Às 23:59:59 o bot real para sozinho, como planejado.</p><div class="breadth" role="img" aria-label="85 positivos, 85 neutros, 19 negativos"><span class="bp" style="flex:85"></span><span class="bz" style="flex:85"></span><span class="bn" style="flex:19"></span></div><div class="meta"><span class="m">SOL <b>96,66</b> <i class="up">+1,5%</i></span><span class="m"><b>85</b> positivos · <b>19</b> negativos de 189</span><span class="m">melhor <code>h1_exits_PNUT_poorjev_relaxed__fork1</code> +9,99%</span><span class="m">pior <code>h2_ensemble_PNUT</code> −2,58%</span></div></div></li><li class="day" id="d2026-10-31"><div class="when"><time datetime="2026-10-31">sáb, 31 out</time></div><div class="what"><h4>Fechamento</h4><p>De madrugada, a surpresa: o laboratório ainda estava rodando, porque o supervisor não tinha prazo de fim. Parei tudo às 02:36 e corrigi o script. O fechamento oficial é o relatório acumulado das 00:41.</p><div class="meta"><span class="m">SOL <b>95,80</b> <i class="down">−0,9%</i></span></div></div></li></ol></section>
+</section>
+
+<section class="block wide" aria-labelledby="s-placar">
+  <div class="col">
+    <span class="eyebrow">6 · O placar final</span>
+    <h2 id="s-placar">Quem terminou na frente, e por quê</h2>
+    <p>Só 8 dos 189 testes terminaram positivos, e 105 bateram “só segurar”, quase sempre por perderem menos. A soma de todas as carteiras, que começaram com cerca de US$ 1.000 cada, foi de −22.036 US$. Ficar em USDC a 6% ao ano teria rendido cerca de +0,46% no período e superado 184 dos 189 testes.</p>
+  </div>
+  <div class="tbl-card">
+    <h3>Os mais lucrativos</h3>
+    <p class="sub">Desde o início de cada teste. Os forks começaram no meio do mês, por isso a coluna “desde”.</p>
+    <div class="tscroll"><table>
+      <thead><tr><th>#</th><th>Teste</th><th>Ativo</th><th>Desde</th><th class="n">Lucro</th><th class="n">Contra segurar</th><th class="n">Habilidade</th><th class="n">Operações</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><span class="nm">RSI de 1 hora, período 17</span><span class="id">rsi_sol_1h__fork1 · tuner</span></td><td>SOL</td><td class="num">15/10</td><td class="n num up">+0,71% · +6,84</td><td class="n num">+30,47</td><td class="n num">+22,40</td><td class="n num">5</td></tr>
+        <tr><td class="num">2</td><td><span class="nm">von relaxado, confiança 0,385</span><span class="id">meme_POPCAT_relaxed__fork1 · tuner</span></td><td>POPCAT</td><td class="num">09/10</td><td class="n num up">+0,64% · +6,15</td><td class="n num">+128,22</td><td class="n num">+6,33</td><td class="n num">1</td></tr>
+        <tr><td class="num">3</td><td><span class="nm">poorjev relaxado paciente</span><span class="id">poorjev_relaxed__fork4 · tuner</span></td><td>SOL</td><td class="num">22/10</td><td class="n num up">+0,57% · +4,94</td><td class="n num">+4,94</td><td class="n num"><b>+46,62</b></td><td class="n num"><b>197</b></td></tr>
+        <tr><td class="num">4</td><td><span class="nm">von relaxado, confiança 0,385</span><span class="id">meme_GOAT_relaxed__fork1 · tuner</span></td><td>GOAT</td><td class="num">11/10</td><td class="n num up">+0,56% · +5,50</td><td class="n num">+139,20</td><td class="n num">+6,42</td><td class="n num">1</td></tr>
+        <tr><td class="num">5</td><td><span class="nm">von relaxado</span><span class="id">meme_FARTCOIN_relaxed · original</span></td><td>FARTCOIN</td><td class="num">01/10</td><td class="n num up">+0,55% · +5,46</td><td class="n num"><b>+315,59</b></td><td class="n num">+14,07</td><td class="n num"><b>139</b></td></tr>
+        <tr><td class="num">6</td><td><span class="nm">von com saídas, ajuste 3</span><span class="id">h1_exits_von_relaxed__fork3 · tuner</span></td><td>SOL</td><td class="num">15/10</td><td class="n num up">+0,25% · +2,34</td><td class="n num">+15,60</td><td class="n num">+2,39</td><td class="n num">1</td></tr>
+        <tr><td class="num">7</td><td><span class="nm">von com teto de 50%, critérios do Claude</span><span class="id">relaxed_expcap50__fork1 · Claude noturno</span></td><td>SOL</td><td class="num">03/10</td><td class="n num up">+0,18% · +1,84</td><td class="n num">+97,45</td><td class="n num">+2,00</td><td class="n num">1</td></tr>
+        <tr><td class="num">8</td><td><span class="nm">von relaxado, ajuste 2</span><span class="id">relaxed__fork2 · tuner</span></td><td>SOL</td><td class="num">10/10</td><td class="n num up">+0,04% · +0,35</td><td class="n num">+58,87</td><td class="n num">+3,06</td><td class="n num">1</td></tr>
+      </tbody>
+    </table></div>
+    <p class="sub" style="padding-bottom:10px">Cinco dos oito fizeram uma única operação: venderam o que tinham e ficaram em caixa enquanto o mercado caía. Isso protege, mas não prova habilidade. Por isso o placar precisa de um mínimo de operações.</p>
+  </div>
+
+  <div class="tbl-card">
+    <h3>Os que mais perderam</h3>
+    <div class="tscroll"><table>
+      <thead><tr><th>Teste</th><th>Ativo</th><th class="n">Lucro</th><th class="n">Contra segurar</th><th class="n">Exposição média</th><th class="n">Operações</th><th class="n">Maior queda</th></tr></thead>
+      <tbody>
+        <tr><td><span class="nm">poorjev + saídas curtas, ajuste 1</span><span class="id">h1_exits_FARTCOIN_poorjev_relaxed__fork1</span></td><td>FARTCOIN</td><td class="n num down">−47,33%</td><td class="n num down">−169,31</td><td class="n num">79%</td><td class="n num">2.096</td><td class="n num">51,4%</td></tr>
+        <tr><td><span class="nm">poorjev + saídas</span><span class="id">h1_exits_GOAT_poorjev_relaxed</span></td><td>GOAT</td><td class="n num down">−39,57%</td><td class="n num down">−155,63</td><td class="n num">96%</td><td class="n num">517</td><td class="n num">48,5%</td></tr>
+        <tr><td><span class="nm">Regime de SOL, 100% na moeda</span><span class="id">GOAT_rule_regime_full</span></td><td>GOAT</td><td class="n num down">−34,26%</td><td class="n num down">−102,50</td><td class="n num">33%</td><td class="n num">26</td><td class="n num">36,7%</td></tr>
+        <tr><td><span class="nm">poorjev + saídas, critérios do Claude</span><span class="id">h1_exits_WIF_poorjev_relaxed__fork1</span></td><td>WIF</td><td class="n num down">−32,76%</td><td class="n num down">−33,16</td><td class="n num">96%</td><td class="n num">476</td><td class="n num">40,7%</td></tr>
+        <tr><td><span class="nm">poorjev + saídas, pausa de 2 h</span><span class="id">h1_exits_MEW_poorjev_relaxed__fork1</span></td><td>MEW</td><td class="n num down">−31,64%</td><td class="n num down">−134,23</td><td class="n num">87%</td><td class="n num">610</td><td class="n num">36,8%</td></tr>
+      </tbody>
+    </table></div>
+    <p class="sub" style="padding-bottom:10px">O padrão é o mesmo: muito tempo exposto a uma moeda em queda e milhares de operações pagando custo. O fork de saídas curtas em FARTCOIN fez 2.096 operações e perdeu quase metade da carteira.</p>
+  </div>
+
+  <div class="tbl-card">
+    <h3>Os vereditos</h3>
+    <p class="sub">Em 31/10 às 02:14: <b>0 vencedoras</b>, <b>4 perdedoras</b> e 185 inconclusivas. As perdedoras foram piores que segurar com p &lt; 0,05.</p>
+    <div class="tscroll"><table>
+      <thead><tr><th>Teste</th><th>Veredito</th><th class="n">Lucro</th><th class="n">Contra segurar</th><th class="n">Habilidade</th><th class="n">Operações</th></tr></thead>
+      <tbody>
+        <tr class="loser"><td><span class="nm">von relaxado + saídas</span><span class="id">h1_exits_von_relaxed</span></td><td><span class="pill lose">perdedora</span></td><td class="n num down">−21,71%</td><td class="n num down">−209,81</td><td class="n num down">−41,53</td><td class="n num">1.450</td></tr>
+        <tr class="loser"><td><span class="nm">Ensemble por percentil em SOL</span><span class="id">h2_ensemble_sol</span></td><td><span class="pill lose">perdedora</span></td><td class="n num down">−26,67%</td><td class="n num down">−259,39</td><td class="n num down">−92,52</td><td class="n num">812</td></tr>
+        <tr class="loser"><td><span class="nm">poorjev SOL + saídas</span><span class="id">poorjev_relaxed__fork1</span></td><td><span class="pill lose">perdedora</span></td><td class="n num down">−21,68%</td><td class="n num down">−163,56</td><td class="n num down">−34,44</td><td class="n num">1.347</td></tr>
+        <tr class="loser"><td><span class="nm">Laya com portão na própria escala</span><span class="id">laya_relaxed__fork1 · Claude noturno</span></td><td><span class="pill lose">perdedora</span></td><td class="n num down">−29,53%</td><td class="n num down">−287,86</td><td class="n num down">−214,66</td><td class="n num">2.583</td></tr>
+      </tbody>
+    </table></div>
+    <p class="sub" style="padding-bottom:10px">A quarta perdedora é o melhor exemplo de método do mês. O Claude noturno criou esse fork no dia 3 escrevendo que esperava que a Laya não tivesse habilidade em SOL. O veredito confirmou essa expectativa.</p>
+  </div>
+</section>
+
+<section class="block wide" aria-labelledby="s-cands">
+  <div class="col">
+    <span class="eyebrow">7 · Habilidade sem lucro</span>
+    <h2 id="s-cands">Três linhas que merecem mais tempo</h2>
+    <p>Nenhum teste ganhou o veredito, mas alguns mostraram habilidade medida com significância: escolheram melhor a hora de estar exposto do que o acaso explicaria. Em queda, isso pode conviver com prejuízo. Estes três são os candidatos para a próxima fase.</p>
+  </div>
+  <div class="cands">
+    <article class="cand">
+      <span class="eyebrow">Regra clássica · SOL</span>
+      <h3>RSI de 1 hora</h3>
+      <div class="stats"><div><b class="down num">−1,6%</b><span>lucro (original)</span></div><div><b class="up num">+55,9</b><span>habilidade, p 0,02</span></div><div><b class="num">19</b><span>operações</span></div></div>
+      <p>Habilidade positiva ao vivo e em todos os meses do retroativo. O fork com período 17 terminou o mês em primeiro lugar por lucro.</p>
+      <p class="caveat">Ressalva: poucas operações. Faltam meses para chegar a 30 operações fechadas.</p>
+    </article>
+    <article class="cand">
+      <span class="eyebrow">Fork do tuner · SOL</span>
+      <h3>poorjev relaxado paciente</h3>
+      <div class="stats"><div><b class="up num">+0,57%</b><span>lucro em 9 dias</span></div><div><b class="up num">+46,6</b><span>habilidade, p 0,01</span></div><div><b class="num">197</b><span>operações</span></div></div>
+      <p>Pausa de 54 minutos entre compras, 20% do caixa por compra e saídas de 3% / 1,8% / 0,8%. Foi o único teste de SOL com lucro, habilidade e volume ao mesmo tempo.</p>
+      <p class="caveat">Ressalva: só 9 dias de vida. Precisa de pelo menos 21 dias para o veredito.</p>
+    </article>
+    <article class="cand">
+      <span class="eyebrow">Modelo · FARTCOIN</span>
+      <h3>von relaxado</h3>
+      <div class="stats"><div><b class="up num">+0,55%</b><span>lucro em 29 dias</span></div><div><b class="up num">+315,6</b><span>contra segurar</span></div><div><b class="num">139</b><span>operações</span></div></div>
+      <p>A maior vantagem sobre segurar do mês: FARTCOIN caiu 31% e o teste ficou em caixa 97% do tempo, com timing de +70 US$ (p 0,01).</p>
+      <p class="caveat">Ressalva: no retroativo de 6 meses o mesmo teste perdeu 21%. Parece mais sorte de regime do que habilidade.</p>
+    </article>
+  </div>
+</section>
+
+<section class="block wide" aria-labelledby="s-bot">
+  <div class="col">
+    <span class="eyebrow">8 · O bot real</span>
+    <h2 id="s-bot">A mesma carteira, com e sem saídas</h2>
+    <p>Além do laboratório, o bot de verdade rodou em modo de papel sobre uma réplica da carteira real: 0,0174 SOL e 50,01 USDT, cerca de US$ 52. O livro A só entra; o livro B, ligado no dia 3, usa o mesmo von com saídas mecânicas e nunca põe mais de metade do livro em SOL.</p>
+  </div>
+  <div class="chart-card">
+    <h3>Valor do livro de papel, em US$</h3>
+    <p class="sub">Fechamento diário. “Segurar” é o livro inicial parado.</p>
+    <div class="legend"><span><i class="dash" style="border-color:var(--hold)"></i>Segurar</span><span><i style="border-color:var(--s1)"></i>Livro A, só entradas</span><span><i style="border-color:var(--s2)"></i>Livro B, saídas e teto de 50%</span></div>
+    <div class="chart" id="c-books" data-h="300"></div>
+    <details class="data"><summary>Ver os valores em tabela</summary><div class="tscroll" id="t-books"></div></details>
+  </div>
+  <div class="tbl-card">
+    <div class="tscroll"><table>
+      <thead><tr><th>Livro</th><th class="n">Valor final</th><th class="n">Contra segurar</th><th class="n">Maior queda</th><th class="n">Operações</th><th class="n">Acerto em 15 min</th><th class="n">SOL no fim</th></tr></thead>
+      <tbody>
+        <tr><td><span class="nm">A · só entradas</span><span class="id">relaxed_paper</span></td><td class="n num">US$ 41,63</td><td class="n num down">−10,06 (−19,47%)</td><td class="n num">25,4%</td><td class="n num">272</td><td class="n num">43%</td><td class="n num">100%</td></tr>
+        <tr><td><span class="nm">B · saídas e teto de 50%</span><span class="id">relaxed_exits_paper · 9 TP, 35 SL, 22 trailing</span></td><td class="n num">US$ 46,84</td><td class="n num down">−4,86 (−9,40%)</td><td class="n num">12,4%</td><td class="n num">4.407</td><td class="n num">50%</td><td class="n num">51%</td></tr>
+      </tbody>
+    </table></div>
+    <p class="sub" style="padding-bottom:10px">O livro A terminou 100% em SOL, comprando a queda até o fim. O B perdeu menos da metade, mas não ganhou de segurar. A diferença veio do teto de exposição, não de acertos: 35 das 66 saídas foram stop loss.</p>
+  </div>
+</section>
+
+<section class="block wide" aria-labelledby="s-retro">
+  <div class="col">
+    <span class="eyebrow">9 · Olhar para trás</span>
+    <h2 id="s-retro">Seis meses de retroativo contam outra história</h2>
+    <p>Um mês de queda é uma amostra só. Por isso, a partir do dia 6, o mesmo código passou a rodar sobre o passado, em velas de 1 minuto, com as respostas dos modelos guardadas em cache: três meses de 30 dias e uma corrida de 6 meses. Os estados e custos são aproximados, então o retroativo serve para ordenar hipóteses, não para provar vencedoras.</p>
+  </div>
+  <div class="tbl-card">
+    <div class="tscroll"><table>
+      <thead><tr><th>Janela</th><th class="n">SOL</th><th>Mais habilidade</th><th class="n">Bot A</th><th class="n">Bot B</th><th class="n">Vencedoras</th><th class="n">Perdedoras</th></tr></thead>
+      <tbody>
+        <tr><td><span class="nm">Julho</span><span class="id">7 jul → 6 ago</span></td><td class="n num down">−9,7%</td><td>Donchian + regime em FARTCOIN<span class="id">+69,1 US$ · lucro +1,2%</span></td><td class="n num down">−9,6%</td><td class="n num down">−11,2%</td><td class="n num">0</td><td class="n num">5</td></tr>
+        <tr><td><span class="nm">Agosto</span><span class="id">6 ago → 6 set</span></td><td class="n num up">+45,1%</td><td>Híbrido von + ordem limite<span class="id">+155,9 US$ · lucro +49,7%</span></td><td class="n num up">+45,2%</td><td class="n num up">+0,3%</td><td class="n num">0</td><td class="n num">7</td></tr>
+        <tr><td><span class="nm">Setembro</span><span class="id">6 set → 6 out</span></td><td class="n num up">+13,0%</td><td>poorjev, portão do artigo<span class="id">+84,0 US$ · lucro +19,2%</span></td><td class="n num up">+12,5%</td><td class="n num down">−4,3%</td><td class="n num">0</td><td class="n num">10</td></tr>
+        <tr><td><span class="nm">Seis meses</span><span class="id">9 abr → 6 out</span></td><td class="n num up">+46,4%</td><td>poorjev relaxado + janela de horário<span class="id">+280 US$ · lucro +61,4% · 20 compras</span></td><td class="n num up">+45,7%</td><td class="n num down"><b>−42,5%</b></td><td class="n num">0</td><td class="n num">15</td></tr>
+        <tr><td><span class="nm">Moedas novas, 6 meses</span><span class="id">JUP, JTO, PYTH, RAY, BOME, PENGU, TRUMP, MOODENG</span></td><td class="n num up">+46,4%</td><td>Só segurar RAY<span class="id">+253,9%; von relaxado falha nas 8</span></td><td class="n num">–</td><td class="n num">–</td><td class="n num">0</td><td class="n num">7</td></tr>
+      </tbody>
+    </table></div>
+    <p class="sub" style="padding-bottom:10px">O dado mais importante está na linha dos seis meses. As mesmas saídas que salvaram o livro B em outubro o fizeram perder 42,5% num semestre em que a SOL subiu 46%. O livro A, que só compra, acompanhou o mercado. As saídas são uma ferramenta de risco: reduzem a perda na queda e cortam o ganho na alta.</p>
+  </div>
+</section>
+
+<section class="block col" aria-labelledby="s-claude">
+  <span class="eyebrow">10 · O pesquisador noturno</span>
+  <h2 id="s-claude">Um Claude que trabalhava enquanto todos dormiam</h2>
+  <p>No dia 3 entrou a parte mais ambiciosa do projeto. Toda noite às 01:30, o Claude Code rodava sozinho, sem aprovação humana e só em papel. Ele lia os relatórios do dia, escrevia um diário de pesquisa e podia criar forks: cópias de um teste com um parâmetro ou critério diferente, sem tocar no original.</p>
+  <p>A regra era escrever cada fork como experimento: hipótese, o que a confirmaria, o que a refutaria e em quantos dias. Um trecho real, do fork da Laya criado na primeira noite:</p>
+  <blockquote style="margin:0 0 1em;padding:14px 18px;border-left:3px solid var(--mark);background:var(--sheet);font-size:16px;line-height:1.55">“Espero habilidade ≤ 0 em SOL, porque as chamadas confiantes de 10-02 tiveram hit 31% (250 erros vs 208 acertos).”</blockquote>
+  <p>No mês, o laboratório ganhou <b>80 forks</b>: 59 do tuner determinístico, 16 do Claude noturno e 5 de sessões manuais. Na primeira noite o Claude encontrou um erro de configuração que eu tinha deixado: forks com níveis de saída definidos, mas com as saídas desligadas. Nas noites seguintes ele testou se o texto dos critérios mudava o comportamento do poorjev (não mudava: o modelo responde comprar a quase tudo, com confiança acima de 0,9) e transformou a ideia de “não perseguir o preço” num parâmetro de pausa.</p>
+  <p>O pesquisador trabalhou sete noites. No dia 10 a sessão OAuth expirou e ele não voltou até o fim. É a maior lição operacional do mês: um agente autônomo precisa de um alarme quando para de rodar, não só quando erra.</p>
+</section>
+
+<section class="block wide" aria-labelledby="s-galeria">
+  <div class="col">
+    <span class="eyebrow">11 · Imagens</span>
+    <h2 id="s-galeria">O que o painel mostrava no fechamento</h2>
+    <p>Capturas de 31/10. Toque numa imagem para ampliar.</p>
+  </div>
+  <div class="gallery" id="gallery">
+    <figure><button type="button" data-cap="Placar no dia 30 de 30: quem está na frente por lucro e por habilidade."><img src="media/01_placar.jpg" alt="Placar do painel no dia 30 de 30" loading="lazy" width="1440" height="900"></button><figcaption>Placar no dia 30 de 30.</figcaption></figure>
+    <figure><button type="button" data-cap="Detalhe do von relaxado em FARTCOIN: 89 compras, 50 vendas, +46,8% contra segurar."><img src="media/02_detalhe_fartcoin.jpg" alt="Detalhe do teste von relaxado em FARTCOIN" loading="lazy" width="1440" height="900"></button><figcaption>von relaxado em FARTCOIN: o patrimônio fica parado enquanto a moeda cai.</figcaption></figure>
+    <figure><button type="button" data-cap="Detalhe do RSI de 1 hora, ajuste 1, contra só segurar."><img src="media/03_detalhe_rsi.jpg" alt="Detalhe do teste RSI de 1 hora, ajuste 1" loading="lazy" width="1440" height="900"></button><figcaption>RSI de 1 hora, ajuste 1, contra só segurar.</figcaption></figure>
+    <figure><button type="button" data-cap="Famílias: mediana, quantos batem segurar e o pior de cada família."><img src="media/04_familias.jpg" alt="Página de famílias de estratégias" loading="lazy" width="1440" height="900"></button><figcaption>Famílias lado a lado na mesma escala.</figcaption></figure>
+    <figure><button type="button" data-cap="Retroativo de 6 meses: nenhum teste passou o critério de vencedora."><img src="media/06_retroativo_6m.jpg" alt="Retroativo de 6 meses" loading="lazy" width="1440" height="900"></button><figcaption>O retroativo de 6 meses.</figcaption></figure>
+    <figure><button type="button" data-cap="Seis meses mês a mês: quem liderou cada mês muda o tempo todo."><img src="media/06_retroativo_6m_b.jpg" alt="Gráfico de 6 meses e líderes por mês" loading="lazy" width="1440" height="900"></button><figcaption>Quem liderou cada mês muda o tempo todo.</figcaption></figure>
+    <figure><button type="button" data-cap="Comparação entre julho, agosto e setembro."><img src="media/07_comparar_meses.jpg" alt="Comparação de três meses retroativos" loading="lazy" width="1440" height="900"></button><figcaption>Três meses lado a lado.</figcaption></figure>
+    <figure><button type="button" data-cap="Carteira real em papel: livro A contra segurar."><img src="media/09_carteira_real.jpg" alt="Carteira real em papel, livros A e B" loading="lazy" width="1440" height="900"></button><figcaption>Carteira real em papel, livros A e B.</figcaption></figure>
+    <figure class="tall"><button type="button" data-cap="O painel no celular, pelo túnel."><img src="media/12_mobile_placar.jpg" alt="Painel no celular" loading="lazy" width="780" height="1688"></button><figcaption>O mesmo painel no celular.</figcaption></figure>
+  </div>
+  <dialog class="lb" id="lb"><button type="button" id="lb-close">Fechar</button><img id="lb-img" alt=""><p id="lb-cap"></p></dialog>
+</section>
+
+<section class="block col" aria-labelledby="s-bastidores">
+  <span class="eyebrow">12 · Bastidores</span>
+  <h2 id="s-bastidores">O que quebrou pelo caminho</h2>
+  <p>Rodar 30 dias numa máquina pessoal ensinou tanto quanto os gráficos. Sete serviços launchd (laboratório, bot real A e B, caffeinate, Claude noturno, túnel e guarda do disco) mantiveram tudo de pé. Estes foram os tropeços:</p>
+  <ul class="plain">
+    <li><b>O disco lotou duas vezes.</b> Primeiro na instalação dos modelos, no dia zero. Depois por caches de build de outros projetos, 111 GB num único dia. A solução foi uma guarda que limpa caches quando sobram menos de 30 GB.</li>
+    <li><b>macOS não é Linux.</b> <code>setsid</code>, <code>flock</code>, <code>/proc</code> e arrays associativos do bash 3.2 tiveram que ser substituídos.</li>
+    <li><b>Um processo duplicado.</b> Um pidfile velho fez o supervisor lançar um segundo bot de regras e gerou 4 operações duplicadas. Agora ele adota o processo vivo.</li>
+    <li><b>O login no celular falhava</b> porque o teclado colocava a primeira letra do usuário em maiúscula.</li>
+    <li><b>O pesquisador noturno parou no dia 10</b> com a sessão expirada, sem nenhum alerta.</li>
+    <li><b>O laboratório não parou no fim.</b> O bot real desligou às 23:59:59 como planejado, mas o supervisor do laboratório não tinha prazo e seguiu rodando até eu parar às 02:36. O fechamento oficial usa o relatório das 00:41, e o script foi corrigido.</li>
+  </ul>
+</section>
+
+<section class="block col" aria-labelledby="s-parecer">
+  <span class="eyebrow">13 · Conclusão</span>
+  <h2 id="s-parecer">Parecer técnico e veredito financeiro</h2>
+  <div class="memo">
+    <h3>Parecer técnico</h3>
+    <ol>
+      <li><b>A infraestrutura cumpriu o papel.</b> 189 estratégias rodaram por 29 dias em paralelo, com 30.055 operações de papel no laboratório, 272 no livro A e 4.407 no livro B, relatórios diários, revisão noturna e painel com acesso remoto. Nenhuma ordem real foi enviada e nenhuma chave foi lida.</li>
+      <li><b>Separar beta de habilidade foi a decisão mais importante.</b> Ordenado só por lucro, o placar premiaria quem ficou fora do mercado. Cinco dos oito testes positivos fizeram uma operação só.</li>
+      <li><b>Nenhum dos quatro modelos mostrou capacidade de escolher a direção depois dos custos.</b> O von relaxado compra quase sempre e passa 99% do tempo exposto. O poorjev responde comprar a quase tudo com confiança acima de 0,9. A Laya não operava com portões na escala do von e, quando ganhou portão próprio, virou perdedora. O Jev hospedado ficou em “segurar” e não fez nenhuma operação em 27 dias.</li>
+      <li><b>Saídas mecânicas e teto de exposição são ferramentas de risco, não de retorno.</b> Reduziram a perda do bot real à metade em outubro (−9,4% contra −19,4%). No retroativo de 6 meses, o mesmo livro B perdeu 42,5% enquanto a SOL subia 46%. O efeito depende do regime de mercado.</li>
+      <li><b>Custo é o inimigo silencioso.</b> As estratégias com milhares de operações ficaram entre as piores. A cada compra e venda em memecoins o laboratório pagou de 13 a 20 pontos-base.</li>
+      <li><b>Há sinais de habilidade, mas não de lucro.</b> As saídas em FARTCOIN (habilidade +83,8 US$, p 0,003), o RSI de 1 hora em SOL (+55,9, p 0,02) e o fork paciente do poorjev (+46,6, p 0,01) escolheram a hora de estar expostos melhor que o acaso. Em queda, isso só reduziu a perda.</li>
+      <li><b>A autonomia funcionou enquanto teve acesso.</b> O Claude noturno escreveu hipóteses falsificáveis, achou um erro de configuração e fez uma previsão que o veredito confirmou. Parou no dia 10 por credencial expirada, sem alarme.</li>
+    </ol>
+    <div class="ruling">
+      <span class="eyebrow">Veredito financeiro</span>
+      <p class="big">Não há estratégia que justifique dinheiro real.</p>
+      <ol>
+        <li>O maior lucro do mês foi de <b>+0,71%</b> (US$ 6,84 sobre cerca de US$ 960), em 16 dias e 5 operações. Só 5 dos 189 testes superaram o USDC a 6% ao ano, que teria rendido cerca de +0,46%.</li>
+        <li>O bot real perderia <b>US$ 10,06</b> contra segurar sem saídas e <b>US$ 4,86</b> com saídas, sobre US$ 52. Segurar também perdeu: a carteira parada passou de US$ 52,08 para US$ 51,69 porque era 96% USDT.</li>
+        <li>Pelo critério definido antes de começar, o resultado é <b>0 vencedoras, 4 perdedoras e 185 inconclusivas</b>. Nenhum teste chegou aos mínimos com vantagem significativa sobre segurar e sobre o USDC.</li>
+      </ol>
+      <h3>Recomendações para a próxima fase</h3>
+      <ol>
+        <li>Manter em papel por mais 60 dias apenas o RSI de 1 hora (original e fork), o poorjev relaxado paciente e o von relaxado em FARTCOIN, para chegarem a 30 operações fechadas.</li>
+        <li>Exigir um mínimo de 30 operações para entrar no topo do placar por lucro.</li>
+        <li>Tratar saídas e teto de exposição como controle de risco do bot real e testá-los num mês de alta antes de qualquer conclusão.</li>
+        <li>Colocar alarme de parada no Claude noturno e um prazo de fim no supervisor do laboratório.</li>
+      </ol>
+    </div>
+    <div class="sign">
+      <div><div class="name">Dale Hanson</div><div class="role">Autor do experimento e do parecer</div></div>
+      <div class="date">31 de outubro de 2026 · run1_2026-09-30</div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot col">
+  <p><b>Sobre os números.</b> Laboratório: relatório acumulado gerado em 31/10 às 00:41 (189 portfólios) e vereditos de 31/10 às 02:14. Diário: relatórios diários de 01/10 a 30/10, gerados à meia-noite de cada dia, e preço da SOL no fechamento diário a partir dos registros de patrimônio. Bot real: livros de papel A (<code>logs/</code>) e B (<code>logs/paper_b</code>), marcados ao fechamento da SOL. Retroativo: execuções <code>bt30</code> e <code>bt180</code> de 6/10. Todas as carteiras do laboratório começaram com cerca de US$ 1.000; o bot real com US$ 52.</p>
+  <p>Tudo foi simulado em papel. Nenhum número aqui é resultado de operações reais, e este texto não é recomendação de investimento.</p>
+</footer>
+</div>
+
+<script>
+const DATA = {"sol": [["2026-09-30", 119.305], ["2026-10-01", 120.03], ["2026-10-02", 118.885], ["2026-10-03", 120.38], ["2026-10-04", 121.25], ["2026-10-05", 120.185], ["2026-10-06", 118.28], ["2026-10-07", 116.4], ["2026-10-08", 110.23], ["2026-10-09", 109.825], ["2026-10-10", 109.905], ["2026-10-11", 111.86], ["2026-10-12", 106.65], ["2026-10-13", 107.655], ["2026-10-14", 103.23], ["2026-10-15", 105.215], ["2026-10-16", 104.445], ["2026-10-17", 103.84], ["2026-10-18", 105.345], ["2026-10-19", 105.015], ["2026-10-20", 106.18], ["2026-10-21", 106.06], ["2026-10-22", 104.515], ["2026-10-23", 102.555], ["2026-10-24", 102.32], ["2026-10-25", 100.495], ["2026-10-26", 100.1], ["2026-10-27", 101.545], ["2026-10-28", 99.905], ["2026-10-29", 95.225], ["2026-10-30", 96.66]], "hold": [["2026-09-30", 52.084], ["2026-10-01", 52.097], ["2026-10-02", 52.077], ["2026-10-03", 52.103], ["2026-10-04", 52.118], ["2026-10-05", 52.1], ["2026-10-06", 52.066], ["2026-10-07", 52.034], ["2026-10-08", 51.926], ["2026-10-09", 51.919], ["2026-10-10", 51.921], ["2026-10-11", 51.955], ["2026-10-12", 51.864], ["2026-10-13", 51.882], ["2026-10-14", 51.805], ["2026-10-15", 51.839], ["2026-10-16", 51.826], ["2026-10-17", 51.815], ["2026-10-18", 51.841], ["2026-10-19", 51.836], ["2026-10-20", 51.856], ["2026-10-21", 51.854], ["2026-10-22", 51.827], ["2026-10-23", 51.793], ["2026-10-24", 51.789], ["2026-10-25", 51.757], ["2026-10-26", 51.75], ["2026-10-27", 51.775], ["2026-10-28", 51.747], ["2026-10-29", 51.665], ["2026-10-30", 51.69]], "A": [["2026-09-30", 52.084], ["2026-10-01", 52.109], ["2026-10-02", 51.268], ["2026-10-03", 51.913], ["2026-10-04", 52.288], ["2026-10-05", 51.829], ["2026-10-06", 50.991], ["2026-10-07", 50.18], ["2026-10-08", 47.521], ["2026-10-09", 47.347], ["2026-10-10", 47.381], ["2026-10-11", 48.224], ["2026-10-12", 45.973], ["2026-10-13", 46.406], ["2026-10-14", 44.486], ["2026-10-15", 45.342], ["2026-10-16", 45.01], ["2026-10-17", 44.742], ["2026-10-18", 45.391], ["2026-10-19", 45.248], ["2026-10-20", 45.746], ["2026-10-21", 45.695], ["2026-10-22", 45.029], ["2026-10-23", 44.185], ["2026-10-24", 44.083], ["2026-10-25", 43.297], ["2026-10-26", 43.127], ["2026-10-27", 43.749], ["2026-10-28", 43.043], ["2026-10-29", 40.933], ["2026-10-30", 41.55]], "B": [["2026-09-30", 52.084], ["2026-10-01", 52.097], ["2026-10-02", 52.077], ["2026-10-03", 52.209], ["2026-10-04", 52.253], ["2026-10-05", 51.966], ["2026-10-06", 51.597], ["2026-10-07", 51.197], ["2026-10-08", 49.886], ["2026-10-09", 49.722], ["2026-10-10", 49.74], ["2026-10-11", 50.163], ["2026-10-12", 49.104], ["2026-10-13", 49.363], ["2026-10-14", 48.339], ["2026-10-15", 48.894], ["2026-10-16", 48.7], ["2026-10-17", 48.364], ["2026-10-18", 48.335], ["2026-10-19", 48.309], ["2026-10-20", 48.768], ["2026-10-21", 48.625], ["2026-10-22", 48.763], ["2026-10-23", 48.22], ["2026-10-24", 48.161], ["2026-10-25", 47.686], ["2026-10-26", 47.1], ["2026-10-27", 47.194], ["2026-10-28", 46.796], ["2026-10-29", 46.363], ["2026-10-30", 46.79]], "breadth": [["2026-10-01", 56, 6, 109, "h1_exits_FARTCOIN_poorjev_relaxed", 1.04, "GOAT_hybrid_poorjev_regime", -0.43], ["2026-10-02", 16, 70, 109, "MEW_poorjev_baseline", 6.19, "WIF_rule_donch_regime_full", -11.96], ["2026-10-03", 47, 39, 117, "BONK_hybrid_poorjev_regime", 5.06, "FARTCOIN_rule_regime_full", -2.24], ["2026-10-04", 69, 22, 119, "h1_exits_FARTCOIN_poorjev_relaxed", 6.95, "MEW_rule_donch_regime_full", -2.65], ["2026-10-05", 16, 78, 121, "h2_ensemble_WIF", 1.68, "h1_exits_BONK_poorjev_relaxed__fork1", -6.75], ["2026-10-06", 3, 86, 124, "meme_FARTCOIN_relaxed", 0.16, "FARTCOIN_hybrid_poorjev_regime", -8.74], ["2026-10-07", 1, 72, 126, "h2_ensemble_BONK", 0.35, "h1_exits_GOAT_poorjev_relaxed", -4.16], ["2026-10-08", 10, 66, 128, "h2_ensemble_FARTCOIN__fork1", 1.37, "WIF_poorjev_baseline", -7.57], ["2026-10-09", 46, 37, 142, "WIF_hybrid_poorjev_regime", 4.61, "h2_ensemble_WIF", -1.86], ["2026-10-10", 33, 62, 144, "FARTCOIN_hybrid_poorjev_regime", 0.68, "h1_exits_WIF_poorjev_relaxed__fork3", -2.95], ["2026-10-11", 68, 28, 146, "h1_exits_WIF_poorjev_relaxed__fork2", 3.79, "POPCAT_rule_regime_full", -2.27], ["2026-10-12", 3, 92, 146, "h1_exits_von_relaxed__fork1", 2.9, "h1_exits_PNUT_poorjev_relaxed", -10.29], ["2026-10-13", 71, 11, 148, "h1_exits_FARTCOIN_poorjev_relaxed__fork2", 3.32, "h2_ensemble_POPCAT", -2.38], ["2026-10-14", 2, 81, 148, "h2_ensemble_MEW", 0.16, "h1_exits_FARTCOIN_poorjev_relaxed", -9.77], ["2026-10-15", 71, 37, 153, "h1_exits_POPCAT_poorjev_relaxed__fork1", 7.76, "h1_exits_GOAT_poorjev_relaxed", -8.17], ["2026-10-16", 17, 100, 169, "h1_exits_WIF_poorjev_relaxed__fork3", 2.87, "h1_exits_FARTCOIN_poorjev_relaxed__fork1", -3.66], ["2026-10-17", 6, 112, 174, "h2_ensemble_WIF", 0.49, "h1_exits_PNUT_poorjev_relaxed__fork2", -6.87], ["2026-10-18", 71, 48, 176, "FARTCOIN_laya_relaxed__fork2", 2.66, "h1_exits_POPCAT_poorjev_relaxed", -4.03], ["2026-10-19", 39, 86, 176, "GOAT_rule_regime_full", 1.04, "h1_exits_FARTCOIN_poorjev_relaxed__fork1", -2.72], ["2026-10-20", 101, 33, 179, "MEW_hybrid_poorjev_regime", 25.0, "PNUT_rule_donch_regime_full", -4.87], ["2026-10-21", 45, 87, 180, "BONK_rule_regime_full__fork1", 3.45, "MEW_hybrid_poorjev_regime", -13.24], ["2026-10-22", 21, 107, 182, "MEW_hybrid_poorjev_regime", 15.99, "FARTCOIN_rule_donch_regime_full", -4.84], ["2026-10-23", 3, 102, 189, "FARTCOIN_laya_relaxed__fork2", 0.89, "h1_exits_MEW_poorjev_relaxed", -11.67], ["2026-10-24", 16, 88, 189, "h1_exits_BONK_poorjev_relaxed__fork1", 1.88, "FARTCOIN_hybrid_poorjev_regime", -6.49], ["2026-10-25", 2, 104, 189, "FARTCOIN_laya_relaxed__fork3", 0.35, "h1_exits_MEW_poorjev_relaxed__fork1", -7.04], ["2026-10-26", 40, 95, 189, "FARTCOIN_hybrid_poorjev_regime", 3.65, "h1_exits_MEW_poorjev_relaxed__fork1", -5.63], ["2026-10-27", 97, 39, 189, "h1_exits_FARTCOIN_poorjev_relaxed__fork1", 3.79, "h2_ensemble_PNUT", -1.23], ["2026-10-28", 13, 126, 189, "h1_exits_von_relaxed__fork1", 2.14, "GOAT_rule_donch_regime_full", -5.35], ["2026-10-29", 8, 123, 189, "h1_exits_von_relaxed__fork1", 2.43, "h1_exits_BONK_poorjev_relaxed__fork1", -12.31], ["2026-10-30", 85, 19, 189, "h1_exits_PNUT_poorjev_relaxed__fork1", 9.99, "h2_ensemble_PNUT", -2.58]]};
+const MES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const fmt = (v, n=2) => v.toLocaleString("pt-BR", {minimumFractionDigits:n, maximumFractionDigits:n});
+const dShort = iso => { const [y,m,d] = iso.split("-").map(Number); return `${d} ${MES[m-1]}`; };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs={}, parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
+function ticks(lo, hi, n=5){ const span=hi-lo, step0=span/n, mag=Math.pow(10,Math.floor(Math.log10(step0))); const err=step0/mag; const step=(err>=7.5?10:err>=3.5?5:err>=1.5?2:1)*mag; const out=[]; for(let v=Math.ceil(lo/step)*step; v<=hi+1e-9; v+=step) out.push(+v.toFixed(6)); return out; }
+function tableFrom(id, head, rows){ const t=document.createElement("table"); t.innerHTML = `<thead><tr>${head.map((h,i)=>`<th class="${i?'n':''}">${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${i?'n num':''}">${c}</td>`).join("")}</tr>`).join("")}</tbody>`; document.getElementById(id).appendChild(t); }
+
+function lineChart(host, {series, yfmt, ann=[], labels=true}){
+  const draw = () => {
+    host.innerHTML = "";
+    const W = host.clientWidth, H = +host.dataset.h * (W < 520 ? .82 : 1);
+    const narrow = W < 520;
+    const m = {l: 44, r: labels && !narrow ? 118 : 14, t: ann.length ? 34 : 12, b: 26};
+    const days = series[0].values.map(v=>v[0]);
+    const all = series.flatMap(s=>s.values.map(v=>v[1]));
+    let lo = Math.min(...all), hi = Math.max(...all); const pad=(hi-lo)*.08; lo-=pad; hi+=pad;
+    const X = i => m.l + i*(W-m.l-m.r)/(days.length-1), Y = v => m.t + (hi-v)/(hi-lo)*(H-m.t-m.b);
+    const svg = el("svg", {viewBox:`0 0 ${W} ${H}`, height:H, role:"img", "aria-label": host.getAttribute("aria-label")||""}, host);
+    for(const t of ticks(lo,hi,4)){ el("line",{x1:m.l,x2:W-m.r,y1:Y(t),y2:Y(t),stroke:css("--rule"),"stroke-width":1},svg); const tx=el("text",{x:m.l-8,y:Y(t)+4,"text-anchor":"end"},svg); tx.textContent=yfmt(t); }
+    const every = narrow ? 7 : 5;
+    days.forEach((d,i)=>{ if(i%every===0 || i===days.length-1){ const tx=el("text",{x:X(i),y:H-6,"text-anchor":"middle"},svg); tx.textContent=dShort(d);} });
+    ann.forEach((a,k)=>{ const i=days.indexOf(a.d); if(i<0) return; el("line",{x1:X(i),x2:X(i),y1:m.t-6-(k%2)*12+4,y2:H-m.b,stroke:css("--ink-3"),"stroke-dasharray":"2 3","stroke-width":1},svg); const tx=el("text",{x:X(i)+4,y:m.t-8-(k%2)*12,class:"ann"},svg); tx.textContent=narrow?a.s:a.t; });
+    const placed=[];
+    series.forEach(s=>{
+      const p = s.values.map((v,i)=>`${i?"L":"M"}${X(days.indexOf(v[0])).toFixed(1)},${Y(v[1]).toFixed(1)}`).join("");
+      el("path",{d:p,fill:"none",stroke:s.color,"stroke-width":s.w||2,"stroke-linejoin":"round","stroke-linecap":"round","stroke-dasharray":s.dash||"none"},svg);
+      const last=s.values[s.values.length-1], lx=X(days.indexOf(last[0])), ly=Y(last[1]);
+      el("circle",{cx:lx,cy:ly,r:4,fill:s.color,stroke:css("--sheet"),"stroke-width":2},svg);
+      if(labels && !narrow){ let y=ly+4; for(const q of placed) if(Math.abs(q-y)<15) y = q + (y>=q?15:-15); placed.push(y); const tx=el("text",{x:lx+9,y,class:"lbl"},svg); tx.textContent=`${s.short||s.name} ${yfmt(last[1])}`; }
+    });
+    const vline = el("line",{y1:m.t,y2:H-m.b,stroke:css("--ink-2"),"stroke-width":1,opacity:0},svg);
+    const dots = series.map(s=>el("circle",{r:4.5,fill:s.color,stroke:css("--sheet"),"stroke-width":2,opacity:0},svg));
+    const tip = document.createElement("div"); tip.className="tip"; host.appendChild(tip);
+    const hit = el("rect",{x:m.l,y:0,width:W-m.l-m.r,height:H,fill:"transparent"},svg);
+    const move = ev => { const r=svg.getBoundingClientRect(); const x=(ev.clientX-r.left)*(W/r.width); const i=Math.max(0,Math.min(days.length-1,Math.round((x-m.l)/((W-m.l-m.r)/(days.length-1))))); const d=days[i];
+      vline.setAttribute("x1",X(i)); vline.setAttribute("x2",X(i)); vline.setAttribute("opacity",.5);
+      let rows=""; series.forEach((s,k)=>{ const v=s.values.find(q=>q[0]===d); if(!v){dots[k].setAttribute("opacity",0);return;} dots[k].setAttribute("cx",X(i)); dots[k].setAttribute("cy",Y(v[1])); dots[k].setAttribute("opacity",1); rows+=`<div class="row"><i style="background:${s.color}"></i>${s.name}: <b>${yfmt(v[1])}</b></div>`; });
+      const note = ann.find(a=>a.d===d);
+      tip.innerHTML=`<b>${dShort(d)}</b>${rows}${note?`<div>${note.t}</div>`:""}`; tip.style.opacity=1;
+      const tx = Math.min(Math.max(X(i)/W*r.width, 90), r.width-90); tip.style.left=tx+"px"; tip.style.top=(m.t+4)+"px"; };
+    hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+    hit.addEventListener("pointerleave", ()=>{ tip.style.opacity=0; vline.setAttribute("opacity",0); dots.forEach(d=>d.setAttribute("opacity",0)); });
+  };
+  draw(); let w=host.clientWidth; new ResizeObserver(()=>{ if(host.clientWidth!==w){ w=host.clientWidth; draw(); } }).observe(host);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+}
+
+function breadthChart(host, rows){
+  const draw = () => {
+    host.innerHTML="";
+    const W=host.clientWidth, H=+host.dataset.h*(W<520?.85:1), m={l:40,r:10,t:10,b:26};
+    const max=Math.max(...rows.flatMap(r=>[r[1],r[2]]));
+    const top=Math.ceil(max/25)*25, Y=v=>m.t+(top-v)/(2*top)*(H-m.t-m.b), n=rows.length, bw=(W-m.l-m.r)/n;
+    const svg=el("svg",{viewBox:`0 0 ${W} ${H}`,height:H,role:"img","aria-label":"Testes no positivo e no negativo por dia"},host);
+    for(const t of [-top,-top/2,0,top/2,top]){ el("line",{x1:m.l,x2:W-m.r,y1:Y(t),y2:Y(t),stroke:t===0?css("--ink-3"):css("--rule"),"stroke-width":1},svg); const tx=el("text",{x:m.l-8,y:Y(t)+4,"text-anchor":"end"},svg); tx.textContent=Math.abs(t); }
+    const bars=[];
+    rows.forEach((r,i)=>{ const x=m.l+i*bw+1, w=Math.max(1,bw-2);
+      const up=el("path",{d:roundBar(x,Y(r[1]),w,Y(0)-Y(r[1]),true),fill:css("--up")},svg);
+      const dn=el("path",{d:roundBar(x,Y(0),w,Y(-r[2])-Y(0),false),fill:css("--down")},svg);
+      bars.push([up,dn]);
+      if(i%(W<520?7:5)===0||i===n-1){ const tx=el("text",{x:x+w/2,y:H-6,"text-anchor":"middle"},svg); tx.textContent=dShort(r[0]); } });
+    const tip=document.createElement("div"); tip.className="tip"; host.appendChild(tip);
+    const hit=el("rect",{x:m.l,y:0,width:W-m.l-m.r,height:H,fill:"transparent"},svg);
+    const move=ev=>{ const rc=svg.getBoundingClientRect(); const x=(ev.clientX-rc.left)*(W/rc.width); const i=Math.max(0,Math.min(n-1,Math.floor((x-m.l)/bw))); const r=rows[i];
+      bars.forEach((b,k)=>b.forEach(p=>p.setAttribute("opacity",k===i?1:.45)));
+      tip.innerHTML=`<b>${dShort(r[0])}</b><div>${r[1]} com lucro · ${r[2]} com prejuízo · ${r[3]} testes</div><div>melhor: ${r[4]} ${fmt(r[5])}%</div><div>pior: ${r[6]} ${fmt(r[7])}%</div>`;
+      tip.style.opacity=1; tip.style.left=Math.min(Math.max((m.l+i*bw+bw/2)/W*rc.width,150),rc.width-150)+"px"; tip.style.top="18px"; };
+    hit.addEventListener("pointermove",move); hit.addEventListener("pointerdown",move);
+    hit.addEventListener("pointerleave",()=>{ tip.style.opacity=0; bars.forEach(b=>b.forEach(p=>p.setAttribute("opacity",1))); });
+  };
+  draw(); let w=host.clientWidth; new ResizeObserver(()=>{ if(host.clientWidth!==w){ w=host.clientWidth; draw(); } }).observe(host);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+}
+function roundBar(x,y,w,h,up){ if(h<=0) return ""; const r=Math.min(3,h,w/2); return up
+  ? `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`
+  : `M${x},${y}V${y+h-r}Q${x},${y+h} ${x+r},${y+h}H${x+w-r}Q${x+w},${y+h} ${x+w},${y+h-r}V${y}Z`; }
+
+const ANN = [
+  {d:"2026-10-03", t:"Claude noturno, livro B e Jev entram", s:"Claude"},
+  {d:"2026-10-10", t:"Sessão do Claude noturno expira", s:"OAuth"},
+  {d:"2026-10-21", t:"Primeiro dia com vereditos", s:"vereditos"},
+  {d:"2026-10-29", t:"Fundo do mês", s:"fundo"},
+];
+lineChart(document.getElementById("c-sol"), {series:[{name:"SOL", short:"SOL", color:css("--s1"), values:DATA.sol}], yfmt:v=>fmt(v,0), ann:ANN, labels:true});
+breadthChart(document.getElementById("c-breadth"), DATA.breadth);
+lineChart(document.getElementById("c-books"), {series:[
+  {name:"Segurar", short:"Segurar", color:css("--hold"), dash:"5 4", values:DATA.hold},
+  {name:"Livro A", short:"A", color:css("--s1"), values:DATA.A},
+  {name:"Livro B", short:"B", color:css("--s2"), values:DATA.B}], yfmt:v=>fmt(v,1)});
+tableFrom("t-sol", ["Dia","SOL (US$)"], DATA.sol.map(r=>[dShort(r[0]), fmt(r[1])]));
+tableFrom("t-breadth", ["Dia","Com lucro","Com prejuízo","Testes"], DATA.breadth.map(r=>[dShort(r[0]), r[1], r[2], r[3]]));
+const bmap = k => Object.fromEntries(DATA[k]);
+const Am=bmap("A"), Bm=bmap("B");
+tableFrom("t-books", ["Dia","Segurar","Livro A","Livro B"], DATA.hold.map(r=>[dShort(r[0]), fmt(r[1]), Am[r[0]]!=null?fmt(Am[r[0]]):"–", Bm[r[0]]!=null?fmt(Bm[r[0]]):"–"]));
+
+const lb=document.getElementById("lb"), lbImg=document.getElementById("lb-img"), lbCap=document.getElementById("lb-cap");
+document.querySelectorAll("#gallery button").forEach(b=>b.addEventListener("click",()=>{ const im=b.querySelector("img"); lbImg.src=im.src; lbImg.alt=im.alt; lbCap.textContent=b.dataset.cap; lb.showModal(); }));
+document.getElementById("lb-close").addEventListener("click",()=>lb.close());
+lb.addEventListener("click",e=>{ if(e.target===lb) lb.close(); });
+</script>

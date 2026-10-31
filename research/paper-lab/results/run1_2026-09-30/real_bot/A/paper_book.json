@@ -1,0 +1,15 @@
+{
+  "run_id": "run1_2026-09-30",
+  "sol": 0.429854432,
+  "usdt": 0.0,
+  "n_trades": 272,
+  "updated_t": "2026-10-29T22:11:53-03:00",
+  "book": "A",
+  "start_t": "2026-09-30T00:50:19-03:00",
+  "start_px": 119.305,
+  "avg_cost": 114.34304966,
+  "peak_px": 123.4,
+  "last_exit_t": null,
+  "n_exits": 0,
+  "position_note": "avg_cost reconstruído de 135 paper_trades (SOL inicial a 119.305)"
+}

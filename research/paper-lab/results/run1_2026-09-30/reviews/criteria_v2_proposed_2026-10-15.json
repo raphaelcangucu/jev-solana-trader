@@ -1,0 +1,924 @@
+{
+  "version": "v2",
+  "source": "night_review_percentile_audit",
+  "parent": "baseline",
+  "generated_at_brt": "2026-10-15T00:33:33.102407-03:00",
+  "method": "Deterministic rewrite from a percentile confidence audit (conf >= P90, candidates=chosen, horizon 900s, band per asset = k*median|ret| ({'SOL': 0.0009637987776210388})). State words are selected by lift (share in mistakes minus share in correct calls >= 0.2, >= 3 mistakes, >= 2 episodes, >= 3 correct calls); phrases are appended only when there are confident mistakes with such words. Baseline untouched (human gate).",
+  "changed": false,
+  "phrases_added": {},
+  "word_selection": {
+    "method": "lift",
+    "params": {
+      "min_lift": 0.2,
+      "min_count": 3,
+      "min_episodes": 2,
+      "min_ref": 3
+    },
+    "eligible": {
+      "all": [],
+      "buy": [],
+      "sell": []
+    },
+    "table": {
+      "all": [
+        {
+          "word": "night",
+          "n_err": 139,
+          "n_ok": 47,
+          "err_share": 0.4557,
+          "ok_share": 0.2733,
+          "lift": 0.1825,
+          "log_odds": 0.795,
+          "episodes": 19,
+          "eligible": false
+        },
+        {
+          "word": "late",
+          "n_err": 174,
+          "n_ok": 74,
+          "err_share": 0.5705,
+          "ok_share": 0.4302,
+          "lift": 0.1403,
+          "log_odds": 0.562,
+          "episodes": 26,
+          "eligible": false
+        },
+        {
+          "word": "pumping",
+          "n_err": 44,
+          "n_ok": 6,
+          "err_share": 0.1443,
+          "ok_share": 0.0349,
+          "lift": 0.1094,
+          "log_odds": 1.472,
+          "episodes": 7,
+          "eligible": false
+        },
+        {
+          "word": "green",
+          "n_err": 239,
+          "n_ok": 116,
+          "err_share": 0.7836,
+          "ok_share": 0.6744,
+          "lift": 0.1092,
+          "log_odds": 0.558,
+          "episodes": 27,
+          "eligible": false
+        },
+        {
+          "word": "wide",
+          "n_err": 75,
+          "n_ok": 31,
+          "err_share": 0.2459,
+          "ok_share": 0.1802,
+          "lift": 0.0657,
+          "log_odds": 0.386,
+          "episodes": 26,
+          "eligible": false
+        },
+        {
+          "word": "calm",
+          "n_err": 305,
+          "n_ok": 172,
+          "err_share": 1.0,
+          "ok_share": 1.0,
+          "lift": 0.0,
+          "log_odds": 0.572,
+          "episodes": 43,
+          "eligible": false
+        },
+        {
+          "word": "deep",
+          "n_err": 305,
+          "n_ok": 172,
+          "err_share": 1.0,
+          "ok_share": 1.0,
+          "lift": 0.0,
+          "log_odds": 0.572,
+          "episodes": 43,
+          "eligible": false
+        },
+        {
+          "word": "quiet",
+          "n_err": 305,
+          "n_ok": 172,
+          "err_share": 1.0,
+          "ok_share": 1.0,
+          "lift": 0.0,
+          "log_odds": 0.572,
+          "episodes": 43,
+          "eligible": false
+        }
+      ],
+      "buy": [
+        {
+          "word": "night",
+          "n_err": 139,
+          "n_ok": 47,
+          "err_share": 0.4557,
+          "ok_share": 0.2733,
+          "lift": 0.1825,
+          "log_odds": 0.795,
+          "episodes": 19,
+          "eligible": false
+        },
+        {
+          "word": "late",
+          "n_err": 174,
+          "n_ok": 74,
+          "err_share": 0.5705,
+          "ok_share": 0.4302,
+          "lift": 0.1403,
+          "log_odds": 0.562,
+          "episodes": 26,
+          "eligible": false
+        },
+        {
+          "word": "pumping",
+          "n_err": 44,
+          "n_ok": 6,
+          "err_share": 0.1443,
+          "ok_share": 0.0349,
+          "lift": 0.1094,
+          "log_odds": 1.472,
+          "episodes": 7,
+          "eligible": false
+        },
+        {
+          "word": "green",
+          "n_err": 239,
+          "n_ok": 116,
+          "err_share": 0.7836,
+          "ok_share": 0.6744,
+          "lift": 0.1092,
+          "log_odds": 0.558,
+          "episodes": 27,
+          "eligible": false
+        },
+        {
+          "word": "wide",
+          "n_err": 75,
+          "n_ok": 31,
+          "err_share": 0.2459,
+          "ok_share": 0.1802,
+          "lift": 0.0657,
+          "log_odds": 0.386,
+          "episodes": 26,
+          "eligible": false
+        },
+        {
+          "word": "calm",
+          "n_err": 305,
+          "n_ok": 172,
+          "err_share": 1.0,
+          "ok_share": 1.0,
+          "lift": 0.0,
+          "log_odds": 0.572,
+          "episodes": 43,
+          "eligible": false
+        },
+        {
+          "word": "deep",
+          "n_err": 305,
+          "n_ok": 172,
+          "err_share": 1.0,
+          "ok_share": 1.0,
+          "lift": 0.0,
+          "log_odds": 0.572,
+          "episodes": 43,
+          "eligible": false
+        },
+        {
+          "word": "quiet",
+          "n_err": 305,
+          "n_ok": 172,
+          "err_share": 1.0,
+          "ok_share": 1.0,
+          "lift": 0.0,
+          "log_odds": 0.572,
+          "episodes": 43,
+          "eligible": false
+        }
+      ],
+      "sell": []
+    }
+  },
+  "action": {
+    "instructions": "buy on strength only when the book can absorb it",
+    "criteria": {
+      "buy": "the move is strong and depth is not thin",
+      "sell": "the move is fading or fees are climbing",
+      "hold": "anything else"
+    }
+  },
+  "skip_this_cycle": {
+    "instructions": "conditions are too hostile to trade at all"
+  },
+  "audit": {
+    "rule": "conf >= P90",
+    "cutoff": 0.39,
+    "percentile": 90,
+    "fixed_bar": null,
+    "candidates": "chosen",
+    "horizon_s": 900,
+    "band": 0.001,
+    "band_mode": "vol",
+    "bands": {
+      "SOL": {
+        "band": 0.0009637987776210388,
+        "source": "vol",
+        "median_abs_ret": 0.0019275975552420777,
+        "clamped": null,
+        "k": 0.5,
+        "floor": 0.0005,
+        "cap": 0.015,
+        "window_s": 259200,
+        "n": 21507,
+        "t_end": 1792033200.0
+      }
+    },
+    "band_by_asset": {
+      "SOL": 0.0009637987776210388
+    },
+    "n_rows": 5706,
+    "n_answered": 5705,
+    "n_candidates": 5705,
+    "n_confident": 597,
+    "confident_share": 0.10464504820333041,
+    "n_confident_acted": 5,
+    "n_resolved": 597,
+    "n_unresolved": 0,
+    "n_mistakes": 305,
+    "mistake_episodes": 43,
+    "n_correct": 172,
+    "n_flat": 120,
+    "hit_rate": 0.288107202680067,
+    "mistake_rate": 0.5108877721943048,
+    "by_side": {
+      "buy": {
+        "confident": 597,
+        "resolved": 597,
+        "correct": 172,
+        "flat": 120,
+        "mistake": 305
+      },
+      "sell": {}
+    },
+    "lose_words": [
+      [
+        "calm",
+        305
+      ],
+      [
+        "deep",
+        305
+      ],
+      [
+        "held",
+        305
+      ],
+      [
+        "mid",
+        305
+      ],
+      [
+        "quiet",
+        305
+      ],
+      [
+        "soft",
+        305
+      ],
+      [
+        "lifting",
+        258
+      ],
+      [
+        "green",
+        239
+      ]
+    ],
+    "word_lift": [
+      {
+        "word": "night",
+        "n_err": 139,
+        "n_ok": 47,
+        "err_share": 0.4557,
+        "ok_share": 0.2733,
+        "lift": 0.1825,
+        "log_odds": 0.795,
+        "episodes": 19,
+        "eligible": false
+      },
+      {
+        "word": "late",
+        "n_err": 174,
+        "n_ok": 74,
+        "err_share": 0.5705,
+        "ok_share": 0.4302,
+        "lift": 0.1403,
+        "log_odds": 0.562,
+        "episodes": 26,
+        "eligible": false
+      },
+      {
+        "word": "pumping",
+        "n_err": 44,
+        "n_ok": 6,
+        "err_share": 0.1443,
+        "ok_share": 0.0349,
+        "lift": 0.1094,
+        "log_odds": 1.472,
+        "episodes": 7,
+        "eligible": false
+      },
+      {
+        "word": "green",
+        "n_err": 239,
+        "n_ok": 116,
+        "err_share": 0.7836,
+        "ok_share": 0.6744,
+        "lift": 0.1092,
+        "log_odds": 0.558,
+        "episodes": 27,
+        "eligible": false
+      },
+      {
+        "word": "wide",
+        "n_err": 75,
+        "n_ok": 31,
+        "err_share": 0.2459,
+        "ok_share": 0.1802,
+        "lift": 0.0657,
+        "log_odds": 0.386,
+        "episodes": 26,
+        "eligible": false
+      },
+      {
+        "word": "calm",
+        "n_err": 305,
+        "n_ok": 172,
+        "err_share": 1.0,
+        "ok_share": 1.0,
+        "lift": 0.0,
+        "log_odds": 0.572,
+        "episodes": 43,
+        "eligible": false
+      },
+      {
+        "word": "deep",
+        "n_err": 305,
+        "n_ok": 172,
+        "err_share": 1.0,
+        "ok_share": 1.0,
+        "lift": 0.0,
+        "log_odds": 0.572,
+        "episodes": 43,
+        "eligible": false
+      },
+      {
+        "word": "quiet",
+        "n_err": 305,
+        "n_ok": 172,
+        "err_share": 1.0,
+        "ok_share": 1.0,
+        "lift": 0.0,
+        "log_odds": 0.572,
+        "episodes": 43,
+        "eligible": false
+      }
+    ],
+    "lift_words": {
+      "all": [],
+      "buy": [],
+      "sell": []
+    },
+    "lift_params": {
+      "min_lift": 0.2,
+      "min_count": 3,
+      "min_episodes": 2,
+      "min_ref": 3
+    },
+    "day": "2026-10-14",
+    "group": "von \u00b7 crit\u00e9rios baseline (baseline+relaxed)",
+    "fixed_bar_compare": {
+      "rule": "conf > 0.8 (barra fixa)",
+      "cutoff": 0.8,
+      "percentile": null,
+      "fixed_bar": 0.8,
+      "candidates": "chosen",
+      "horizon_s": 900,
+      "band": 0.001,
+      "band_mode": "vol",
+      "bands": {},
+      "band_by_asset": {},
+      "n_rows": 5706,
+      "n_answered": 5705,
+      "n_candidates": 5705,
+      "n_confident": 0,
+      "confident_share": 0.0,
+      "n_confident_acted": 0,
+      "n_resolved": 0,
+      "n_unresolved": 0,
+      "n_mistakes": 0,
+      "mistake_episodes": 0,
+      "n_correct": 0,
+      "n_flat": 0,
+      "hit_rate": null,
+      "mistake_rate": null,
+      "by_side": {
+        "buy": {},
+        "sell": {}
+      },
+      "lose_words": [],
+      "word_lift": [],
+      "lift_words": {
+        "all": [],
+        "buy": [],
+        "sell": []
+      },
+      "lift_params": {
+        "min_lift": 0.2,
+        "min_count": 3,
+        "min_episodes": 2,
+        "min_ref": 3
+      }
+    },
+    "groups": {
+      "von \u00b7 crit\u00e9rios baseline (baseline+relaxed)": {
+        "percentile": {
+          "rule": "conf >= P90",
+          "cutoff": 0.39,
+          "percentile": 90,
+          "fixed_bar": null,
+          "candidates": "chosen",
+          "horizon_s": 900,
+          "band": 0.001,
+          "band_mode": "vol",
+          "bands": {
+            "SOL": {
+              "band": 0.0009637987776210388,
+              "source": "vol",
+              "median_abs_ret": 0.0019275975552420777,
+              "clamped": null,
+              "k": 0.5,
+              "floor": 0.0005,
+              "cap": 0.015,
+              "window_s": 259200,
+              "n": 21507,
+              "t_end": 1792033200.0
+            }
+          },
+          "band_by_asset": {
+            "SOL": 0.0009637987776210388
+          },
+          "n_rows": 5706,
+          "n_answered": 5705,
+          "n_candidates": 5705,
+          "n_confident": 597,
+          "confident_share": 0.10464504820333041,
+          "n_confident_acted": 5,
+          "n_resolved": 597,
+          "n_unresolved": 0,
+          "n_mistakes": 305,
+          "mistake_episodes": 43,
+          "n_correct": 172,
+          "n_flat": 120,
+          "hit_rate": 0.288107202680067,
+          "mistake_rate": 0.5108877721943048,
+          "by_side": {
+            "buy": {
+              "confident": 597,
+              "resolved": 597,
+              "correct": 172,
+              "flat": 120,
+              "mistake": 305
+            },
+            "sell": {}
+          },
+          "lose_words": [
+            [
+              "calm",
+              305
+            ],
+            [
+              "deep",
+              305
+            ],
+            [
+              "held",
+              305
+            ],
+            [
+              "mid",
+              305
+            ],
+            [
+              "quiet",
+              305
+            ],
+            [
+              "soft",
+              305
+            ],
+            [
+              "lifting",
+              258
+            ],
+            [
+              "green",
+              239
+            ]
+          ],
+          "word_lift": [
+            {
+              "word": "night",
+              "n_err": 139,
+              "n_ok": 47,
+              "err_share": 0.4557,
+              "ok_share": 0.2733,
+              "lift": 0.1825,
+              "log_odds": 0.795,
+              "episodes": 19,
+              "eligible": false
+            },
+            {
+              "word": "late",
+              "n_err": 174,
+              "n_ok": 74,
+              "err_share": 0.5705,
+              "ok_share": 0.4302,
+              "lift": 0.1403,
+              "log_odds": 0.562,
+              "episodes": 26,
+              "eligible": false
+            },
+            {
+              "word": "pumping",
+              "n_err": 44,
+              "n_ok": 6,
+              "err_share": 0.1443,
+              "ok_share": 0.0349,
+              "lift": 0.1094,
+              "log_odds": 1.472,
+              "episodes": 7,
+              "eligible": false
+            },
+            {
+              "word": "green",
+              "n_err": 239,
+              "n_ok": 116,
+              "err_share": 0.7836,
+              "ok_share": 0.6744,
+              "lift": 0.1092,
+              "log_odds": 0.558,
+              "episodes": 27,
+              "eligible": false
+            },
+            {
+              "word": "wide",
+              "n_err": 75,
+              "n_ok": 31,
+              "err_share": 0.2459,
+              "ok_share": 0.1802,
+              "lift": 0.0657,
+              "log_odds": 0.386,
+              "episodes": 26,
+              "eligible": false
+            },
+            {
+              "word": "calm",
+              "n_err": 305,
+              "n_ok": 172,
+              "err_share": 1.0,
+              "ok_share": 1.0,
+              "lift": 0.0,
+              "log_odds": 0.572,
+              "episodes": 43,
+              "eligible": false
+            },
+            {
+              "word": "deep",
+              "n_err": 305,
+              "n_ok": 172,
+              "err_share": 1.0,
+              "ok_share": 1.0,
+              "lift": 0.0,
+              "log_odds": 0.572,
+              "episodes": 43,
+              "eligible": false
+            },
+            {
+              "word": "quiet",
+              "n_err": 305,
+              "n_ok": 172,
+              "err_share": 1.0,
+              "ok_share": 1.0,
+              "lift": 0.0,
+              "log_odds": 0.572,
+              "episodes": 43,
+              "eligible": false
+            }
+          ],
+          "lift_words": {
+            "all": [],
+            "buy": [],
+            "sell": []
+          },
+          "lift_params": {
+            "min_lift": 0.2,
+            "min_count": 3,
+            "min_episodes": 2,
+            "min_ref": 3
+          }
+        },
+        "fixed_bar": {
+          "rule": "conf > 0.8 (barra fixa)",
+          "cutoff": 0.8,
+          "percentile": null,
+          "fixed_bar": 0.8,
+          "candidates": "chosen",
+          "horizon_s": 900,
+          "band": 0.001,
+          "band_mode": "vol",
+          "bands": {},
+          "band_by_asset": {},
+          "n_rows": 5706,
+          "n_answered": 5705,
+          "n_candidates": 5705,
+          "n_confident": 0,
+          "confident_share": 0.0,
+          "n_confident_acted": 0,
+          "n_resolved": 0,
+          "n_unresolved": 0,
+          "n_mistakes": 0,
+          "mistake_episodes": 0,
+          "n_correct": 0,
+          "n_flat": 0,
+          "hit_rate": null,
+          "mistake_rate": null,
+          "by_side": {
+            "buy": {},
+            "sell": {}
+          },
+          "lose_words": [],
+          "word_lift": [],
+          "lift_words": {
+            "all": [],
+            "buy": [],
+            "sell": []
+          },
+          "lift_params": {
+            "min_lift": 0.2,
+            "min_count": 3,
+            "min_episodes": 2,
+            "min_ref": 3
+          }
+        }
+      },
+      "von \u00b7 crit\u00e9rios v2 (v2)": {
+        "percentile": {
+          "rule": "conf >= P90",
+          "cutoff": 0.281,
+          "percentile": 90,
+          "fixed_bar": null,
+          "candidates": "chosen",
+          "horizon_s": 900,
+          "band": 0.001,
+          "band_mode": "vol",
+          "bands": {
+            "SOL": {
+              "band": 0.0009637987776210388,
+              "source": "vol",
+              "median_abs_ret": 0.0019275975552420777,
+              "clamped": null,
+              "k": 0.5,
+              "floor": 0.0005,
+              "cap": 0.015,
+              "window_s": 259200,
+              "n": 21507,
+              "t_end": 1792033200.0
+            }
+          },
+          "band_by_asset": {
+            "SOL": 0.0009637987776210388
+          },
+          "n_rows": 5706,
+          "n_answered": 5705,
+          "n_candidates": 5705,
+          "n_confident": 586,
+          "confident_share": 0.10271691498685363,
+          "n_confident_acted": 0,
+          "n_resolved": 586,
+          "n_unresolved": 0,
+          "n_mistakes": 269,
+          "mistake_episodes": 46,
+          "n_correct": 191,
+          "n_flat": 126,
+          "hit_rate": 0.32593856655290104,
+          "mistake_rate": 0.4590443686006826,
+          "by_side": {
+            "buy": {
+              "confident": 320,
+              "resolved": 320,
+              "correct": 84,
+              "flat": 65,
+              "mistake": 171
+            },
+            "sell": {
+              "confident": 266,
+              "resolved": 266,
+              "correct": 107,
+              "flat": 61,
+              "mistake": 98
+            }
+          },
+          "lose_words": [
+            [
+              "buoyed",
+              269
+            ],
+            [
+              "deep",
+              269
+            ],
+            [
+              "mid",
+              269
+            ],
+            [
+              "quiet",
+              269
+            ],
+            [
+              "sold",
+              269
+            ],
+            [
+              "calm",
+              256
+            ],
+            [
+              "lifting",
+              171
+            ],
+            [
+              "late",
+              165
+            ]
+          ],
+          "word_lift": [
+            {
+              "word": "late",
+              "n_err": 165,
+              "n_ok": 46,
+              "err_share": 0.6134,
+              "ok_share": 0.2408,
+              "lift": 0.3725,
+              "log_odds": 1.601,
+              "episodes": 26,
+              "eligible": true
+            },
+            {
+              "word": "night",
+              "n_err": 119,
+              "n_ok": 45,
+              "err_share": 0.4424,
+              "ok_share": 0.2356,
+              "lift": 0.2068,
+              "log_odds": 0.939,
+              "episodes": 20,
+              "eligible": true
+            },
+            {
+              "word": "lifting",
+              "n_err": 171,
+              "n_ok": 82,
+              "err_share": 0.6357,
+              "ok_share": 0.4293,
+              "lift": 0.2064,
+              "log_odds": 0.838,
+              "episodes": 33,
+              "eligible": true
+            },
+            {
+              "word": "tight",
+              "n_err": 127,
+              "n_ok": 66,
+              "err_share": 0.4721,
+              "ok_share": 0.3455,
+              "lift": 0.1266,
+              "log_odds": 0.524,
+              "episodes": 32,
+              "eligible": false
+            },
+            {
+              "word": "gray",
+              "n_err": 102,
+              "n_ok": 59,
+              "err_share": 0.3792,
+              "ok_share": 0.3089,
+              "lift": 0.0703,
+              "log_odds": 0.309,
+              "episodes": 26,
+              "eligible": false
+            },
+            {
+              "word": "green",
+              "n_err": 75,
+              "n_ok": 40,
+              "err_share": 0.2788,
+              "ok_share": 0.2094,
+              "lift": 0.0694,
+              "log_odds": 0.373,
+              "episodes": 16,
+              "eligible": false
+            },
+            {
+              "word": "calm",
+              "n_err": 256,
+              "n_ok": 175,
+              "err_share": 0.9517,
+              "ok_share": 0.9162,
+              "lift": 0.0354,
+              "log_odds": 0.58,
+              "episodes": 45,
+              "eligible": false
+            },
+            {
+              "word": "jumpy",
+              "n_err": 13,
+              "n_ok": 6,
+              "err_share": 0.0483,
+              "ok_share": 0.0314,
+              "lift": 0.0169,
+              "log_odds": 0.407,
+              "episodes": 2,
+              "eligible": false
+            }
+          ],
+          "lift_words": {
+            "all": [
+              "late",
+              "night",
+              "lifting"
+            ],
+            "buy": [],
+            "sell": [
+              "late"
+            ]
+          },
+          "lift_params": {
+            "min_lift": 0.2,
+            "min_count": 3,
+            "min_episodes": 2,
+            "min_ref": 3
+          }
+        },
+        "fixed_bar": {
+          "rule": "conf > 0.8 (barra fixa)",
+          "cutoff": 0.8,
+          "percentile": null,
+          "fixed_bar": 0.8,
+          "candidates": "chosen",
+          "horizon_s": 900,
+          "band": 0.001,
+          "band_mode": "vol",
+          "bands": {},
+          "band_by_asset": {},
+          "n_rows": 5706,
+          "n_answered": 5705,
+          "n_candidates": 5705,
+          "n_confident": 0,
+          "confident_share": 0.0,
+          "n_confident_acted": 0,
+          "n_resolved": 0,
+          "n_unresolved": 0,
+          "n_mistakes": 0,
+          "mistake_episodes": 0,
+          "n_correct": 0,
+          "n_flat": 0,
+          "hit_rate": null,
+          "mistake_rate": null,
+          "by_side": {
+            "buy": {},
+            "sell": {}
+          },
+          "lose_words": [],
+          "word_lift": [],
+          "lift_words": {
+            "all": [],
+            "buy": [],
+            "sell": []
+          },
+          "lift_params": {
+            "min_lift": 0.2,
+            "min_count": 3,
+            "min_episodes": 2,
+            "min_ref": 3
+          }
+        }
+      }
+    }
+  }
+}

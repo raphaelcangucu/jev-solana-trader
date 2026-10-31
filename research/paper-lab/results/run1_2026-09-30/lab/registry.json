@@ -1,0 +1,3425 @@
+{
+  "portfolios": {
+    "h1_exits_von_relaxed": {
+      "name": "h1_exits_von_relaxed",
+      "hyp": "H1",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "params": {
+        "exits": {
+          "tp": 0.025,
+          "sl": 0.015,
+          "trail": 0.01,
+          "trail_arm": 0.01,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas (TP/SL/trailing) \u2014 von relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:14.016874-03:00",
+      "strategy": "hyp:h1_exits_von_relaxed",
+      "lineage": "h1_exits_von_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_BONK_poorjev_relaxed": {
+      "name": "h1_exits_BONK_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "BONK_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed BONK",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:14.017483-03:00",
+      "strategy": "hyp:h1_exits_BONK_poorjev_relaxed",
+      "lineage": "h1_exits_BONK_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_WIF_poorjev_relaxed": {
+      "name": "h1_exits_WIF_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "WIF_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed WIF",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:14.017855-03:00",
+      "strategy": "hyp:h1_exits_WIF_poorjev_relaxed",
+      "lineage": "h1_exits_WIF_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_POPCAT_poorjev_relaxed": {
+      "name": "h1_exits_POPCAT_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "POPCAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed POPCAT",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:14.018173-03:00",
+      "strategy": "hyp:h1_exits_POPCAT_poorjev_relaxed",
+      "lineage": "h1_exits_POPCAT_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_FARTCOIN_poorjev_relaxed": {
+      "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "FARTCOIN_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed FARTCOIN",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:14.018476-03:00",
+      "strategy": "hyp:h1_exits_FARTCOIN_poorjev_relaxed",
+      "lineage": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_PNUT_poorjev_relaxed": {
+      "name": "h1_exits_PNUT_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "PNUT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed PNUT",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:14.018905-03:00",
+      "strategy": "hyp:h1_exits_PNUT_poorjev_relaxed",
+      "lineage": "h1_exits_PNUT_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_MEW_poorjev_relaxed": {
+      "name": "h1_exits_MEW_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "MEW_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed MEW",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:14.019206-03:00",
+      "strategy": "hyp:h1_exits_MEW_poorjev_relaxed",
+      "lineage": "h1_exits_MEW_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_GOAT_poorjev_relaxed": {
+      "name": "h1_exits_GOAT_poorjev_relaxed",
+      "hyp": "H1",
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "GOAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exits": {
+          "tp": 0.06,
+          "sl": 0.04,
+          "trail": 0.03,
+          "trail_arm": 0.03,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "label": "H1 Sa\u00eddas \u2014 poorjev relaxed GOAT",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.178492-03:00",
+      "strategy": "hyp:h1_exits_GOAT_poorjev_relaxed",
+      "lineage": "h1_exits_GOAT_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_sol": {
+      "name": "h2_ensemble_sol",
+      "hyp": "H2",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble von/poorjev/laya (percentil) \u2014 SOL",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.178940-03:00",
+      "strategy": "hyp:h2_ensemble_sol",
+      "lineage": "h2_ensemble_sol",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_BONK": {
+      "name": "h2_ensemble_BONK",
+      "hyp": "H2",
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 BONK",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.179192-03:00",
+      "strategy": "hyp:h2_ensemble_BONK",
+      "lineage": "h2_ensemble_BONK",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_WIF": {
+      "name": "h2_ensemble_WIF",
+      "hyp": "H2",
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 WIF",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.179403-03:00",
+      "strategy": "hyp:h2_ensemble_WIF",
+      "lineage": "h2_ensemble_WIF",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_POPCAT": {
+      "name": "h2_ensemble_POPCAT",
+      "hyp": "H2",
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 POPCAT",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.179735-03:00",
+      "strategy": "hyp:h2_ensemble_POPCAT",
+      "lineage": "h2_ensemble_POPCAT",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_FARTCOIN": {
+      "name": "h2_ensemble_FARTCOIN",
+      "hyp": "H2",
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 FARTCOIN",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.179958-03:00",
+      "strategy": "hyp:h2_ensemble_FARTCOIN",
+      "lineage": "h2_ensemble_FARTCOIN",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_PNUT": {
+      "name": "h2_ensemble_PNUT",
+      "hyp": "H2",
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 PNUT",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.180134-03:00",
+      "strategy": "hyp:h2_ensemble_PNUT",
+      "lineage": "h2_ensemble_PNUT",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_MEW": {
+      "name": "h2_ensemble_MEW",
+      "hyp": "H2",
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 MEW",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.180328-03:00",
+      "strategy": "hyp:h2_ensemble_MEW",
+      "lineage": "h2_ensemble_MEW",
+      "parent": null,
+      "is_original": true
+    },
+    "h2_ensemble_GOAT": {
+      "name": "h2_ensemble_GOAT",
+      "hyp": "H2",
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "ensemble",
+      "profile": "baseline",
+      "model": "ensemble",
+      "params": {
+        "ensemble": {
+          "min_agree": 2,
+          "pct_threshold": 0.8,
+          "min_window": 100
+        }
+      },
+      "label": "H2 Ensemble (percentil) \u2014 GOAT",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.180501-03:00",
+      "strategy": "hyp:h2_ensemble_GOAT",
+      "lineage": "h2_ensemble_GOAT",
+      "parent": null,
+      "is_original": true
+    },
+    "h3_limit_poorjev_relaxed": {
+      "name": "h3_limit_poorjev_relaxed",
+      "hyp": "H3",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "exec": {
+          "mode": "limit",
+          "offset_bps": 10,
+          "ttl_min": 15,
+          "fee_bps": 10
+        }
+      },
+      "label": "H3 Ordem limite \u2014 poorjev relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.180698-03:00",
+      "strategy": "hyp:h3_limit_poorjev_relaxed",
+      "lineage": "h3_limit_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h3_limit_hybrid_von_cap2": {
+      "name": "h3_limit_hybrid_von_cap2",
+      "hyp": "H3",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "params": {
+        "exec": {
+          "mode": "limit",
+          "offset_bps": 10,
+          "ttl_min": 15,
+          "fee_bps": 10
+        },
+        "gates": {
+          "max_trades_per_hour": 2
+        }
+      },
+      "label": "H3 Ordem limite \u2014 hybrid von relaxed cap2",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.180911-03:00",
+      "strategy": "hyp:h3_limit_hybrid_von_cap2",
+      "lineage": "h3_limit_hybrid_von_cap2",
+      "parent": null,
+      "is_original": true
+    },
+    "h4_hours_poorjev_relaxed": {
+      "name": "h4_hours_poorjev_relaxed",
+      "hyp": "H4",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "params": {
+        "hours": [
+          5,
+          10,
+          11,
+          12,
+          18
+        ]
+      },
+      "label": "H4 Filtro de hor\u00e1rio \u2014 poorjev relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.181086-03:00",
+      "strategy": "hyp:h4_hours_poorjev_relaxed",
+      "lineage": "h4_hours_poorjev_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h4_hours_von_relaxed": {
+      "name": "h4_hours_von_relaxed",
+      "hyp": "H4",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "params": {
+        "hours": [
+          5,
+          10,
+          11,
+          12,
+          18
+        ]
+      },
+      "label": "H4 Filtro de hor\u00e1rio \u2014 von relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-10-01T22:24:24.181257-03:00",
+      "strategy": "hyp:h4_hours_von_relaxed",
+      "lineage": "h4_hours_von_relaxed",
+      "parent": null,
+      "is_original": true
+    },
+    "h1_exits_hybrid_von_cap2": {
+      "name": "h1_exits_hybrid_von_cap2",
+      "hyp": "H1",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": "lab_h1_exits",
+      "label": "H1 Sa\u00eddas \u2014 hybrid von relaxed cap2 (contra a deriva s\u00f3-compra)",
+      "status": "active",
+      "created_brt": "2026-10-01T22:49:49.862682-03:00",
+      "strategy": "hyp:h1_exits_hybrid_von_cap2",
+      "lineage": "h1_exits_hybrid_von_cap2",
+      "parent": null,
+      "is_original": true
+    },
+    "relaxed_expcap50": {
+      "name": "relaxed_expcap50",
+      "hyp": "EXP",
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "label": "Exposi\u00e7\u00e3o SOL \u2264 50% do valor \u2014 von relaxed SOL",
+      "status": "active",
+      "created_brt": "2026-10-01T22:49:49.863280-03:00",
+      "strategy": "hyp:relaxed_expcap50",
+      "lineage": "relaxed_expcap50",
+      "parent": null,
+      "is_original": true
+    },
+    "relaxed__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-03T00:10:04.527876-03:00",
+      "strategy": "fork:relaxed__fork1",
+      "lineage": "relaxed",
+      "parent": "relaxed",
+      "params_diff": {
+        "exits": {
+          "tp": 0.025,
+          "sl": 0.015,
+          "trail": 0.01,
+          "trail_arm": 0.01,
+          "reentry_cooldown_min": 30
+        },
+        "gates": {
+          "max_exposure_frac": 0.5
+        }
+      },
+      "reason": "sess\u00e3o Claude 2026-10-03 (pedido do utilizador): von SOL relaxado + sa\u00eddas + exposi\u00e7\u00e3o \u226450% contra a deriva s\u00f3-compra (44C/2V, 97% exposto em 24h)",
+      "is_original": false,
+      "label": "Fork 1 de relaxed",
+      "start_value": 994.8870198244662,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:35:38.839026-03:00",
+      "report_label_reason": "margem +11.32pp, \u00e0 frente 63% de 27 dias"
+    },
+    "poorjev_relaxed__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": "model_gated",
+      "name": "poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-03T00:10:04.530938-03:00",
+      "strategy": "fork:poorjev_relaxed__fork1",
+      "lineage": "poorjev_relaxed",
+      "parent": "poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "tp": 0.025,
+          "sl": 0.015,
+          "trail": 0.01,
+          "trail_arm": 0.01,
+          "reentry_cooldown_min": 30
+        }
+      },
+      "reason": "sess\u00e3o Claude 2026-10-03: poorjev SOL + sa\u00eddas; H1 deu +86 US$ de habilidade em memes, testar em SOL",
+      "is_original": false,
+      "label": "Fork 1 de poorjev_relaxed",
+      "start_value": 993.8140052293164,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:35:49.016661-03:00",
+      "report_label_reason": "margem -7.57pp, \u00e0 frente 19% de 27 dias"
+    },
+    "h1_exits_FARTCOIN_poorjev_relaxed__fork1": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "FARTCOIN_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-03T00:10:04.532657-03:00",
+      "strategy": "fork:h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+      "lineage": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "parent": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "tp": 0.015,
+          "trail": 0.007,
+          "trail_arm": 0.007
+        }
+      },
+      "reason": "sess\u00e3o Claude 2026-10-03: TP/trailing mais curtos para colher volatilidade mais vezes (timing +58 US$, p<0,01)",
+      "is_original": false,
+      "label": "Fork 1 de h1_exits_FARTCOIN_poorjev_relaxed",
+      "start_value": 1057.5155068999236,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:35:54.659273-03:00",
+      "report_label_reason": "margem -20.68pp, \u00e0 frente 26% de 27 dias"
+    },
+    "h2_ensemble_FARTCOIN__fork1": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "ensemble",
+      "source": null,
+      "profile": "baseline",
+      "model": "ensemble",
+      "test_type": null,
+      "name": "h2_ensemble_FARTCOIN__fork1",
+      "status": "active",
+      "created_brt": "2026-10-03T00:10:04.534323-03:00",
+      "strategy": "fork:h2_ensemble_FARTCOIN__fork1",
+      "lineage": "h2_ensemble_FARTCOIN",
+      "parent": "h2_ensemble_FARTCOIN",
+      "params_diff": {
+        "gates": {
+          "cooldown_seconds": 600
+        }
+      },
+      "reason": "sess\u00e3o Claude 2026-10-03: cooldown 10 min; timing positivo mas custos comem o ganho",
+      "is_original": false,
+      "label": "Fork 1 de h2_ensemble_FARTCOIN",
+      "start_value": 1008.4975545918708,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:35:59.774395-03:00",
+      "report_label_reason": "margem +2.35pp, \u00e0 frente 59% de 27 dias"
+    },
+    "h2_ensemble_WIF__fork1": {
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "ensemble",
+      "source": null,
+      "profile": "baseline",
+      "model": "ensemble",
+      "test_type": null,
+      "name": "h2_ensemble_WIF__fork1",
+      "status": "active",
+      "created_brt": "2026-10-03T00:10:04.535984-03:00",
+      "strategy": "fork:h2_ensemble_WIF__fork1",
+      "lineage": "h2_ensemble_WIF",
+      "parent": "h2_ensemble_WIF",
+      "params_diff": {
+        "gates": {
+          "cooldown_seconds": 600
+        }
+      },
+      "reason": "sess\u00e3o Claude 2026-10-03: cooldown 10 min; timing +6 US$ mas habilidade \u221214 US$",
+      "is_original": false,
+      "label": "Fork 1 de h2_ensemble_WIF",
+      "start_value": 978.5240884489857,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:36:05.017576-03:00",
+      "report_label_reason": "margem +1.38pp, \u00e0 frente 63% de 27 dias"
+    },
+    "relaxed_expcap50__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "relaxed_expcap50__fork1",
+      "status": "active",
+      "created_brt": "2026-10-03T01:40:44.957054-03:00",
+      "strategy": "fork:relaxed_expcap50__fork1",
+      "lineage": "relaxed_expcap50",
+      "parent": "relaxed_expcap50",
+      "params_diff": {
+        "criteria": {
+          "file": "data/lab/criteria/relaxed_expcap50__fork1.json",
+          "sha256": "695f62ca7dc81a0ffe1ffb440a71a2daa4a8c07185da21717c778471d23e61ef"
+        }
+      },
+      "reason": "[claude-night] Hip\u00f3tese: os erros confiantes do von em SOL (24 h, 42 epis\u00f3dios) s\u00e3o compras com a fita j\u00e1 green (60% dos erros vs 39% dos acertos) ou pumping (12% vs 6%), enquanto os acertos s\u00e3o mais gray (59% vs 32%): o von persegue o movimento depois de ele acontecer. Crit\u00e9rios que preferem gray lifting e pedem cautela em green ou pumping com spread tight devem reduzir compras tardias. Pai relaxed_expcap50 (teto de exposi\u00e7\u00e3o 50%) para separar habilidade de beta. Confirma se: em 3-7 dias habilidade fork - pai > 0 US$ com >= 15 trades e hit rate das chamadas confiantes do fork > a do pai. Refuta se: habilidade fork - pai <= 0 com >= 15 trades, ou < 5 trades em 7 dias (texto estrangula a confian\u00e7a).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 1 de relaxed_expcap50",
+      "start_value": 998.8535962741453,
+      "night": "2026-10-02",
+      "fork_kind": "criteria",
+      "criteria_summary": "compra: the move is strong and depth is not thin; prefer a gray tap\u2026 | venda: the move is fading or fees are climbing | skip: conditions are too hostile to trade at all; skip when the b\u2026",
+      "criteria_parent": "criteria_baseline.json",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:36:10.125213-03:00",
+      "report_label_reason": "margem +11.43pp, \u00e0 frente 63% de 27 dias"
+    },
+    "laya_relaxed__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "laya_relaxed",
+      "profile": "relaxed",
+      "model": "laya",
+      "test_type": "model_gated",
+      "name": "laya_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-03T01:40:56.849639-03:00",
+      "strategy": "fork:laya_relaxed__fork1",
+      "lineage": "laya_relaxed",
+      "parent": "laya_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.04,
+          "min_prob_margin": 0.0
+        }
+      },
+      "reason": "[claude-night] Hip\u00f3tese: a Laya nunca negociou (0 trades em 4 dias) porque o port\u00e3o relaxed (conf 0.35, margem 0.2) est\u00e1 na escala do von; a confian\u00e7a da Laya em SOL tem p50 0.028 e P90 0.044. Um port\u00e3o na escala pr\u00f3pria (conf >= 0.04, sem margem; uma ideia: calibrar o port\u00e3o ao modelo) torna a Laya mensur\u00e1vel. Espero habilidade <= 0 em SOL, porque as chamadas confiantes de 10-02 tiveram hit 31% (250 erros vs 208 acertos). Confirma se: em 3-7 dias o fork tem >= 20 trades e habilidade fork - pai > 0 US$. Refuta se: >= 20 trades e habilidade fork - pai <= 0 (Laya sem habilidade em SOL ao P90), ou 0 trades em 3 dias (port\u00e3o ainda mal calibrado).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 1 de laya_relaxed",
+      "start_value": 1000.56805671005,
+      "night": "2026-10-02",
+      "fork_kind": "params",
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:36:20.153234-03:00",
+      "report_label_reason": "margem -28.54pp, \u00e0 frente 19% de 27 dias"
+    },
+    "FARTCOIN_laya_relaxed__fork1": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "FARTCOIN_laya_relaxed",
+      "profile": "relaxed",
+      "model": "laya",
+      "test_type": "model_gated",
+      "name": "FARTCOIN_laya_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-03T01:41:01.715352-03:00",
+      "strategy": "fork:FARTCOIN_laya_relaxed__fork1",
+      "lineage": "FARTCOIN_laya_relaxed",
+      "parent": "FARTCOIN_laya_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.07,
+          "min_prob_margin": 0.0
+        }
+      },
+      "reason": "[claude-night] Hip\u00f3tese: a Laya \u00e9 o \u00fanico modelo pequeno que vende em memes (553 sells em 1437 chamadas; poorjev 0) e as suas chamadas confiantes em memes foram ligeiramente positivas em 10-02 (65 acertos vs 58 erros, hit 45%), mas nunca negociou porque o port\u00e3o relaxed est\u00e1 na escala do von (conf da Laya em memes: p50 0.046, P90 0.078). Port\u00e3o na escala pr\u00f3pria (conf >= 0.07, sem margem) deve gerar trades e mostrar se h\u00e1 habilidade com sa\u00eddas feitas pelo modelo. FARTCOIN por ter a maior faixa e o melhor sinal nas outras fam\u00edlias. Confirma se: em 3-7 dias >= 20 trades e habilidade fork - pai > 0 US$ com vendas > 0. Refuta se: >= 20 trades e habilidade fork - pai <= 0, ou 0 trades em 3 dias.",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 1 de FARTCOIN_laya_relaxed",
+      "start_value": 1000.0,
+      "night": "2026-10-02",
+      "fork_kind": "params",
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:36:22.892025-03:00",
+      "report_label_reason": "margem -4.11pp, \u00e0 frente 0% de 27 dias"
+    },
+    "h1_exits_von_relaxed__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": null,
+      "name": "h1_exits_von_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-04T01:35:22.039741-03:00",
+      "strategy": "fork:h1_exits_von_relaxed__fork1",
+      "lineage": "h1_exits_von_relaxed",
+      "parent": "h1_exits_von_relaxed",
+      "params_diff": {
+        "criteria": {
+          "file": "data/lab/criteria/h1_exits_von_relaxed__fork1.json",
+          "sha256": "ca6fdf1353ea7b54b16e4cedf884673f7b82e4ac96d901928f6a8706dd277d00"
+        }
+      },
+      "reason": "[claude-night] Hip\u00f3tese (m\u00e9todo GEPA): relaxed_expcap50__fork1 mudou buy, hold e skip e o von passou a vender em 82% das chamadas com conf p50 0.186 (vs 0.32 no texto base), quase sem trades. Uma s\u00f3 cl\u00e1usula acrescentada ao buy (n\u00e3o comprar fita j\u00e1 green: lift +0.21 em 10-02, +0.15 no v2 em 10-03), com hold/sell/skip intactos, deve preservar a confian\u00e7a do von (p50 > 0.30, maioria compras) e cortar compras tardias. Pai h1_exits_von_relaxed: von relaxed com sa\u00eddas, 99 trades, linhagem livre. Confirma se em 3-7 dias: >= 15 trades, compras > 50% das ordens, conf p50 > 0.30 e habilidade fork - pai > 0 US$. Refuta se: conf p50 < 0.25 ou vendas > 70% (qualquer edi\u00e7\u00e3o perturba o von) ou habilidade fork - pai <= 0 com >= 15 trades.",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 1 de h1_exits_von_relaxed",
+      "start_value": 1017.280832313902,
+      "night": "2026-10-03",
+      "fork_kind": "criteria",
+      "criteria_summary": "compra: the move is strong and depth is not thin; do not buy when t\u2026 | venda: the move is fading or fees are climbing | skip: conditions are too hostile to trade at all",
+      "criteria_parent": "criteria_baseline.json",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:36:27.722256-03:00",
+      "report_label_reason": "margem +15.60pp, \u00e0 frente 62% de 26 dias"
+    },
+    "h1_exits_WIF_poorjev_relaxed__fork1": {
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "WIF_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_WIF_poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-04T01:35:39.585550-03:00",
+      "strategy": "fork:h1_exits_WIF_poorjev_relaxed__fork1",
+      "lineage": "h1_exits_WIF_poorjev_relaxed",
+      "parent": "h1_exits_WIF_poorjev_relaxed",
+      "params_diff": {
+        "criteria": {
+          "file": "data/lab/criteria/h1_exits_WIF_poorjev_relaxed__fork1.json",
+          "sha256": "e2715f698b601ee4315d2a3c6bf80e7d1440a59b839c673973bbfbc5252ef683"
+        }
+      },
+      "reason": "[claude-night] Hip\u00f3tese: em dois dias seguidos (10-02 memes: acertos dumping 63% vs 41%; 10-03 memes: erros jumpy 95% vs 71%, pumping 66% vs 43%; 10-03 SOL: erros green 26% vs 6%) as compras confiantes do poorjev falham quando perseguem a fita (pumping/jumpy/green) e acertam no despejo (red/dumping/flat). O poorjev responde buy a tudo com conf 0.90-0.97, por isso testa-se primeiro se o texto o move: cautelas contra pumping/jumpy, prefer\u00eancia por red/dumping. Pai h1_exits_WIF_poorjev_relaxed (100/4 trades, sa\u00eddas ligadas, linhagem livre). Confirma se em 3-7 dias: compras do fork < 70% das do pai (o texto tem efeito) e habilidade fork - pai > 0 US$ com >= 20 trades. Refuta se: trades do fork = pai +-10% com as mesmas a\u00e7\u00f5es (poorjev ignora o texto) ou habilidade fork - pai <= 0 com >= 20 trades.",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 1 de h1_exits_WIF_poorjev_relaxed",
+      "start_value": 1012.272462821704,
+      "night": "2026-10-03",
+      "fork_kind": "criteria",
+      "criteria_summary": "compra: the move is strong and depth is not thin; prefer a red or d\u2026 | venda: the move is fading or fees are climbing | skip: conditions are too hostile to trade at all",
+      "criteria_parent": "criteria_baseline.json",
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:36:32.500358-03:00",
+      "report_label_reason": "margem -0.19pp, \u00e0 frente 31% de 26 dias"
+    },
+    "h1_exits_BONK_poorjev_relaxed__fork1": {
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "BONK_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_BONK_poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-05T01:35:10.350977-03:00",
+      "strategy": "fork:h1_exits_BONK_poorjev_relaxed__fork1",
+      "lineage": "h1_exits_BONK_poorjev_relaxed",
+      "parent": "h1_exits_BONK_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "reentry_cooldown_min": 120
+        }
+      },
+      "reason": "[claude-night] Hipotese: em 3 dias (10-02 a 10-04, mercado em baixa, alta e lateral) as compras confiantes do poorjev em memes falham quando a fita esta pumping/jumpy/green/tight e acertam em red/dumping/calm/wide. Toda a habilidade de H1 vem de ~6 saidas por moeda; 30 min depois de cada saida por trailing o poorjev (que compra sempre) recompra com a fita ainda agitada. Esperar 2 h apos a saida e o unico parametro que codifica \"nao perseguir\" sem texto. Confirma se: habilidade fork - pai > 0 US$ com >= 3 vendas no fork em 3-7 dias. Refuta se: habilidade fork - pai <= 0 com >= 3 vendas, ou PnL fork - pai < -1 pp com habilidade ~ 0 (perda de beta sem ganho de selecao).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 1 de h1_exits_BONK_poorjev_relaxed",
+      "start_value": 1071.6224501702295,
+      "night": "2026-10-04",
+      "fork_kind": "params",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:36:37.516558-03:00",
+      "report_label_reason": "margem +5.12pp, \u00e0 frente 44% de 25 dias"
+    },
+    "h1_exits_MEW_poorjev_relaxed__fork1": {
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "MEW_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_MEW_poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-05T01:35:42.835678-03:00",
+      "strategy": "fork:h1_exits_MEW_poorjev_relaxed__fork1",
+      "lineage": "h1_exits_MEW_poorjev_relaxed",
+      "parent": "h1_exits_MEW_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "reentry_cooldown_min": 120
+        }
+      },
+      "reason": "[claude-night] Replica em MEW da hipotese testada em h1_exits_BONK_poorjev_relaxed__fork1 (mesma noite), para separar efeito de moeda de efeito de mecanismo. Hipotese: apos uma saida por trailing/TP, recomprar 30 min depois perseguir a fita ainda pumping/jumpy (marcador de erro do poorjev em 3 dias); esperar 2 h evita a recompra no topo e nao custa habilidade porque esta vem das saidas, nao do tempo exposto. Confirma se: habilidade fork - pai > 0 US$ com >= 3 vendas no fork em 3-7 dias, no mesmo sentido que o fork BONK. Refuta se: habilidade fork - pai <= 0 com >= 3 vendas, ou sinais opostos entre BONK e MEW (efeito de moeda, nao de mecanismo).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 1 de h1_exits_MEW_poorjev_relaxed",
+      "start_value": 1053.3109432228487,
+      "night": "2026-10-04",
+      "fork_kind": "params",
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:36:42.016554-03:00",
+      "report_label_reason": "margem -1.89pp, \u00e0 frente 60% de 25 dias"
+    },
+    "laya_relaxed__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "laya_relaxed",
+      "profile": "relaxed",
+      "model": "laya",
+      "test_type": "model_gated",
+      "name": "laya_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-06T01:35:32.032882-03:00",
+      "strategy": "fork:laya_relaxed__fork2",
+      "lineage": "laya_relaxed",
+      "parent": "laya_relaxed__fork1",
+      "params_diff": {
+        "gates": {
+          "cooldown_seconds": 3600
+        }
+      },
+      "reason": "[claude-night] Hipotese: laya_relaxed__fork1 perde por custo e nao por selecao. Em 3 dias (10-03 a 10-05) o excesso ajustado foi -31 US$ com cerca de 40 US$ de taxas mais custo vs mark (10-05: 101 trades, 9.1 de taxas + 9.0 de custo vs mark, excesso -14.4, bruto de custos aprox. +3.8). Uma pausa de 3600 s entre trades corta a frequencia para no maximo 24 por dia e deixa a selecao, se existir, aparecer liquida. Uma ideia: frequencia; conf 0.04 e margem 0 herdam do fork1. Confirma se: habilidade fork - laya_relaxed > 0 US$ com >= 20 trades em 3-7 dias e acima da margem de laya_relaxed__fork1 no mesmo periodo. Refuta se: habilidade <= 0 com >= 20 trades (a Laya em SOL nao tem selecao positiva mesmo sem churn; a linha Laya SOL fecha).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 2 de laya_relaxed__fork1",
+      "start_value": 974.3419276582014,
+      "night": "2026-10-05",
+      "fork_kind": "params",
+      "report_label": "lead fork (base para tuning \u2014 n\u00e3o \u00e9 veredito)",
+      "report_label_brt": "2026-10-31T00:36:46.642389-03:00",
+      "report_label_reason": "margem +17.73pp, \u00e0 frente 83% de 24 dias"
+    },
+    "FARTCOIN_laya_relaxed__fork2": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "FARTCOIN_laya_relaxed",
+      "profile": "relaxed",
+      "model": "laya",
+      "test_type": "model_gated",
+      "name": "FARTCOIN_laya_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-06T01:35:38.145442-03:00",
+      "strategy": "fork:FARTCOIN_laya_relaxed__fork2",
+      "lineage": "FARTCOIN_laya_relaxed",
+      "parent": "FARTCOIN_laya_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.07,
+          "min_prob_margin": 0.0,
+          "max_skip_noul": 0.95
+        }
+      },
+      "reason": "[claude-night] Hipotese: FARTCOIN_laya_relaxed__fork1 (conf >= 0.07, margem 0) fez 2 trades em 3 dias porque o veto de skip (skip_noul_high) bloqueia a maioria dos ciclos, incluindo os que passam o portao de confianca (10-05: 10 de 13 ciclos; 10-06 ate 01:30: 8 de 13, 5 deles com conf 0.08-0.10 acima do portao). O skip da Laya esta numa escala propria, como a confianca. Relaxar so o veto (max_skip_noul 0.95), mantendo conf 0.07 e margem 0, isola o efeito do veto (comparar com fork1) e torna a Laya FARTCOIN mensuravel: e o unico modelo pequeno que vende em memes. Confirma se: >= 20 trades com vendas > 0 em 3-7 dias e habilidade fork - pai > 0 US$. Refuta se: >= 20 trades e habilidade <= 0 (Laya sem habilidade em memes), ou < 5 trades em 3 dias (ha outro bloqueio).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 2 de FARTCOIN_laya_relaxed",
+      "start_value": 1000.0,
+      "night": "2026-10-05",
+      "fork_kind": "params",
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:36:49.085024-03:00",
+      "report_label_reason": "margem -10.26pp, \u00e0 frente 46% de 24 dias"
+    },
+    "h1_exits_WIF_poorjev_relaxed__fork2": {
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "WIF_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_WIF_poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-06T01:35:58.237184-03:00",
+      "strategy": "fork:h1_exits_WIF_poorjev_relaxed__fork2",
+      "lineage": "h1_exits_WIF_poorjev_relaxed",
+      "parent": "h1_exits_WIF_poorjev_relaxed__fork1",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.75
+        }
+      },
+      "reason": "[claude-night] Hipotese: no fork de criterios WIF o texto nao muda a acao (buy em 100% das chamadas) mas desloca a confianca por estado: o decil superior do fork (conf >= 0.81) cai em fita dumping/red/wide, os estados que o texto prefere; no poorjev sem texto cai em pumping/jumpy/green/tight. Nas recompras de hoje apos stop-loss o fork comprou com conf 0.65-0.74 (pai 0.90-0.91), nos mesmos ciclos do pai. Um portao a 0.75 transforma o deslocamento em filtro de estado: fork2 so compra quando o texto concorda com a fita e recompra menos apos saidas. Uma ideia: portao; o resto herda do fork1. Confirma se: habilidade fork2 - fork1 > 0 US$ com >= 3 vendas em 5-7 dias (contar da primeira venda). Refuta se: <= 0 com >= 3 vendas, ou < 5 compras em 3 dias (portao alto demais).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 2 de h1_exits_WIF_poorjev_relaxed__fork1",
+      "start_value": 987.1222791662651,
+      "night": "2026-10-05",
+      "fork_kind": "params",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:36:53.577755-03:00",
+      "report_label_reason": "margem +7.38pp, \u00e0 frente 62% de 24 dias"
+    },
+    "h1_exits_von_relaxed__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": null,
+      "name": "h1_exits_von_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-07T01:37:52.426149-03:00",
+      "strategy": "fork:h1_exits_von_relaxed__fork2",
+      "lineage": "h1_exits_von_relaxed",
+      "parent": "h1_exits_von_relaxed",
+      "params_diff": {
+        "gates": {
+          "cooldown_seconds": 3600
+        }
+      },
+      "reason": "[claude-night] Hipotese: h1_exits_von_relaxed perde por custo e nao por selecao. Em 3 dias (10-04 a 10-06) o excesso ajustado foi -7.0 US$ com 14.9 US$ de taxas mais custo vs mark (bruto aprox. +7.9) em 92 trades; a escada de recompra depois de cada saida faz 8-10 compras por hora. As saidas (SL/TP/trailing) nao passam pelo cooldown (check_exits chama market_trade), logo a pausa de 1 h so espaca as compras. Replica entre modelos a hipotese de laya_relaxed__fork2 (dia 1: 16 trades, bruto +6.7, liquido +0.7). Uma ideia: frequencia. Confirma se: habilidade fork - pai > 0 US$ com >= 15 trades em 3-7 dias e custos por dia abaixo de metade dos do pai. Refuta se: <= 0 com >= 15 trades (a selecao do von nao sobrevive a amostragem esparsa) ou < 8 trades em 3 dias.",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 2 de h1_exits_von_relaxed",
+      "start_value": 989.7645169259047,
+      "night": "2026-10-06",
+      "fork_kind": "params",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:36:58.001893-03:00",
+      "report_label_reason": "margem +7.16pp, \u00e0 frente 52% de 23 dias"
+    },
+    "poorjev_relaxed__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": "model_gated",
+      "name": "poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-07T01:37:56.857696-03:00",
+      "strategy": "fork:poorjev_relaxed__fork2",
+      "lineage": "poorjev_relaxed",
+      "parent": "poorjev_relaxed__fork1",
+      "params_diff": {
+        "gates": {
+          "cooldown_seconds": 3600
+        }
+      },
+      "reason": "[claude-night] Replica em poorjev_relaxed__fork1 (SOL, saidas, margem 0) da hipotese de custo testada em laya_relaxed__fork2 e, esta noite, em h1_exits_von_relaxed, para separar efeito de modelo de efeito de mecanismo. Hipotese: em 4 dias (10-03 a 10-06) o excesso ajustado foi -3.5 US$ com 10.9 US$ de taxas mais custo vs mark (bruto aprox. +7.4; 3 de 4 dias com bruto > 0) em 112 trades. As saidas nao passam pelo cooldown; a pausa de 1 h so espaca a escada de recompra do poorjev, que compra em todos os ciclos. Uma ideia: frequencia. Confirma se: habilidade fork2 - fork1 > 0 US$ com >= 15 trades em 3-7 dias, no mesmo sentido que o fork do von. Refuta se: <= 0 com >= 15 trades, ou sinais opostos entre von e poorjev (efeito de modelo).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 2 de poorjev_relaxed__fork1",
+      "start_value": 982.7801529255804,
+      "night": "2026-10-06",
+      "fork_kind": "params",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:02.231706-03:00",
+      "report_label_reason": "margem +7.77pp, \u00e0 frente 52% de 23 dias"
+    },
+    "FARTCOIN_laya_relaxed__fork3": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "FARTCOIN_laya_relaxed",
+      "profile": "relaxed",
+      "model": "laya",
+      "test_type": "model_gated",
+      "name": "FARTCOIN_laya_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-08T01:38:37.229201-03:00",
+      "strategy": "fork:FARTCOIN_laya_relaxed__fork3",
+      "lineage": "FARTCOIN_laya_relaxed",
+      "parent": "FARTCOIN_laya_relaxed__fork2",
+      "params_diff": {
+        "gates": {
+          "cooldown_seconds": 3600
+        }
+      },
+      "reason": "[claude-night] Hipotese: FARTCOIN_laya_relaxed__fork2 perde por custo de round trips de minutos, nao por selecao. Em 2 dias: 14 trades, 7 round trips de 7 a 71 min (10-07: 15:36-15:43, 22:29-22:36, 22:43-22:50), 0 ganhos, realizado -3.3 US$ com 1.8 de taxas e 3.8 de custo vs mark no dia: cada round trip custa cerca de 0.8% e a chamada a 15 min nao cobre isso. Em SOL, laya_relaxed__fork2 (cooldown 3600 s) ficou positivo liquido 2 dias seguidos (+0.7, +2.7 US$, 36 trades). Replica o mecanismo em FARTCOIN para separar ativo de mecanismo. Uma ideia: pausa de 1 h. Confirma se: habilidade fork3 - fork2 > 0 US$ com >= 10 trades em 3-7 dias. Refuta se: <= 0 com >= 10 trades (fecha a linha Laya memes) ou < 6 trades em 4 dias.",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 3 de FARTCOIN_laya_relaxed__fork2",
+      "start_value": 994.64887153747,
+      "night": "2026-10-07",
+      "fork_kind": "params",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:06.338975-03:00",
+      "report_label_reason": "margem +1.65pp, \u00e0 frente 55% de 22 dias"
+    },
+    "laya_relaxed__fork3": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "laya_relaxed",
+      "profile": "relaxed",
+      "model": "laya",
+      "test_type": "model_gated",
+      "name": "laya_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-08T01:38:42.437052-03:00",
+      "strategy": "fork:laya_relaxed__fork3",
+      "lineage": "laya_relaxed",
+      "parent": "laya_relaxed__fork2",
+      "params_diff": {
+        "criteria": {
+          "file": "data/lab/criteria/laya_relaxed__fork3.json",
+          "sha256": "cbac4690b62ba160258ab6eb413c2f52f3b3619dc2999158c63632ffa5d2398d"
+        }
+      },
+      "reason": "[claude-night] Hipotese: as compras confiantes da Laya em SOL falham quando perseguem uma fita ja lifting com spread tight: lifting nos erros em 5 de 6 dias (hoje lifting 51% vs 26%, tight 48% vs 26%, green 29% vs 10%; erro mais frequente buy lifting calm mid gray tight x35), ao contrario do von, onde green trocava de lado cada dia. O pai (cooldown 3600 s) e o primeiro Laya positivo liquido (+0.7 e +2.7 US$ em 2 dias, 36 trades); como o cooldown limita a cerca de 1 trade/h, o texto so muda qual ciclo da hora passa, nao quantos: controla o confundidor dos textos do von. Uma ideia: nao perseguir (cautela no buy, clausula no hold). Confirma se: habilidade fork3 - fork2 > 0 US$ com >= 20 trades em 3-7 dias e trades >= metade do pai. Refuta se: <= 0 com >= 20 trades, ou trades < metade do pai.",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 3 de laya_relaxed__fork2",
+      "start_value": 957.5941038965132,
+      "night": "2026-10-07",
+      "fork_kind": "criteria",
+      "criteria_summary": "compra: the move is strong and depth is not thin; be wary of buying\u2026 | venda: the move is fading or fees are climbing | skip: conditions are too hostile to trade at all",
+      "criteria_parent": "criteria_baseline.json",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:10.152685-03:00",
+      "report_label_reason": "margem +7.82pp, \u00e0 frente 59% de 22 dias"
+    },
+    "h1_exits_hybrid_von_cap2__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": "lab_h1_exits",
+      "name": "h1_exits_hybrid_von_cap2__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:30:45.078820-03:00",
+      "strategy": "fork:h1_exits_hybrid_von_cap2__fork1",
+      "lineage": "h1_exits_hybrid_von_cap2",
+      "parent": "h1_exits_hybrid_von_cap2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-09: val -0.928 vs -12.680 (train +0.782 vs -28.920), custo 8.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de h1_exits_hybrid_von_cap2",
+      "start_value": 985.2494987705835,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:13.618296-03:00",
+      "report_label_reason": "margem +4.51pp, \u00e0 frente 38% de 21 dias"
+    },
+    "h2_ensemble_sol__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "ensemble",
+      "source": null,
+      "profile": "baseline",
+      "model": "ensemble",
+      "test_type": null,
+      "name": "h2_ensemble_sol__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:18.488657-03:00",
+      "strategy": "fork:h2_ensemble_sol__fork1",
+      "lineage": "h2_ensemble_sol",
+      "parent": "h2_ensemble_sol",
+      "params_diff": {
+        "ensemble": {
+          "pct_threshold": 0.96
+        }
+      },
+      "reason": "nightly 2026-10-09: val -78.291 vs -92.606 (train -20.521 vs -53.131), custo 8.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de h2_ensemble_sol",
+      "start_value": 888.4990335377806,
+      "report_label": "lead fork (base para tuning \u2014 n\u00e3o \u00e9 veredito)",
+      "report_label_brt": "2026-10-31T00:37:17.460158-03:00",
+      "report_label_reason": "margem +5.02pp, \u00e0 frente 76% de 21 dias"
+    },
+    "h3_limit_hybrid_von_cap2__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": null,
+      "name": "h3_limit_hybrid_von_cap2__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:21.785921-03:00",
+      "strategy": "fork:h3_limit_hybrid_von_cap2__fork1",
+      "lineage": "h3_limit_hybrid_von_cap2",
+      "parent": "h3_limit_hybrid_von_cap2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-09: val -3.480 vs -45.205 (train +0.608 vs -35.979), custo 8.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de h3_limit_hybrid_von_cap2",
+      "start_value": 883.1855613676122,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:21.016295-03:00",
+      "report_label_reason": "margem +12.41pp, \u00e0 frente 67% de 21 dias"
+    },
+    "h4_hours_von_relaxed__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": null,
+      "name": "h4_hours_von_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:24.280453-03:00",
+      "strategy": "fork:h4_hours_von_relaxed__fork1",
+      "lineage": "h4_hours_von_relaxed",
+      "parent": "h4_hours_von_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-09: val -3.480 vs -78.556 (train +0.608 vs -16.023), custo 8.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de h4_hours_von_relaxed",
+      "start_value": 900.8247629684183,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:24.519354-03:00",
+      "report_label_reason": "margem +0.98pp, \u00e0 frente 57% de 21 dias"
+    },
+    "hybrid_von_relaxed_cap2__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": "hybrid",
+      "name": "hybrid_von_relaxed_cap2__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:26.483704-03:00",
+      "strategy": "fork:hybrid_von_relaxed_cap2__fork1",
+      "lineage": "hybrid_von_relaxed_cap2",
+      "parent": "hybrid_von_relaxed_cap2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-09: val -3.480 vs -67.955 (train +0.601 vs -23.888), custo 8.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de hybrid_von_relaxed_cap2",
+      "start_value": 890.7076762462506,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:31.207634-03:00",
+      "report_label_reason": "margem +10.69pp, \u00e0 frente 52% de 21 dias"
+    },
+    "h1_exits_GOAT_poorjev_relaxed__fork1": {
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "GOAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_GOAT_poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:45.148409-03:00",
+      "strategy": "fork:h1_exits_GOAT_poorjev_relaxed__fork1",
+      "lineage": "h1_exits_GOAT_poorjev_relaxed",
+      "parent": "h1_exits_GOAT_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "sl": 0.036000000000000004,
+          "reentry_cooldown_min": 36
+        }
+      },
+      "reason": "nightly 2026-10-09: val -111.898 vs -119.560 (train +22.300 vs +10.228), custo 14.3 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de h1_exits_GOAT_poorjev_relaxed",
+      "start_value": 906.4979187537214,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:34.964432-03:00",
+      "report_label_reason": "margem +5.68pp, \u00e0 frente 48% de 21 dias"
+    },
+    "h1_exits_PNUT_poorjev_relaxed__fork1": {
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "PNUT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_PNUT_poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:47.291514-03:00",
+      "strategy": "fork:h1_exits_PNUT_poorjev_relaxed__fork1",
+      "lineage": "h1_exits_PNUT_poorjev_relaxed",
+      "parent": "h1_exits_PNUT_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "sl": 0.032
+        },
+        "gates": {
+          "max_trades_per_hour": 6
+        }
+      },
+      "reason": "nightly 2026-10-09: val -80.434 vs -95.302 (train -39.336 vs -49.102), custo 14.3 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de h1_exits_PNUT_poorjev_relaxed",
+      "start_value": 921.0174353668343,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:37:38.651007-03:00",
+      "report_label_reason": "margem -0.29pp, \u00e0 frente 62% de 21 dias"
+    },
+    "h1_exits_POPCAT_poorjev_relaxed__fork1": {
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "POPCAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_POPCAT_poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:48.415581-03:00",
+      "strategy": "fork:h1_exits_POPCAT_poorjev_relaxed__fork1",
+      "lineage": "h1_exits_POPCAT_poorjev_relaxed",
+      "parent": "h1_exits_POPCAT_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "sl": 0.032
+        }
+      },
+      "reason": "nightly 2026-10-09: val -119.516 vs -127.547 (train -27.577 vs -37.137), custo 14.3 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de h1_exits_POPCAT_poorjev_relaxed",
+      "start_value": 926.7923741145147,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:37:42.342594-03:00",
+      "report_label_reason": "margem -3.36pp, \u00e0 frente 43% de 21 dias"
+    },
+    "meme_BONK_relaxed__fork1": {
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_BONK_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_BONK_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:53.096793-03:00",
+      "strategy": "fork:meme_BONK_relaxed__fork1",
+      "lineage": "meme_BONK_relaxed",
+      "parent": "meme_BONK_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-09: val +0.000 vs -6.812 (train +0.000 vs -12.596), custo 14.3 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de meme_BONK_relaxed",
+      "start_value": 989.1147798560544,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:44.415652-03:00",
+      "report_label_reason": "margem +4.47pp, \u00e0 frente 76% de 21 dias"
+    },
+    "meme_MEW_relaxed__fork1": {
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_MEW_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_MEW_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:54.255627-03:00",
+      "strategy": "fork:meme_MEW_relaxed__fork1",
+      "lineage": "meme_MEW_relaxed",
+      "parent": "meme_MEW_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-09: val +0.000 vs -5.281 (train +0.000 vs -27.643), custo 14.3 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de meme_MEW_relaxed",
+      "start_value": 970.3495975330088,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:46.400406-03:00",
+      "report_label_reason": "margem +8.57pp, \u00e0 frente 71% de 21 dias"
+    },
+    "meme_POPCAT_relaxed__fork1": {
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_POPCAT_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_POPCAT_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:55.057576-03:00",
+      "strategy": "fork:meme_POPCAT_relaxed__fork1",
+      "lineage": "meme_POPCAT_relaxed",
+      "parent": "meme_POPCAT_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-09: val +0.000 vs -13.456 (train +0.000 vs -23.270), custo 14.3 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de meme_POPCAT_relaxed",
+      "start_value": 963.9673366833625,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:48.496718-03:00",
+      "report_label_reason": "margem +4.11pp, \u00e0 frente 62% de 21 dias"
+    },
+    "meme_WIF_relaxed__fork1": {
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_WIF_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_WIF_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-09T00:31:55.496428-03:00",
+      "strategy": "fork:meme_WIF_relaxed__fork1",
+      "lineage": "meme_WIF_relaxed",
+      "parent": "meme_WIF_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-09: val +0.000 vs -4.637 (train +0.000 vs -7.253), custo 14.3 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de meme_WIF_relaxed",
+      "start_value": 991.5084681608682,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:50.672517-03:00",
+      "report_label_reason": "margem +7.70pp, \u00e0 frente 86% de 21 dias"
+    },
+    "h1_exits_FARTCOIN_poorjev_relaxed__fork2": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "FARTCOIN_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-09T01:34:40.574349-03:00",
+      "strategy": "fork:h1_exits_FARTCOIN_poorjev_relaxed__fork2",
+      "lineage": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "parent": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "reentry_cooldown_min": 120
+        }
+      },
+      "reason": "[claude-night] Hipotese: replica em FARTCOIN (3.a moeda) da reentrada de 120 min testada em BONK e MEW desde 10-05: apos uma saida do H1, recomprar 30 min depois apanha preco pior do que esperar 2 h. Em 4 dias BONK +60 US$ e MEW +22 US$ de habilidade vs pai; em 10-08 ambos venderam ao mesmo minuto que o pai (12:21 e 12:13) e recompraram 1.3-1.4% mais barato. Mas 10-07 e 10-08 foram dias de queda; FARTCOIN subiu 1.8% em 10-08 e tem o maior numero de saidas (11 RT), logo testa o mecanismo noutro regime. Confirma se: habilidade fork - pai > 0 US$ com >= 3 vendas em 3-7 dias, no mesmo sentido que BONK/MEW. Refuta se: <= 0 com >= 3 vendas (o ganho era regime de queda, nao mecanismo).",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 2 de h1_exits_FARTCOIN_poorjev_relaxed",
+      "start_value": 1020.0789764958495,
+      "night": "2026-10-08",
+      "fork_kind": "params",
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:37:55.317550-03:00",
+      "report_label_reason": "margem +4.50pp, \u00e0 frente 52% de 21 dias"
+    },
+    "h1_exits_WIF_poorjev_relaxed__fork3": {
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "WIF_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_WIF_poorjev_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-09T01:35:06.756631-03:00",
+      "strategy": "fork:h1_exits_WIF_poorjev_relaxed__fork3",
+      "lineage": "h1_exits_WIF_poorjev_relaxed",
+      "parent": "h1_exits_WIF_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "reentry_cooldown_min": 120
+        }
+      },
+      "reason": "[claude-night] Hipotese: replica em WIF (4.a moeda, a que mais caiu em 10-08: -5.5%) da reentrada de 120 min de BONK/MEW (+60 e +22 US$ de habilidade vs pai em 4 dias; em 10-08 recompraram 1.3-1.4% mais barato que o pai depois de vender ao mesmo minuto). Par com o fork de FARTCOIN desta noite (moeda que subiu): se so WIF ganhar, o efeito e regime de queda; se ambos, e mecanismo. O pai WIF tem 9 RT e os forks fork1/fork2 da linhagem nao mudaram trades (clones do pai), logo o pai original e a base limpa. Confirma se: habilidade fork - pai > 0 US$ com >= 3 vendas em 3-7 dias. Refuta se: <= 0 com >= 3 vendas, ou sinal oposto ao de FARTCOIN sem explicacao de regime.",
+      "is_original": false,
+      "who": "claude-night",
+      "label": "Fork 3 de h1_exits_WIF_poorjev_relaxed",
+      "start_value": 871.7219297912646,
+      "night": "2026-10-08",
+      "fork_kind": "params",
+      "report_label": "lead fork (base para tuning \u2014 n\u00e3o \u00e9 veredito)",
+      "report_label_brt": "2026-10-31T00:37:58.899433-03:00",
+      "report_label_reason": "margem +15.62pp, \u00e0 frente 76% de 21 dias"
+    },
+    "relaxed__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-10T00:31:36.838925-03:00",
+      "strategy": "fork:relaxed__fork2",
+      "lineage": "relaxed",
+      "parent": "relaxed__fork1",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42,
+          "buy_fraction_usdt": 0.3
+        },
+        "exits": {
+          "sl": 0.0135
+        }
+      },
+      "reason": "nightly 2026-10-10: val -15.016 vs -47.695 (train +24.211 vs -4.950), custo 8.9 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de relaxed__fork1",
+      "start_value": 970.1370382980881,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:02.377748-03:00",
+      "report_label_reason": "margem +6.07pp, \u00e0 frente 65% de 20 dias"
+    },
+    "meme_PNUT_relaxed__fork1": {
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_PNUT_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_PNUT_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-10T00:32:11.241059-03:00",
+      "strategy": "fork:meme_PNUT_relaxed__fork1",
+      "lineage": "meme_PNUT_relaxed",
+      "parent": "meme_PNUT_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-10: val +0.000 vs -12.224 (train +0.000 vs -7.626), custo 13.4 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de meme_PNUT_relaxed",
+      "start_value": 970.2912217226938,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:04.266039-03:00",
+      "report_label_reason": "margem +3.37pp, \u00e0 frente 70% de 20 dias"
+    },
+    "relaxed_expcap50__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "relaxed_expcap50__fork2",
+      "status": "active",
+      "created_brt": "2026-10-11T00:31:26.737588-03:00",
+      "strategy": "fork:relaxed_expcap50__fork2",
+      "lineage": "relaxed_expcap50",
+      "parent": "relaxed_expcap50",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-11: val -1.816 vs -26.539 (train -1.291 vs -23.017), custo 9.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de relaxed_expcap50",
+      "start_value": 958.9628632053104,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:07.444372-03:00",
+      "report_label_reason": "margem +1.59pp, \u00e0 frente 68% de 19 dias"
+    },
+    "meme_GOAT_relaxed__fork1": {
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_GOAT_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_GOAT_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-11T00:32:05.664559-03:00",
+      "strategy": "fork:meme_GOAT_relaxed__fork1",
+      "lineage": "meme_GOAT_relaxed",
+      "parent": "meme_GOAT_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-11: val +0.000 vs -11.130 (train +0.000 vs -3.353), custo 13.7 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de meme_GOAT_relaxed",
+      "start_value": 979.9965269594401,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:09.299015-03:00",
+      "report_label_reason": "margem +8.24pp, \u00e0 frente 84% de 19 dias"
+    },
+    "h1_exits_BONK_poorjev_relaxed__fork2": {
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "BONK_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_BONK_poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-13T00:32:01.104188-03:00",
+      "strategy": "fork:h1_exits_BONK_poorjev_relaxed__fork2",
+      "lineage": "h1_exits_BONK_poorjev_relaxed",
+      "parent": "h1_exits_BONK_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "sl": 0.036000000000000004,
+          "tp": 0.054
+        },
+        "gates": {
+          "buy_fraction_usdt": 0.3
+        }
+      },
+      "reason": "nightly 2026-10-13: val -23.530 vs -30.740 (train -152.559 vs -193.277), custo 14.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h1_exits_BONK_poorjev_relaxed",
+      "start_value": 869.8914442715259,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:12.114619-03:00",
+      "report_label_reason": "margem +2.42pp, \u00e0 frente 47% de 17 dias"
+    },
+    "h1_exits_MEW_poorjev_relaxed__fork2": {
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "MEW_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_MEW_poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-13T00:32:05.873927-03:00",
+      "strategy": "fork:h1_exits_MEW_poorjev_relaxed__fork2",
+      "lineage": "h1_exits_MEW_poorjev_relaxed",
+      "parent": "h1_exits_MEW_poorjev_relaxed__fork1",
+      "params_diff": {
+        "exits": {
+          "sl": 0.032
+        }
+      },
+      "reason": "nightly 2026-10-13: val -72.738 vs -84.290 (train -89.421 vs -122.357), custo 14.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h1_exits_MEW_poorjev_relaxed__fork1",
+      "start_value": 898.8328105576932,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:38:14.896839-03:00",
+      "report_label_reason": "margem -4.65pp, \u00e0 frente 47% de 17 dias"
+    },
+    "h1_exits_von_relaxed__fork3": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": null,
+      "name": "h1_exits_von_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-15T00:30:54.707192-03:00",
+      "strategy": "fork:h1_exits_von_relaxed__fork3",
+      "lineage": "h1_exits_von_relaxed",
+      "parent": "h1_exits_von_relaxed__fork2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        },
+        "exits": {
+          "trail": 0.008,
+          "trail_arm": 0.008,
+          "sl": 0.012
+        }
+      },
+      "reason": "nightly 2026-10-15: val -0.986 vs -65.119 (train -1.086 vs -57.957), custo 14.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de h1_exits_von_relaxed__fork2",
+      "start_value": 917.7600173156798,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:16.974088-03:00",
+      "report_label_reason": "margem +7.03pp, \u00e0 frente 60% de 15 dias"
+    },
+    "h3_limit_poorjev_relaxed__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h3_limit_poorjev_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-15T00:31:50.174292-03:00",
+      "strategy": "fork:h3_limit_poorjev_relaxed__fork1",
+      "lineage": "h3_limit_poorjev_relaxed",
+      "parent": "h3_limit_poorjev_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_prob_margin": 0.24
+        }
+      },
+      "reason": "nightly 2026-10-15: val -20.636 vs -25.558 (train -27.675 vs -40.850), custo 14.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de h3_limit_poorjev_relaxed",
+      "start_value": 910.1089291764381,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:19.482776-03:00",
+      "report_label_reason": "margem +0.09pp, \u00e0 frente 60% de 15 dias"
+    },
+    "poorjev_baseline__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_baseline",
+      "profile": "baseline",
+      "model": "poorjev",
+      "test_type": "model_gated",
+      "name": "poorjev_baseline__fork1",
+      "status": "active",
+      "created_brt": "2026-10-15T00:32:01.123806-03:00",
+      "strategy": "fork:poorjev_baseline__fork1",
+      "lineage": "poorjev_baseline",
+      "parent": "poorjev_baseline",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.72
+        }
+      },
+      "reason": "nightly 2026-10-15: val -2.404 vs -22.087 (train -3.052 vs -41.894), custo 14.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de poorjev_baseline",
+      "start_value": 907.7860534838024,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:23.607888-03:00",
+      "report_label_reason": "margem +0.25pp, \u00e0 frente 67% de 15 dias"
+    },
+    "poorjev_relaxed__fork3": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": "model_gated",
+      "name": "poorjev_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-15T00:32:05.116370-03:00",
+      "strategy": "fork:poorjev_relaxed__fork3",
+      "lineage": "poorjev_relaxed",
+      "parent": "poorjev_relaxed__fork2",
+      "params_diff": {
+        "exits": {
+          "trail_arm": 0.008
+        }
+      },
+      "reason": "nightly 2026-10-15: val -45.908 vs -62.560 (train -54.604 vs -55.018), custo 14.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de poorjev_relaxed__fork2",
+      "start_value": 912.0338548080585,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:25.896085-03:00",
+      "report_label_reason": "margem +2.13pp, \u00e0 frente 33% de 15 dias"
+    },
+    "rsi_sol_1h__fork1": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "rule",
+      "source": null,
+      "profile": "baseline",
+      "model": "rule",
+      "test_type": "rule_rsi",
+      "rule": "rsi",
+      "variant": null,
+      "runner": "rules_bot",
+      "name": "rsi_sol_1h__fork1",
+      "status": "active",
+      "created_brt": "2026-10-15T00:33:10.579659-03:00",
+      "strategy": "fork:rsi_sol_1h__fork1",
+      "lineage": "rsi_sol_1h",
+      "parent": "rsi_sol_1h",
+      "params_diff": {
+        "rule": {
+          "rsi_period": 17
+        }
+      },
+      "reason": "nightly 2026-10-15: replay de regra 1h val +0.000 vs -4.527 (train -2.352 vs -2.352), 119 barras",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de rsi_sol_1h",
+      "start_value": 962.2561486978548,
+      "report_label": "atr\u00e1s da original (amostra ainda pequena)",
+      "report_label_brt": "2026-10-31T00:38:28.379158-03:00",
+      "report_label_reason": "margem -1.48pp, \u00e0 frente 53% de 15 dias"
+    },
+    "h2_ensemble_sol__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "ensemble",
+      "source": null,
+      "profile": "baseline",
+      "model": "ensemble",
+      "test_type": null,
+      "name": "h2_ensemble_sol__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:31:43.845626-03:00",
+      "strategy": "fork:h2_ensemble_sol__fork2",
+      "lineage": "h2_ensemble_sol",
+      "parent": "h2_ensemble_sol",
+      "params_diff": {
+        "ensemble": {
+          "pct_threshold": 0.96
+        }
+      },
+      "reason": "nightly 2026-10-16: val -20.548 vs -70.050 (train -105.431 vs -174.259), custo 15.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h2_ensemble_sol",
+      "start_value": 813.0580083559412,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:30.232395-03:00",
+      "report_label_reason": "margem +1.41pp, \u00e0 frente 79% de 14 dias"
+    },
+    "h3_limit_hybrid_von_cap2__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": null,
+      "name": "h3_limit_hybrid_von_cap2__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:31:51.517030-03:00",
+      "strategy": "fork:h3_limit_hybrid_von_cap2__fork2",
+      "lineage": "h3_limit_hybrid_von_cap2",
+      "parent": "h3_limit_hybrid_von_cap2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-16: val -2.471 vs -45.154 (train -2.725 vs -121.590), custo 15.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h3_limit_hybrid_von_cap2",
+      "start_value": 846.4095133207608,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:32.048987-03:00",
+      "report_label_reason": "margem +0.85pp, \u00e0 frente 64% de 14 dias"
+    },
+    "h4_hours_von_relaxed__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": null,
+      "name": "h4_hours_von_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:32:04.787351-03:00",
+      "strategy": "fork:h4_hours_von_relaxed__fork2",
+      "lineage": "h4_hours_von_relaxed",
+      "parent": "h4_hours_von_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-16: val -2.471 vs -79.053 (train -2.725 vs -95.764), custo 15.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h4_hours_von_relaxed",
+      "start_value": 855.0498524151739,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:33.957916-03:00",
+      "report_label_reason": "margem +0.15pp, \u00e0 frente 43% de 14 dias"
+    },
+    "hybrid_von_relaxed_cap2__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": "hybrid",
+      "name": "hybrid_von_relaxed_cap2__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:32:09.072806-03:00",
+      "strategy": "fork:hybrid_von_relaxed_cap2__fork2",
+      "lineage": "hybrid_von_relaxed_cap2",
+      "parent": "hybrid_von_relaxed_cap2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-16: val -2.471 vs -58.411 (train -2.725 vs -118.957), custo 15.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de hybrid_von_relaxed_cap2",
+      "start_value": 850.2376584650453,
+      "report_label": "atr\u00e1s da original (amostra ainda pequena)",
+      "report_label_brt": "2026-10-31T00:38:37.325495-03:00",
+      "report_label_reason": "margem -1.65pp, \u00e0 frente 57% de 14 dias"
+    },
+    "h1_exits_GOAT_poorjev_relaxed__fork2": {
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "GOAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_GOAT_poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:06.764933-03:00",
+      "strategy": "fork:h1_exits_GOAT_poorjev_relaxed__fork2",
+      "lineage": "h1_exits_GOAT_poorjev_relaxed",
+      "parent": "h1_exits_GOAT_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "sl": 0.036000000000000004,
+          "trail": 0.024,
+          "tp": 0.072,
+          "reentry_cooldown_min": 36
+        }
+      },
+      "reason": "nightly 2026-10-16: val -88.922 vs -110.269 (train -97.962 vs -112.388), custo 14.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h1_exits_GOAT_poorjev_relaxed",
+      "start_value": 716.0450150244208,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:39.138779-03:00",
+      "report_label_reason": "margem +2.47pp, \u00e0 frente 50% de 14 dias"
+    },
+    "h1_exits_PNUT_poorjev_relaxed__fork2": {
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "PNUT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_PNUT_poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:09.833115-03:00",
+      "strategy": "fork:h1_exits_PNUT_poorjev_relaxed__fork2",
+      "lineage": "h1_exits_PNUT_poorjev_relaxed",
+      "parent": "h1_exits_PNUT_poorjev_relaxed__fork1",
+      "params_diff": {
+        "exits": {
+          "sl": 0.0256
+        }
+      },
+      "reason": "nightly 2026-10-16: val -33.933 vs -39.409 (train -27.977 vs -39.514), custo 14.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h1_exits_PNUT_poorjev_relaxed__fork1",
+      "start_value": 844.9056854935048,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:38:41.038035-03:00",
+      "report_label_reason": "margem -7.99pp, \u00e0 frente 36% de 14 dias"
+    },
+    "h1_exits_POPCAT_poorjev_relaxed__fork2": {
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "POPCAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_POPCAT_poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:12.217326-03:00",
+      "strategy": "fork:h1_exits_POPCAT_poorjev_relaxed__fork2",
+      "lineage": "h1_exits_POPCAT_poorjev_relaxed",
+      "parent": "h1_exits_POPCAT_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "reentry_cooldown_min": 36
+        }
+      },
+      "reason": "nightly 2026-10-16: val -17.623 vs -47.017 (train -123.125 vs -141.079), custo 14.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h1_exits_POPCAT_poorjev_relaxed",
+      "start_value": 935.3443692934957,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:42.869003-03:00",
+      "report_label_reason": "margem +1.92pp, \u00e0 frente 57% de 14 dias"
+    },
+    "meme_BONK_relaxed__fork2": {
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_BONK_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_BONK_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:23.903346-03:00",
+      "strategy": "fork:meme_BONK_relaxed__fork2",
+      "lineage": "meme_BONK_relaxed",
+      "parent": "meme_BONK_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-16: val +0.000 vs -6.624 (train +0.000 vs -38.226), custo 14.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de meme_BONK_relaxed",
+      "start_value": 978.4643315543377,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:43.843331-03:00",
+      "report_label_reason": "margem +3.48pp, \u00e0 frente 79% de 14 dias"
+    },
+    "meme_MEW_relaxed__fork2": {
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_MEW_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_MEW_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:26.636820-03:00",
+      "strategy": "fork:meme_MEW_relaxed__fork2",
+      "lineage": "meme_MEW_relaxed",
+      "parent": "meme_MEW_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-16: val +0.000 vs -7.717 (train +0.000 vs -55.211), custo 14.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de meme_MEW_relaxed",
+      "start_value": 935.8718808707367,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:44.826859-03:00",
+      "report_label_reason": "margem +5.21pp, \u00e0 frente 57% de 14 dias"
+    },
+    "meme_POPCAT_relaxed__fork2": {
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_POPCAT_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_POPCAT_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:28.390869-03:00",
+      "strategy": "fork:meme_POPCAT_relaxed__fork2",
+      "lineage": "meme_POPCAT_relaxed",
+      "parent": "meme_POPCAT_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-16: val +0.000 vs -5.040 (train +0.000 vs -34.790), custo 14.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de meme_POPCAT_relaxed",
+      "start_value": 958.2841523069606,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:45.814986-03:00",
+      "report_label_reason": "margem +2.90pp, \u00e0 frente 64% de 14 dias"
+    },
+    "meme_WIF_relaxed__fork2": {
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_WIF_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_WIF_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:29.337289-03:00",
+      "strategy": "fork:meme_WIF_relaxed__fork2",
+      "lineage": "meme_WIF_relaxed",
+      "parent": "meme_WIF_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-16: val +0.000 vs -17.087 (train +0.000 vs -20.554), custo 14.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de meme_WIF_relaxed",
+      "start_value": 967.2460117123853,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:38:46.891268-03:00",
+      "report_label_reason": "margem +5.39pp, \u00e0 frente 93% de 14 dias"
+    },
+    "BONK_rule_regime_full__fork1": {
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "rule",
+      "source": null,
+      "profile": "baseline",
+      "model": "rule",
+      "test_type": "rule_regime",
+      "rule": "rule_regime_full",
+      "variant": "full",
+      "runner": "rules_bot",
+      "name": "BONK_rule_regime_full__fork1",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:40.014116-03:00",
+      "strategy": "fork:BONK_rule_regime_full__fork1",
+      "lineage": "BONK_rule_regime_full",
+      "parent": "BONK_rule_regime_full",
+      "params_diff": {
+        "rule": {
+          "ema_slow": 31
+        }
+      },
+      "reason": "nightly 2026-10-16: replay de regra 1h val -14.482 vs -19.555 (train -39.100 vs -39.100), 119 barras",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de BONK_rule_regime_full",
+      "start_value": 831.4734207173,
+      "report_label": "atr\u00e1s da original (amostra ainda pequena)",
+      "report_label_brt": "2026-10-31T00:38:49.765636-03:00",
+      "report_label_reason": "margem -7.92pp, \u00e0 frente 36% de 14 dias"
+    },
+    "FARTCOIN_rule_regime_full__fork1": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "rule",
+      "source": null,
+      "profile": "baseline",
+      "model": "rule",
+      "test_type": "rule_regime",
+      "rule": "rule_regime_full",
+      "variant": "full",
+      "runner": "rules_bot",
+      "name": "FARTCOIN_rule_regime_full__fork1",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:40.022760-03:00",
+      "strategy": "fork:FARTCOIN_rule_regime_full__fork1",
+      "lineage": "FARTCOIN_rule_regime_full",
+      "parent": "FARTCOIN_rule_regime_full",
+      "params_diff": {
+        "rule": {
+          "ema_fast": 10
+        }
+      },
+      "reason": "nightly 2026-10-16: replay de regra 1h val -11.097 vs -17.624 (train -5.082 vs -24.659), 119 barras",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de FARTCOIN_rule_regime_full",
+      "start_value": 862.1346752888659,
+      "report_label": "atr\u00e1s da original (amostra ainda pequena)",
+      "report_label_brt": "2026-10-31T00:38:52.507315-03:00",
+      "report_label_reason": "margem -2.71pp, \u00e0 frente 43% de 14 dias"
+    },
+    "GOAT_rule_regime_full__fork1": {
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "rule",
+      "source": null,
+      "profile": "baseline",
+      "model": "rule",
+      "test_type": "rule_regime",
+      "rule": "rule_regime_full",
+      "variant": "full",
+      "runner": "rules_bot",
+      "name": "GOAT_rule_regime_full__fork1",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:40.051652-03:00",
+      "strategy": "fork:GOAT_rule_regime_full__fork1",
+      "lineage": "GOAT_rule_regime_full",
+      "parent": "GOAT_rule_regime_full",
+      "params_diff": {
+        "rule": {
+          "ema_fast": 10
+        }
+      },
+      "reason": "nightly 2026-10-16: replay de regra 1h val -19.806 vs -26.666 (train -14.223 vs -32.898), 119 barras",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de GOAT_rule_regime_full",
+      "start_value": 766.3270070077057,
+      "report_label": "atr\u00e1s da original (amostra ainda pequena)",
+      "report_label_brt": "2026-10-31T00:38:54.590267-03:00",
+      "report_label_reason": "margem -2.28pp, \u00e0 frente 43% de 14 dias"
+    },
+    "POPCAT_rule_regime_full__fork1": {
+      "asset": "POPCAT",
+      "cls": "meme",
+      "kind": "rule",
+      "source": null,
+      "profile": "baseline",
+      "model": "rule",
+      "test_type": "rule_regime",
+      "rule": "rule_regime_full",
+      "variant": "full",
+      "runner": "rules_bot",
+      "name": "POPCAT_rule_regime_full__fork1",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:40.068807-03:00",
+      "strategy": "fork:POPCAT_rule_regime_full__fork1",
+      "lineage": "POPCAT_rule_regime_full",
+      "parent": "POPCAT_rule_regime_full",
+      "params_diff": {
+        "rule": {
+          "ema_fast": 10
+        }
+      },
+      "reason": "nightly 2026-10-16: replay de regra 1h val +11.205 vs +1.556 (train -24.486 vs -41.348), 119 barras",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de POPCAT_rule_regime_full",
+      "start_value": 839.5067419696148,
+      "report_label": "atr\u00e1s da original (amostra ainda pequena)",
+      "report_label_brt": "2026-10-31T00:38:56.683116-03:00",
+      "report_label_reason": "margem -2.92pp, \u00e0 frente 43% de 14 dias"
+    },
+    "WIF_rule_regime_full__fork1": {
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "rule",
+      "source": null,
+      "profile": "baseline",
+      "model": "rule",
+      "test_type": "rule_regime",
+      "rule": "rule_regime_full",
+      "variant": "full",
+      "runner": "rules_bot",
+      "name": "WIF_rule_regime_full__fork1",
+      "status": "active",
+      "created_brt": "2026-10-16T00:33:40.094727-03:00",
+      "strategy": "fork:WIF_rule_regime_full__fork1",
+      "lineage": "WIF_rule_regime_full",
+      "parent": "WIF_rule_regime_full",
+      "params_diff": {
+        "rule": {
+          "ema_fast": 10
+        }
+      },
+      "reason": "nightly 2026-10-16: replay de regra 1h val -8.163 vs -12.587 (train -28.500 vs -37.975), 119 barras",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de WIF_rule_regime_full",
+      "start_value": 779.8679403443106,
+      "report_label": "atr\u00e1s da original (amostra ainda pequena)",
+      "report_label_brt": "2026-10-31T00:38:58.860252-03:00",
+      "report_label_reason": "margem -3.26pp, \u00e0 frente 29% de 14 dias"
+    },
+    "h1_exits_hybrid_von_cap2__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": "lab_h1_exits",
+      "name": "h1_exits_hybrid_von_cap2__fork2",
+      "status": "active",
+      "created_brt": "2026-10-17T00:31:11.224322-03:00",
+      "strategy": "fork:h1_exits_hybrid_von_cap2__fork2",
+      "lineage": "h1_exits_hybrid_von_cap2",
+      "parent": "h1_exits_hybrid_von_cap2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-17: val -0.821 vs -33.627 (train +0.730 vs -53.470), custo 16.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h1_exits_hybrid_von_cap2",
+      "start_value": 955.1076772687895,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:00.455115-03:00",
+      "report_label_reason": "margem +1.50pp, \u00e0 frente 23% de 13 dias"
+    },
+    "relaxed__fork3": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-17T00:32:44.959102-03:00",
+      "strategy": "fork:relaxed__fork3",
+      "lineage": "relaxed",
+      "parent": "relaxed__fork1",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42,
+          "buy_fraction_usdt": 0.3
+        }
+      },
+      "reason": "nightly 2026-10-17: val -15.680 vs -51.840 (train +23.023 vs -66.568), custo 16.0 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de relaxed__fork1",
+      "start_value": 945.6933387019324,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:02.132267-03:00",
+      "report_label_reason": "margem +3.24pp, \u00e0 frente 69% de 13 dias"
+    },
+    "h1_exits_FARTCOIN_poorjev_relaxed__fork3": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "FARTCOIN_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-17T00:33:22.902248-03:00",
+      "strategy": "fork:h1_exits_FARTCOIN_poorjev_relaxed__fork3",
+      "lineage": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "parent": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "params_diff": {
+        "gates": {
+          "max_trades_per_hour": 6
+        }
+      },
+      "reason": "nightly 2026-10-17: val -87.831 vs -121.753 (train -89.930 vs -90.254), custo 15.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de h1_exits_FARTCOIN_poorjev_relaxed",
+      "start_value": 929.4234665177725,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:03.821308-03:00",
+      "report_label_reason": "margem +0.55pp, \u00e0 frente 38% de 13 dias"
+    },
+    "h1_exits_WIF_poorjev_relaxed__fork4": {
+      "asset": "WIF",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "WIF_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_WIF_poorjev_relaxed__fork4",
+      "status": "active",
+      "created_brt": "2026-10-17T00:33:33.110078-03:00",
+      "strategy": "fork:h1_exits_WIF_poorjev_relaxed__fork4",
+      "lineage": "h1_exits_WIF_poorjev_relaxed",
+      "parent": "h1_exits_WIF_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "tp": 0.054,
+          "sl": 0.036000000000000004
+        },
+        "gates": {
+          "buy_fraction_usdt": 0.3
+        }
+      },
+      "reason": "nightly 2026-10-17: val -31.186 vs -56.070 (train -165.549 vs -182.509), custo 15.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 4 de h1_exits_WIF_poorjev_relaxed",
+      "start_value": 840.9245959082655,
+      "report_label": "lead fork (base para tuning \u2014 n\u00e3o \u00e9 veredito)",
+      "report_label_brt": "2026-10-31T00:39:05.485966-03:00",
+      "report_label_reason": "margem +8.56pp, \u00e0 frente 92% de 13 dias"
+    },
+    "meme_PNUT_relaxed__fork2": {
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_PNUT_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_PNUT_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-17T00:33:45.600500-03:00",
+      "strategy": "fork:meme_PNUT_relaxed__fork2",
+      "lineage": "meme_PNUT_relaxed",
+      "parent": "meme_PNUT_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-17: val +0.000 vs -8.167 (train +0.000 vs -18.138), custo 15.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de meme_PNUT_relaxed",
+      "start_value": 959.4123053069832,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:06.431087-03:00",
+      "report_label_reason": "margem +2.28pp, \u00e0 frente 77% de 13 dias"
+    },
+    "relaxed_expcap50__fork3": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "relaxed_expcap50__fork3",
+      "status": "active",
+      "created_brt": "2026-10-18T00:34:29.177627-03:00",
+      "strategy": "fork:relaxed_expcap50__fork3",
+      "lineage": "relaxed_expcap50",
+      "parent": "relaxed_expcap50",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-18: val -0.972 vs -26.420 (train -4.538 vs -72.154), custo 16.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de relaxed_expcap50",
+      "start_value": 931.056666209066,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:07.884653-03:00",
+      "report_label_reason": "margem +1.19pp, \u00e0 frente 58% de 12 dias"
+    },
+    "meme_GOAT_relaxed__fork2": {
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_GOAT_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_GOAT_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-18T00:35:57.592626-03:00",
+      "strategy": "fork:meme_GOAT_relaxed__fork2",
+      "lineage": "meme_GOAT_relaxed",
+      "parent": "meme_GOAT_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-18: val +0.000 vs -6.156 (train +0.000 vs -36.964), custo 15.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de meme_GOAT_relaxed",
+      "start_value": 951.6829772624056,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:08.654448-03:00",
+      "report_label_reason": "margem +4.80pp, \u00e0 frente 83% de 12 dias"
+    },
+    "h1_exits_BONK_poorjev_relaxed__fork3": {
+      "asset": "BONK",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "BONK_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_BONK_poorjev_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-20T00:33:18.408634-03:00",
+      "strategy": "fork:h1_exits_BONK_poorjev_relaxed__fork3",
+      "lineage": "h1_exits_BONK_poorjev_relaxed",
+      "parent": "h1_exits_BONK_poorjev_relaxed",
+      "params_diff": {
+        "exits": {
+          "sl": 0.036000000000000004
+        },
+        "gates": {
+          "buy_fraction_usdt": 0.3
+        }
+      },
+      "reason": "nightly 2026-10-20: val -44.313 vs -57.359 (train -160.808 vs -179.363), custo 17.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de h1_exits_BONK_poorjev_relaxed",
+      "start_value": 792.3208665516307,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:39:09.752248-03:00",
+      "report_label_reason": "margem -5.72pp, \u00e0 frente 40% de 10 dias"
+    },
+    "h1_exits_MEW_poorjev_relaxed__fork3": {
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "MEW_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_MEW_poorjev_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-20T00:33:25.579410-03:00",
+      "strategy": "fork:h1_exits_MEW_poorjev_relaxed__fork3",
+      "lineage": "h1_exits_MEW_poorjev_relaxed",
+      "parent": "h1_exits_MEW_poorjev_relaxed__fork1",
+      "params_diff": {
+        "exits": {
+          "sl": 0.036000000000000004
+        },
+        "gates": {
+          "buy_fraction_usdt": 0.3
+        }
+      },
+      "reason": "nightly 2026-10-20: val -45.939 vs -53.267 (train -193.482 vs -206.667), custo 17.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de h1_exits_MEW_poorjev_relaxed__fork1",
+      "start_value": 833.0196992222635,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:39:10.932622-03:00",
+      "report_label_reason": "margem -0.23pp, \u00e0 frente 60% de 10 dias"
+    },
+    "meme_FARTCOIN_relaxed__fork1": {
+      "asset": "FARTCOIN",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "meme_FARTCOIN_relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": "model_gated",
+      "name": "meme_FARTCOIN_relaxed__fork1",
+      "status": "active",
+      "created_brt": "2026-10-20T00:33:42.769691-03:00",
+      "strategy": "fork:meme_FARTCOIN_relaxed__fork1",
+      "lineage": "meme_FARTCOIN_relaxed",
+      "parent": "meme_FARTCOIN_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.385
+        }
+      },
+      "reason": "nightly 2026-10-20: val +0.000 vs -7.823 (train +0.000 vs -8.610), custo 17.5 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de meme_FARTCOIN_relaxed",
+      "start_value": 1021.288057882669,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:11.568375-03:00",
+      "report_label_reason": "margem +1.55pp, \u00e0 frente 60% de 10 dias"
+    },
+    "MEW_rule_donch_regime_full__fork1": {
+      "asset": "MEW",
+      "cls": "meme",
+      "kind": "rule",
+      "source": null,
+      "profile": "baseline",
+      "model": "rule",
+      "test_type": "rule_donchian",
+      "rule": "rule_donch_regime_full",
+      "variant": "full",
+      "runner": "rules_bot",
+      "name": "MEW_rule_donch_regime_full__fork1",
+      "status": "active",
+      "created_brt": "2026-10-21T00:34:22.708786-03:00",
+      "strategy": "fork:MEW_rule_donch_regime_full__fork1",
+      "lineage": "MEW_rule_donch_regime_full",
+      "parent": "MEW_rule_donch_regime_full",
+      "params_diff": {
+        "rule": {
+          "ema_fast": 13
+        }
+      },
+      "reason": "nightly 2026-10-21: replay de regra 1h val +191.916 vs +186.698 (train -8.775 vs -8.775), 119 barras",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 1 de MEW_rule_donch_regime_full",
+      "start_value": 1066.6304528374874,
+      "report_label": "atr\u00e1s da original (amostra ainda pequena)",
+      "report_label_brt": "2026-10-31T00:39:12.665046-03:00",
+      "report_label_reason": "margem -0.04pp, \u00e0 frente 0% de 9 dias"
+    },
+    "h1_exits_von_relaxed__fork4": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": null,
+      "name": "h1_exits_von_relaxed__fork4",
+      "status": "active",
+      "created_brt": "2026-10-22T01:58:09.822466-03:00",
+      "strategy": "fork:h1_exits_von_relaxed__fork4",
+      "lineage": "h1_exits_von_relaxed",
+      "parent": "h1_exits_von_relaxed__fork2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42,
+          "buy_fraction_usdt": 0.2
+        },
+        "exits": {
+          "trail": 0.008,
+          "tp": 0.027500000000000004,
+          "trail_arm": 0.012,
+          "sl": 0.0135
+        }
+      },
+      "reason": "nightly 2026-10-22: val +4.936 vs -35.106 (train -14.953 vs -168.447), custo 16.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 4 de h1_exits_von_relaxed__fork2",
+      "start_value": 869.4486093099599,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:13.479179-03:00",
+      "report_label_reason": "margem +1.57pp, \u00e0 frente 38% de 8 dias"
+    },
+    "poorjev_relaxed__fork4": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": "model_gated",
+      "name": "poorjev_relaxed__fork4",
+      "status": "active",
+      "created_brt": "2026-10-22T02:59:34.124618-03:00",
+      "strategy": "fork:poorjev_relaxed__fork4",
+      "lineage": "poorjev_relaxed",
+      "parent": "poorjev_relaxed__fork2",
+      "params_diff": {
+        "gates": {
+          "cooldown_seconds": 3240,
+          "buy_fraction_usdt": 0.2
+        },
+        "exits": {
+          "sl": 0.018,
+          "trail": 0.008,
+          "tp": 0.03
+        }
+      },
+      "reason": "nightly 2026-10-22: val -22.416 vs -34.720 (train -114.056 vs -159.857), custo 16.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 4 de poorjev_relaxed__fork2",
+      "start_value": 864.6024872659655,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:14.328243-03:00",
+      "report_label_reason": "margem +1.78pp, \u00e0 frente 62% de 8 dias"
+    },
+    "h3_limit_hybrid_von_cap2__fork3": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": null,
+      "name": "h3_limit_hybrid_von_cap2__fork3",
+      "status": "active",
+      "created_brt": "2026-10-23T00:32:43.158708-03:00",
+      "strategy": "fork:h3_limit_hybrid_von_cap2__fork3",
+      "lineage": "h3_limit_hybrid_von_cap2",
+      "parent": "h3_limit_hybrid_von_cap2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-23: val +0.204 vs -15.951 (train -2.199 vs -63.692), custo 16.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de h3_limit_hybrid_von_cap2",
+      "start_value": 837.9496429537315,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:15.141377-03:00",
+      "report_label_reason": "margem +0.53pp, \u00e0 frente 29% de 7 dias"
+    },
+    "h3_limit_poorjev_relaxed__fork2": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h3_limit_poorjev_relaxed__fork2",
+      "status": "active",
+      "created_brt": "2026-10-23T00:32:51.200917-03:00",
+      "strategy": "fork:h3_limit_poorjev_relaxed__fork2",
+      "lineage": "h3_limit_poorjev_relaxed",
+      "parent": "h3_limit_poorjev_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_prob_margin": 0.22000000000000003
+        }
+      },
+      "reason": "nightly 2026-10-23: val +0.699 vs -9.577 (train -12.008 vs -16.565), custo 16.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 2 de h3_limit_poorjev_relaxed",
+      "start_value": 925.6503452585652,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:16.049170-03:00",
+      "report_label_reason": "margem +0.09pp, \u00e0 frente 14% de 7 dias"
+    },
+    "h4_hours_von_relaxed__fork3": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "relaxed",
+      "profile": "relaxed",
+      "model": "von",
+      "test_type": null,
+      "name": "h4_hours_von_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-23T00:32:56.773048-03:00",
+      "strategy": "fork:h4_hours_von_relaxed__fork3",
+      "lineage": "h4_hours_von_relaxed",
+      "parent": "h4_hours_von_relaxed",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-23: val +0.204 vs -20.374 (train -2.199 vs -88.536), custo 16.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de h4_hours_von_relaxed",
+      "start_value": 846.1448583369513,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:16.970949-03:00",
+      "report_label_reason": "margem +0.22pp, \u00e0 frente 43% de 7 dias"
+    },
+    "hybrid_von_relaxed_cap2__fork3": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "hybrid_von_relaxed_cap2",
+      "profile": "relaxed",
+      "model": "von+rules",
+      "test_type": "hybrid",
+      "name": "hybrid_von_relaxed_cap2__fork3",
+      "status": "active",
+      "created_brt": "2026-10-23T00:33:01.668896-03:00",
+      "strategy": "fork:hybrid_von_relaxed_cap2__fork3",
+      "lineage": "hybrid_von_relaxed_cap2",
+      "parent": "hybrid_von_relaxed_cap2",
+      "params_diff": {
+        "gates": {
+          "min_confidence": 0.42
+        }
+      },
+      "reason": "nightly 2026-10-23: val +0.204 vs -19.743 (train -2.199 vs -70.244), custo 16.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de hybrid_von_relaxed_cap2",
+      "start_value": 840.4179184305088,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:18.228007-03:00",
+      "report_label_reason": "margem +5.35pp, \u00e0 frente 43% de 7 dias"
+    },
+    "laya_relaxed__fork4": {
+      "asset": "SOL",
+      "cls": "sol",
+      "kind": "gated",
+      "source": "laya_relaxed",
+      "profile": "relaxed",
+      "model": "laya",
+      "test_type": "model_gated",
+      "name": "laya_relaxed__fork4",
+      "status": "active",
+      "created_brt": "2026-10-23T00:33:05.596166-03:00",
+      "strategy": "fork:laya_relaxed__fork4",
+      "lineage": "laya_relaxed",
+      "parent": "laya_relaxed__fork2",
+      "params_diff": {
+        "gates": {
+          "buy_fraction_usdt": 0.2
+        }
+      },
+      "reason": "nightly 2026-10-23: val -38.139 vs -41.133 (train -62.835 vs -68.922), custo 16.6 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 4 de laya_relaxed__fork2",
+      "start_value": 913.3968821909984,
+      "report_label": "lead fork (base para tuning \u2014 n\u00e3o \u00e9 veredito)",
+      "report_label_brt": "2026-10-31T00:39:19.011078-03:00",
+      "report_label_reason": "margem +0.65pp, \u00e0 frente 86% de 7 dias"
+    },
+    "h1_exits_GOAT_poorjev_relaxed__fork3": {
+      "asset": "GOAT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "GOAT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_GOAT_poorjev_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-23T00:34:14.047094-03:00",
+      "strategy": "fork:h1_exits_GOAT_poorjev_relaxed__fork3",
+      "lineage": "h1_exits_GOAT_poorjev_relaxed",
+      "parent": "h1_exits_GOAT_poorjev_relaxed",
+      "params_diff": {
+        "gates": {
+          "max_trades_per_hour": 6
+        }
+      },
+      "reason": "nightly 2026-10-23: val +30.787 vs +25.841 (train -199.620 vs -200.722), custo 20.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de h1_exits_GOAT_poorjev_relaxed",
+      "start_value": 642.094578133022,
+      "report_label": "em observa\u00e7\u00e3o",
+      "report_label_brt": "2026-10-31T00:39:19.698722-03:00",
+      "report_label_reason": "margem +0.60pp, \u00e0 frente 57% de 7 dias"
+    },
+    "h1_exits_PNUT_poorjev_relaxed__fork3": {
+      "asset": "PNUT",
+      "cls": "meme",
+      "kind": "gated",
+      "source": "PNUT_poorjev_relaxed",
+      "profile": "relaxed",
+      "model": "poorjev",
+      "test_type": null,
+      "name": "h1_exits_PNUT_poorjev_relaxed__fork3",
+      "status": "active",
+      "created_brt": "2026-10-23T00:34:19.680198-03:00",
+      "strategy": "fork:h1_exits_PNUT_poorjev_relaxed__fork3",
+      "lineage": "h1_exits_PNUT_poorjev_relaxed",
+      "parent": "h1_exits_PNUT_poorjev_relaxed__fork1",
+      "params_diff": {
+        "gates": {
+          "buy_fraction_usdt": 0.3
+        }
+      },
+      "reason": "nightly 2026-10-23: val +52.781 vs +40.705 (train -150.821 vs -167.926), custo 20.2 bps",
+      "is_original": false,
+      "who": "nightly",
+      "label": "Fork 3 de h1_exits_PNUT_poorjev_relaxed__fork1",
+      "start_value": 835.5585194784521,
+      "report_label": "atr\u00e1s da original",
+      "report_label_brt": "2026-10-31T00:39:20.468524-03:00",
+      "report_label_reason": "margem -0.60pp, \u00e0 frente 14% de 7 dias"
+    }
+  },
+  "lineages": {
+    "h1_exits_von_relaxed": {
+      "root": "h1_exits_von_relaxed",
+      "lead": "h1_exits_von_relaxed__fork2",
+      "members": [
+        "h1_exits_von_relaxed",
+        "h1_exits_von_relaxed__fork1",
+        "h1_exits_von_relaxed__fork2",
+        "h1_exits_von_relaxed__fork3",
+        "h1_exits_von_relaxed__fork4"
+      ]
+    },
+    "h1_exits_BONK_poorjev_relaxed": {
+      "root": "h1_exits_BONK_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_BONK_poorjev_relaxed",
+        "h1_exits_BONK_poorjev_relaxed__fork1",
+        "h1_exits_BONK_poorjev_relaxed__fork2",
+        "h1_exits_BONK_poorjev_relaxed__fork3"
+      ]
+    },
+    "h1_exits_WIF_poorjev_relaxed": {
+      "root": "h1_exits_WIF_poorjev_relaxed",
+      "lead": "h1_exits_WIF_poorjev_relaxed__fork4",
+      "members": [
+        "h1_exits_WIF_poorjev_relaxed",
+        "h1_exits_WIF_poorjev_relaxed__fork1",
+        "h1_exits_WIF_poorjev_relaxed__fork2",
+        "h1_exits_WIF_poorjev_relaxed__fork3",
+        "h1_exits_WIF_poorjev_relaxed__fork4"
+      ]
+    },
+    "h1_exits_POPCAT_poorjev_relaxed": {
+      "root": "h1_exits_POPCAT_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_POPCAT_poorjev_relaxed",
+        "h1_exits_POPCAT_poorjev_relaxed__fork1",
+        "h1_exits_POPCAT_poorjev_relaxed__fork2"
+      ]
+    },
+    "h1_exits_FARTCOIN_poorjev_relaxed": {
+      "root": "h1_exits_FARTCOIN_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_FARTCOIN_poorjev_relaxed",
+        "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+        "h1_exits_FARTCOIN_poorjev_relaxed__fork2",
+        "h1_exits_FARTCOIN_poorjev_relaxed__fork3"
+      ]
+    },
+    "h1_exits_PNUT_poorjev_relaxed": {
+      "root": "h1_exits_PNUT_poorjev_relaxed",
+      "lead": "h1_exits_PNUT_poorjev_relaxed__fork1",
+      "members": [
+        "h1_exits_PNUT_poorjev_relaxed",
+        "h1_exits_PNUT_poorjev_relaxed__fork1",
+        "h1_exits_PNUT_poorjev_relaxed__fork2",
+        "h1_exits_PNUT_poorjev_relaxed__fork3"
+      ]
+    },
+    "h1_exits_MEW_poorjev_relaxed": {
+      "root": "h1_exits_MEW_poorjev_relaxed",
+      "lead": "h1_exits_MEW_poorjev_relaxed__fork3",
+      "members": [
+        "h1_exits_MEW_poorjev_relaxed",
+        "h1_exits_MEW_poorjev_relaxed__fork1",
+        "h1_exits_MEW_poorjev_relaxed__fork2",
+        "h1_exits_MEW_poorjev_relaxed__fork3"
+      ]
+    },
+    "h1_exits_GOAT_poorjev_relaxed": {
+      "root": "h1_exits_GOAT_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h1_exits_GOAT_poorjev_relaxed",
+        "h1_exits_GOAT_poorjev_relaxed__fork1",
+        "h1_exits_GOAT_poorjev_relaxed__fork2",
+        "h1_exits_GOAT_poorjev_relaxed__fork3"
+      ]
+    },
+    "h2_ensemble_sol": {
+      "root": "h2_ensemble_sol",
+      "lead": "h2_ensemble_sol__fork1",
+      "members": [
+        "h2_ensemble_sol",
+        "h2_ensemble_sol__fork1",
+        "h2_ensemble_sol__fork2"
+      ]
+    },
+    "h2_ensemble_BONK": {
+      "root": "h2_ensemble_BONK",
+      "lead": null,
+      "members": [
+        "h2_ensemble_BONK"
+      ]
+    },
+    "h2_ensemble_WIF": {
+      "root": "h2_ensemble_WIF",
+      "lead": null,
+      "members": [
+        "h2_ensemble_WIF",
+        "h2_ensemble_WIF__fork1"
+      ]
+    },
+    "h2_ensemble_POPCAT": {
+      "root": "h2_ensemble_POPCAT",
+      "lead": null,
+      "members": [
+        "h2_ensemble_POPCAT"
+      ]
+    },
+    "h2_ensemble_FARTCOIN": {
+      "root": "h2_ensemble_FARTCOIN",
+      "lead": "h2_ensemble_FARTCOIN__fork1",
+      "members": [
+        "h2_ensemble_FARTCOIN",
+        "h2_ensemble_FARTCOIN__fork1"
+      ]
+    },
+    "h2_ensemble_PNUT": {
+      "root": "h2_ensemble_PNUT",
+      "lead": null,
+      "members": [
+        "h2_ensemble_PNUT"
+      ]
+    },
+    "h2_ensemble_MEW": {
+      "root": "h2_ensemble_MEW",
+      "lead": null,
+      "members": [
+        "h2_ensemble_MEW"
+      ]
+    },
+    "h2_ensemble_GOAT": {
+      "root": "h2_ensemble_GOAT",
+      "lead": null,
+      "members": [
+        "h2_ensemble_GOAT"
+      ]
+    },
+    "h3_limit_poorjev_relaxed": {
+      "root": "h3_limit_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h3_limit_poorjev_relaxed",
+        "h3_limit_poorjev_relaxed__fork1",
+        "h3_limit_poorjev_relaxed__fork2"
+      ]
+    },
+    "h3_limit_hybrid_von_cap2": {
+      "root": "h3_limit_hybrid_von_cap2",
+      "lead": null,
+      "members": [
+        "h3_limit_hybrid_von_cap2",
+        "h3_limit_hybrid_von_cap2__fork1",
+        "h3_limit_hybrid_von_cap2__fork2",
+        "h3_limit_hybrid_von_cap2__fork3"
+      ]
+    },
+    "h4_hours_poorjev_relaxed": {
+      "root": "h4_hours_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "h4_hours_poorjev_relaxed"
+      ]
+    },
+    "h4_hours_von_relaxed": {
+      "root": "h4_hours_von_relaxed",
+      "lead": null,
+      "members": [
+        "h4_hours_von_relaxed",
+        "h4_hours_von_relaxed__fork1",
+        "h4_hours_von_relaxed__fork2",
+        "h4_hours_von_relaxed__fork3"
+      ]
+    },
+    "h1_exits_hybrid_von_cap2": {
+      "root": "h1_exits_hybrid_von_cap2",
+      "lead": null,
+      "members": [
+        "h1_exits_hybrid_von_cap2",
+        "h1_exits_hybrid_von_cap2__fork1",
+        "h1_exits_hybrid_von_cap2__fork2"
+      ]
+    },
+    "relaxed_expcap50": {
+      "root": "relaxed_expcap50",
+      "lead": null,
+      "members": [
+        "relaxed_expcap50",
+        "relaxed_expcap50__fork1",
+        "relaxed_expcap50__fork2",
+        "relaxed_expcap50__fork3"
+      ]
+    },
+    "relaxed": {
+      "root": "relaxed",
+      "lead": "relaxed__fork1",
+      "members": [
+        "relaxed",
+        "relaxed__fork1",
+        "relaxed__fork2",
+        "relaxed__fork3"
+      ]
+    },
+    "poorjev_relaxed": {
+      "root": "poorjev_relaxed",
+      "lead": "poorjev_relaxed__fork2",
+      "members": [
+        "poorjev_relaxed",
+        "poorjev_relaxed__fork1",
+        "poorjev_relaxed__fork2",
+        "poorjev_relaxed__fork3",
+        "poorjev_relaxed__fork4"
+      ]
+    },
+    "laya_relaxed": {
+      "root": "laya_relaxed",
+      "lead": "laya_relaxed__fork4",
+      "members": [
+        "laya_relaxed",
+        "laya_relaxed__fork1",
+        "laya_relaxed__fork2",
+        "laya_relaxed__fork3",
+        "laya_relaxed__fork4"
+      ]
+    },
+    "FARTCOIN_laya_relaxed": {
+      "root": "FARTCOIN_laya_relaxed",
+      "lead": null,
+      "members": [
+        "FARTCOIN_laya_relaxed",
+        "FARTCOIN_laya_relaxed__fork1",
+        "FARTCOIN_laya_relaxed__fork2",
+        "FARTCOIN_laya_relaxed__fork3"
+      ]
+    },
+    "hybrid_von_relaxed_cap2": {
+      "root": "hybrid_von_relaxed_cap2",
+      "lead": null,
+      "members": [
+        "hybrid_von_relaxed_cap2",
+        "hybrid_von_relaxed_cap2__fork1",
+        "hybrid_von_relaxed_cap2__fork2",
+        "hybrid_von_relaxed_cap2__fork3"
+      ]
+    },
+    "meme_BONK_relaxed": {
+      "root": "meme_BONK_relaxed",
+      "lead": null,
+      "members": [
+        "meme_BONK_relaxed",
+        "meme_BONK_relaxed__fork1",
+        "meme_BONK_relaxed__fork2"
+      ]
+    },
+    "meme_MEW_relaxed": {
+      "root": "meme_MEW_relaxed",
+      "lead": null,
+      "members": [
+        "meme_MEW_relaxed",
+        "meme_MEW_relaxed__fork1",
+        "meme_MEW_relaxed__fork2"
+      ]
+    },
+    "meme_POPCAT_relaxed": {
+      "root": "meme_POPCAT_relaxed",
+      "lead": null,
+      "members": [
+        "meme_POPCAT_relaxed",
+        "meme_POPCAT_relaxed__fork1",
+        "meme_POPCAT_relaxed__fork2"
+      ]
+    },
+    "meme_WIF_relaxed": {
+      "root": "meme_WIF_relaxed",
+      "lead": null,
+      "members": [
+        "meme_WIF_relaxed",
+        "meme_WIF_relaxed__fork1",
+        "meme_WIF_relaxed__fork2"
+      ]
+    },
+    "meme_PNUT_relaxed": {
+      "root": "meme_PNUT_relaxed",
+      "lead": null,
+      "members": [
+        "meme_PNUT_relaxed",
+        "meme_PNUT_relaxed__fork1",
+        "meme_PNUT_relaxed__fork2"
+      ]
+    },
+    "meme_GOAT_relaxed": {
+      "root": "meme_GOAT_relaxed",
+      "lead": null,
+      "members": [
+        "meme_GOAT_relaxed",
+        "meme_GOAT_relaxed__fork1",
+        "meme_GOAT_relaxed__fork2"
+      ]
+    },
+    "poorjev_baseline": {
+      "root": "poorjev_baseline",
+      "lead": null,
+      "members": [
+        "poorjev_baseline",
+        "poorjev_baseline__fork1"
+      ]
+    },
+    "rsi_sol_1h": {
+      "root": "rsi_sol_1h",
+      "lead": null,
+      "members": [
+        "rsi_sol_1h",
+        "rsi_sol_1h__fork1"
+      ]
+    },
+    "BONK_rule_regime_full": {
+      "root": "BONK_rule_regime_full",
+      "lead": null,
+      "members": [
+        "BONK_rule_regime_full",
+        "BONK_rule_regime_full__fork1"
+      ]
+    },
+    "FARTCOIN_rule_regime_full": {
+      "root": "FARTCOIN_rule_regime_full",
+      "lead": null,
+      "members": [
+        "FARTCOIN_rule_regime_full",
+        "FARTCOIN_rule_regime_full__fork1"
+      ]
+    },
+    "GOAT_rule_regime_full": {
+      "root": "GOAT_rule_regime_full",
+      "lead": null,
+      "members": [
+        "GOAT_rule_regime_full",
+        "GOAT_rule_regime_full__fork1"
+      ]
+    },
+    "POPCAT_rule_regime_full": {
+      "root": "POPCAT_rule_regime_full",
+      "lead": null,
+      "members": [
+        "POPCAT_rule_regime_full",
+        "POPCAT_rule_regime_full__fork1"
+      ]
+    },
+    "WIF_rule_regime_full": {
+      "root": "WIF_rule_regime_full",
+      "lead": null,
+      "members": [
+        "WIF_rule_regime_full",
+        "WIF_rule_regime_full__fork1"
+      ]
+    },
+    "meme_FARTCOIN_relaxed": {
+      "root": "meme_FARTCOIN_relaxed",
+      "lead": null,
+      "members": [
+        "meme_FARTCOIN_relaxed",
+        "meme_FARTCOIN_relaxed__fork1"
+      ]
+    },
+    "MEW_rule_donch_regime_full": {
+      "root": "MEW_rule_donch_regime_full",
+      "lead": null,
+      "members": [
+        "MEW_rule_donch_regime_full",
+        "MEW_rule_donch_regime_full__fork1"
+      ]
+    },
+    "BONK_rule_regime": {
+      "root": "BONK_rule_regime",
+      "lead": null,
+      "members": [
+        "BONK_rule_regime"
+      ]
+    },
+    "MEW_rule_regime": {
+      "root": "MEW_rule_regime",
+      "lead": null,
+      "members": [
+        "MEW_rule_regime"
+      ]
+    },
+    "MEW_rule_regime_full": {
+      "root": "MEW_rule_regime_full",
+      "lead": null,
+      "members": [
+        "MEW_rule_regime_full"
+      ]
+    },
+    "PNUT_rule_donch_regime": {
+      "root": "PNUT_rule_donch_regime",
+      "lead": null,
+      "members": [
+        "PNUT_rule_donch_regime"
+      ]
+    },
+    "PNUT_rule_donch_regime_full": {
+      "root": "PNUT_rule_donch_regime_full",
+      "lead": null,
+      "members": [
+        "PNUT_rule_donch_regime_full"
+      ]
+    },
+    "PNUT_rule_regime_full": {
+      "root": "PNUT_rule_regime_full",
+      "lead": null,
+      "members": [
+        "PNUT_rule_regime_full"
+      ]
+    },
+    "POPCAT_rule_regime": {
+      "root": "POPCAT_rule_regime",
+      "lead": null,
+      "members": [
+        "POPCAT_rule_regime"
+      ]
+    },
+    "WIF_rule_regime": {
+      "root": "WIF_rule_regime",
+      "lead": null,
+      "members": [
+        "WIF_rule_regime"
+      ]
+    },
+    "MEW_hybrid_poorjev_regime": {
+      "root": "MEW_hybrid_poorjev_regime",
+      "lead": null,
+      "members": [
+        "MEW_hybrid_poorjev_regime"
+      ]
+    },
+    "MEW_poorjev_baseline": {
+      "root": "MEW_poorjev_baseline",
+      "lead": null,
+      "members": [
+        "MEW_poorjev_baseline"
+      ]
+    },
+    "MEW_poorjev_relaxed": {
+      "root": "MEW_poorjev_relaxed",
+      "lead": null,
+      "members": [
+        "MEW_poorjev_relaxed"
+      ]
+    },
+    "POPCAT_rule_donch_regime": {
+      "root": "POPCAT_rule_donch_regime",
+      "lead": null,
+      "members": [
+        "POPCAT_rule_donch_regime"
+      ]
+    },
+    "POPCAT_rule_donch_regime_full": {
+      "root": "POPCAT_rule_donch_regime_full",
+      "lead": null,
+      "members": [
+        "POPCAT_rule_donch_regime_full"
+      ]
+    },
+    "PNUT_rule_regime": {
+      "root": "PNUT_rule_regime",
+      "lead": null,
+      "members": [
+        "PNUT_rule_regime"
+      ]
+    },
+    "BONK_rule_donch_regime": {
+      "root": "BONK_rule_donch_regime",
+      "lead": null,
+      "members": [
+        "BONK_rule_donch_regime"
+      ]
+    },
+    "BONK_rule_donch_regime_full": {
+      "root": "BONK_rule_donch_regime_full",
+      "lead": null,
+      "members": [
+        "BONK_rule_donch_regime_full"
+      ]
+    },
+    "GOAT_rule_donch_regime": {
+      "root": "GOAT_rule_donch_regime",
+      "lead": null,
+      "members": [
+        "GOAT_rule_donch_regime"
+      ]
+    },
+    "GOAT_rule_donch_regime_full": {
+      "root": "GOAT_rule_donch_regime_full",
+      "lead": null,
+      "members": [
+        "GOAT_rule_donch_regime_full"
+      ]
+    },
+    "MEW_rule_donch_regime": {
+      "root": "MEW_rule_donch_regime",
+      "lead": null,
+      "members": [
+        "MEW_rule_donch_regime"
+      ]
+    },
+    "WIF_rule_donch_regime_full": {
+      "root": "WIF_rule_donch_regime_full",
+      "lead": null,
+      "members": [
+        "WIF_rule_donch_regime_full"
+      ]
+    },
+    "FARTCOIN_rule_regime": {
+      "root": "FARTCOIN_rule_regime",
+      "lead": null,
+      "members": [
+        "FARTCOIN_rule_regime"
+      ]
+    }
+  },
+  "caps": {
+    "per_lineage_days": 7,
+    "total": 80
+  }
+}

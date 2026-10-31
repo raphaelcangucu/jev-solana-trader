@@ -1,0 +1,317 @@
+{
+  "version": "v2",
+  "source": "night_review_percentile_audit",
+  "parent": "baseline",
+  "generated_at_brt": "2026-10-02T00:30:32.421042-03:00",
+  "method": "Deterministic rewrite from a percentile confidence audit (conf > P90 (empates), candidates=chosen, horizon 900s, band 0.001). Phrases are appended only when there are confident mistakes. Baseline untouched (human gate).",
+  "changed": true,
+  "phrases_added": {
+    "buy": [
+      "be wary when the tape reads calm, deep, late"
+    ]
+  },
+  "action": {
+    "instructions": "buy on strength only when the book can absorb it; be stricter after overnight audit of confident mistakes",
+    "criteria": {
+      "buy": "the move is strong and depth is not thin; be wary when the tape reads calm, deep, late",
+      "sell": "the move is fading or fees are climbing",
+      "hold": "anything else"
+    }
+  },
+  "skip_this_cycle": {
+    "instructions": "conditions are too hostile to trade at all"
+  },
+  "audit": {
+    "rule": "conf > P90 (empates)",
+    "cutoff": 0.397,
+    "percentile": 90,
+    "fixed_bar": null,
+    "candidates": "chosen",
+    "horizon_s": 900,
+    "band": 0.001,
+    "n_rows": 380,
+    "n_answered": 379,
+    "n_candidates": 379,
+    "n_confident": 13,
+    "confident_share": 0.03430079155672823,
+    "n_confident_acted": 0,
+    "n_resolved": 13,
+    "n_unresolved": 0,
+    "n_mistakes": 5,
+    "mistake_episodes": 2,
+    "n_correct": 7,
+    "n_flat": 1,
+    "hit_rate": 0.5384615384615384,
+    "mistake_rate": 0.38461538461538464,
+    "by_side": {
+      "buy": {
+        "confident": 13,
+        "resolved": 13,
+        "mistake": 5,
+        "correct": 7,
+        "flat": 1
+      },
+      "sell": {}
+    },
+    "lose_words": [
+      [
+        "calm",
+        5
+      ],
+      [
+        "deep",
+        5
+      ],
+      [
+        "held",
+        5
+      ],
+      [
+        "late",
+        5
+      ],
+      [
+        "lifting",
+        5
+      ],
+      [
+        "mid",
+        5
+      ],
+      [
+        "night",
+        5
+      ],
+      [
+        "quiet",
+        5
+      ]
+    ],
+    "day": "2026-10-01",
+    "group": "von \u00b7 crit\u00e9rios baseline (baseline+relaxed)",
+    "fixed_bar_compare": {
+      "rule": "conf > 0.8 (barra fixa)",
+      "cutoff": 0.8,
+      "percentile": null,
+      "fixed_bar": 0.8,
+      "candidates": "chosen",
+      "horizon_s": 900,
+      "band": 0.001,
+      "n_rows": 380,
+      "n_answered": 379,
+      "n_candidates": 379,
+      "n_confident": 0,
+      "confident_share": 0.0,
+      "n_confident_acted": 0,
+      "n_resolved": 0,
+      "n_unresolved": 0,
+      "n_mistakes": 0,
+      "mistake_episodes": 0,
+      "n_correct": 0,
+      "n_flat": 0,
+      "hit_rate": null,
+      "mistake_rate": null,
+      "by_side": {
+        "buy": {},
+        "sell": {}
+      },
+      "lose_words": []
+    },
+    "groups": {
+      "von \u00b7 crit\u00e9rios baseline (baseline+relaxed)": {
+        "percentile": {
+          "rule": "conf > P90 (empates)",
+          "cutoff": 0.397,
+          "percentile": 90,
+          "fixed_bar": null,
+          "candidates": "chosen",
+          "horizon_s": 900,
+          "band": 0.001,
+          "n_rows": 380,
+          "n_answered": 379,
+          "n_candidates": 379,
+          "n_confident": 13,
+          "confident_share": 0.03430079155672823,
+          "n_confident_acted": 0,
+          "n_resolved": 13,
+          "n_unresolved": 0,
+          "n_mistakes": 5,
+          "mistake_episodes": 2,
+          "n_correct": 7,
+          "n_flat": 1,
+          "hit_rate": 0.5384615384615384,
+          "mistake_rate": 0.38461538461538464,
+          "by_side": {
+            "buy": {
+              "confident": 13,
+              "resolved": 13,
+              "mistake": 5,
+              "correct": 7,
+              "flat": 1
+            },
+            "sell": {}
+          },
+          "lose_words": [
+            [
+              "calm",
+              5
+            ],
+            [
+              "deep",
+              5
+            ],
+            [
+              "held",
+              5
+            ],
+            [
+              "late",
+              5
+            ],
+            [
+              "lifting",
+              5
+            ],
+            [
+              "mid",
+              5
+            ],
+            [
+              "night",
+              5
+            ],
+            [
+              "quiet",
+              5
+            ]
+          ]
+        },
+        "fixed_bar": {
+          "rule": "conf > 0.8 (barra fixa)",
+          "cutoff": 0.8,
+          "percentile": null,
+          "fixed_bar": 0.8,
+          "candidates": "chosen",
+          "horizon_s": 900,
+          "band": 0.001,
+          "n_rows": 380,
+          "n_answered": 379,
+          "n_candidates": 379,
+          "n_confident": 0,
+          "confident_share": 0.0,
+          "n_confident_acted": 0,
+          "n_resolved": 0,
+          "n_unresolved": 0,
+          "n_mistakes": 0,
+          "mistake_episodes": 0,
+          "n_correct": 0,
+          "n_flat": 0,
+          "hit_rate": null,
+          "mistake_rate": null,
+          "by_side": {
+            "buy": {},
+            "sell": {}
+          },
+          "lose_words": []
+        }
+      },
+      "von \u00b7 crit\u00e9rios v2 (v2)": {
+        "percentile": {
+          "rule": "conf > P90 (empates)",
+          "cutoff": 0.33,
+          "percentile": 90,
+          "fixed_bar": null,
+          "candidates": "chosen",
+          "horizon_s": 900,
+          "band": 0.001,
+          "n_rows": 380,
+          "n_answered": 380,
+          "n_candidates": 380,
+          "n_confident": 13,
+          "confident_share": 0.034210526315789476,
+          "n_confident_acted": 0,
+          "n_resolved": 13,
+          "n_unresolved": 0,
+          "n_mistakes": 5,
+          "mistake_episodes": 2,
+          "n_correct": 7,
+          "n_flat": 1,
+          "hit_rate": 0.5384615384615384,
+          "mistake_rate": 0.38461538461538464,
+          "by_side": {
+            "buy": {
+              "confident": 13,
+              "resolved": 13,
+              "mistake": 5,
+              "correct": 7,
+              "flat": 1
+            },
+            "sell": {}
+          },
+          "lose_words": [
+            [
+              "calm",
+              5
+            ],
+            [
+              "deep",
+              5
+            ],
+            [
+              "held",
+              5
+            ],
+            [
+              "late",
+              5
+            ],
+            [
+              "lifting",
+              5
+            ],
+            [
+              "mid",
+              5
+            ],
+            [
+              "night",
+              5
+            ],
+            [
+              "quiet",
+              5
+            ]
+          ]
+        },
+        "fixed_bar": {
+          "rule": "conf > 0.8 (barra fixa)",
+          "cutoff": 0.8,
+          "percentile": null,
+          "fixed_bar": 0.8,
+          "candidates": "chosen",
+          "horizon_s": 900,
+          "band": 0.001,
+          "n_rows": 380,
+          "n_answered": 380,
+          "n_candidates": 380,
+          "n_confident": 0,
+          "confident_share": 0.0,
+          "n_confident_acted": 0,
+          "n_resolved": 0,
+          "n_unresolved": 0,
+          "n_mistakes": 0,
+          "mistake_episodes": 0,
+          "n_correct": 0,
+          "n_flat": 0,
+          "hit_rate": null,
+          "mistake_rate": null,
+          "by_side": {
+            "buy": {},
+            "sell": {}
+          },
+          "lose_words": []
+        }
+      }
+    }
+  }
+}

@@ -27,6 +27,8 @@ stop "$RUN/von.pid" von
 pkill -f "$LAB/bot/sol_bot.py" 2>/dev/null || true
 pkill -f "$LAB/bot/meme_bot.py" 2>/dev/null || true
 pkill -f "$LAB/bot/rules_bot.py" 2>/dev/null || true
+pkill -f "$LAB/bot/lab_bot.py" 2>/dev/null || true
+pkill -f "$LAB/bot/nightly.py" 2>/dev/null || true
 pkill -f "$LAB/dashboard/app.py" 2>/dev/null || true
 pkill -f "von serve --host 127.0.0.1 --port 8765" 2>/dev/null || true
 pkill -f "serve_laya.py" 2>/dev/null || true
