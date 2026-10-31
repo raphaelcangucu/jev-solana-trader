@@ -1,0 +1,3302 @@
+{
+ "days": [
+  {
+   "day": "2026-10-01",
+   "n": 109,
+   "pos": 56,
+   "neg": 6,
+   "sum_pnl": 207.15,
+   "best": {
+    "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+    "group": "FARTCOIN lab",
+    "pnl": 10.42,
+    "pct": 1.04,
+    "exb": -5.178,
+    "expo": 73.9,
+    "skill": -1.127,
+    "trades": "13 (13/0)"
+   },
+   "worst": {
+    "name": "GOAT_hybrid_poorjev_regime",
+    "group": "GOAT poorjev+rules",
+    "pnl": -4.258,
+    "pct": -0.43,
+    "exb": -11.319,
+    "expo": 40.5,
+    "skill": -6.914,
+    "trades": "8 (8/0)"
+   },
+   "exp_day": 2,
+   "ntr": 391
+  },
+  {
+   "day": "2026-10-02",
+   "n": 109,
+   "pos": 16,
+   "neg": 70,
+   "sum_pnl": -1381.28,
+   "best": {
+    "name": "MEW_poorjev_baseline",
+    "group": "MEW poorjev",
+    "pnl": 62.411,
+    "pct": 6.19,
+    "exb": -0.867,
+    "expo": 99.6,
+    "skill": 0.426,
+    "trades": "8 (8/0)"
+   },
+   "worst": {
+    "name": "WIF_rule_donch_regime_full",
+    "group": "WIF rule",
+    "pnl": -119.576,
+    "pct": -11.96,
+    "exb": -76.339,
+    "expo": 58.1,
+    "skill": -95.325,
+    "trades": "2 (1/1)"
+   },
+   "exp_day": 3,
+   "ntr": 1030
+  },
+  {
+   "day": "2026-10-03",
+   "n": 117,
+   "pos": 47,
+   "neg": 39,
+   "sum_pnl": 380.29,
+   "best": {
+    "name": "BONK_hybrid_poorjev_regime",
+    "group": "BONK poorjev+rules",
+    "pnl": 48.571,
+    "pct": 5.06,
+    "exb": -0.775,
+    "expo": 99.7,
+    "skill": 0.255,
+    "trades": "0 (0/0)"
+   },
+   "worst": {
+    "name": "FARTCOIN_rule_regime_full",
+    "group": "FARTCOIN rule",
+    "pnl": -21.675,
+    "pct": -2.24,
+    "exb": -13.42,
+    "expo": 41.5,
+    "skill": -18.669,
+    "trades": "1 (1/0)"
+   },
+   "exp_day": 4,
+   "ntr": 349
+  },
+  {
+   "day": "2026-10-04",
+   "n": 119,
+   "pos": 69,
+   "neg": 22,
+   "sum_pnl": 1003.21,
+   "best": {
+    "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+    "group": "FARTCOIN lab",
+    "pnl": 72.56,
+    "pct": 6.95,
+    "exb": 5.958,
+    "expo": 95.8,
+    "skill": 6.255,
+    "trades": "34 (33/1)"
+   },
+   "worst": {
+    "name": "MEW_rule_donch_regime_full",
+    "group": "MEW rule",
+    "pnl": -25.363,
+    "pct": -2.65,
+    "exb": -29.037,
+    "expo": 62.6,
+    "skill": -27.605,
+    "trades": "2 (1/1)"
+   },
+   "exp_day": 5,
+   "ntr": 533
+  },
+  {
+   "day": "2026-10-05",
+   "n": 121,
+   "pos": 16,
+   "neg": 78,
+   "sum_pnl": -1379.98,
+   "best": {
+    "name": "h2_ensemble_WIF",
+    "group": "WIF lab",
+    "pnl": 16.288,
+    "pct": 1.68,
+    "exb": 45.642,
+    "expo": 11.8,
+    "skill": 19.53,
+    "trades": "23 (18/5)"
+   },
+   "worst": {
+    "name": "h1_exits_BONK_poorjev_relaxed__fork1",
+    "group": "BONK lab",
+    "pnl": -72.306,
+    "pct": -6.75,
+    "exb": -19.858,
+    "expo": 88.1,
+    "skill": -26.863,
+    "trades": "38 (37/1)"
+   },
+   "exp_day": 6,
+   "ntr": 657
+  },
+  {
+   "day": "2026-10-06",
+   "n": 124,
+   "pos": 3,
+   "neg": 86,
+   "sum_pnl": -2599.3,
+   "best": {
+    "name": "meme_FARTCOIN_relaxed",
+    "group": "FARTCOIN von",
+    "pnl": 1.657,
+    "pct": 0.16,
+    "exb": 90.516,
+    "expo": 2.7,
+    "skill": 4.131,
+    "trades": "6 (4/2)"
+   },
+   "worst": {
+    "name": "FARTCOIN_hybrid_poorjev_regime",
+    "group": "FARTCOIN poorjev+rules",
+    "pnl": -87.506,
+    "pct": -8.74,
+    "exb": 1.354,
+    "expo": 99.7,
+    "skill": 2.393,
+    "trades": "0 (0/0)"
+   },
+   "exp_day": 7,
+   "ntr": 797
+  },
+  {
+   "day": "2026-10-07",
+   "n": 126,
+   "pos": 1,
+   "neg": 72,
+   "sum_pnl": -986.15,
+   "best": {
+    "name": "h2_ensemble_BONK",
+    "group": "BONK lab",
+    "pnl": 3.461,
+    "pct": 0.35,
+    "exb": 5.595,
+    "expo": 8.5,
+    "skill": 3.592,
+    "trades": "9 (6/3)"
+   },
+   "worst": {
+    "name": "h1_exits_GOAT_poorjev_relaxed",
+    "group": "GOAT lab",
+    "pnl": -40.372,
+    "pct": -4.16,
+    "exb": -0.176,
+    "expo": 95.3,
+    "skill": -1.797,
+    "trades": "36 (35/1)"
+   },
+   "exp_day": 8,
+   "ntr": 714
+  },
+  {
+   "day": "2026-10-08",
+   "n": 128,
+   "pos": 10,
+   "neg": 66,
+   "sum_pnl": -1988.63,
+   "best": {
+    "name": "h2_ensemble_FARTCOIN__fork1",
+    "group": "FARTCOIN lab",
+    "pnl": 13.486,
+    "pct": 1.37,
+    "exb": 15.543,
+    "expo": 19.3,
+    "skill": 13.469,
+    "trades": "17 (12/5)"
+   },
+   "worst": {
+    "name": "WIF_poorjev_baseline",
+    "group": "WIF poorjev",
+    "pnl": -68.622,
+    "pct": -7.57,
+    "exb": 0.398,
+    "expo": 99.6,
+    "skill": 1.005,
+    "trades": "0 (0/0)"
+   },
+   "exp_day": 9,
+   "ntr": 1184
+  },
+  {
+   "day": "2026-10-09",
+   "n": 142,
+   "pos": 46,
+   "neg": 37,
+   "sum_pnl": 838.49,
+   "best": {
+    "name": "WIF_hybrid_poorjev_regime",
+    "group": "WIF poorjev+rules",
+    "pnl": 38.388,
+    "pct": 4.61,
+    "exb": -0.485,
+    "expo": 99.6,
+    "skill": 0.254,
+    "trades": "0 (0/0)"
+   },
+   "worst": {
+    "name": "h2_ensemble_WIF",
+    "group": "WIF lab",
+    "pnl": -17.682,
+    "pct": -1.86,
+    "exb": -56.159,
+    "expo": 17.3,
+    "skill": -25.157,
+    "trades": "21 (15/6)"
+   },
+   "exp_day": 10,
+   "ntr": 880
+  },
+  {
+   "day": "2026-10-10",
+   "n": 144,
+   "pos": 33,
+   "neg": 62,
+   "sum_pnl": -490.51,
+   "best": {
+    "name": "FARTCOIN_hybrid_poorjev_regime",
+    "group": "FARTCOIN poorjev+rules",
+    "pnl": 6.222,
+    "pct": 0.68,
+    "exb": -0.096,
+    "expo": 99.7,
+    "skill": -0.246,
+    "trades": "0 (0/0)"
+   },
+   "worst": {
+    "name": "h1_exits_WIF_poorjev_relaxed__fork3",
+    "group": "WIF lab",
+    "pnl": -26.531,
+    "pct": -2.95,
+    "exb": -4.809,
+    "expo": 90.2,
+    "skill": -7.093,
+    "trades": "6 (5/1)"
+   },
+   "exp_day": 11,
+   "ntr": 357
+  },
+  {
+   "day": "2026-10-11",
+   "n": 146,
+   "pos": 68,
+   "neg": 28,
+   "sum_pnl": 909.58,
+   "best": {
+    "name": "h1_exits_WIF_poorjev_relaxed__fork2",
+    "group": "WIF lab",
+    "pnl": 33.658,
+    "pct": 3.79,
+    "exb": 2.51,
+    "expo": 95.6,
+    "skill": 3.367,
+    "trades": "13 (13/0)"
+   },
+   "worst": {
+    "name": "POPCAT_rule_regime_full",
+    "group": "POPCAT rule",
+    "pnl": -20.581,
+    "pct": -2.27,
+    "exb": -17.166,
+    "expo": 4.5,
+    "skill": -20.44,
+    "trades": "1 (0/1)"
+   },
+   "exp_day": 12,
+   "ntr": 368
+  },
+  {
+   "day": "2026-10-12",
+   "n": 146,
+   "pos": 3,
+   "neg": 92,
+   "sum_pnl": -3862.11,
+   "best": {
+    "name": "h1_exits_von_relaxed__fork1",
+    "group": "SOL lab",
+    "pnl": 27.938,
+    "pct": 2.9,
+    "exb": 71.367,
+    "expo": 33.0,
+    "skill": 42.781,
+    "trades": "21 (18/3)"
+   },
+   "worst": {
+    "name": "h1_exits_PNUT_poorjev_relaxed",
+    "group": "PNUT lab",
+    "pnl": -99.378,
+    "pct": -10.29,
+    "exb": -19.127,
+    "expo": 91.9,
+    "skill": -23.18,
+    "trades": "35 (33/2)"
+   },
+   "exp_day": 13,
+   "ntr": 1175
+  },
+  {
+   "day": "2026-10-13",
+   "n": 148,
+   "pos": 71,
+   "neg": 11,
+   "sum_pnl": 577.63,
+   "best": {
+    "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork2",
+    "group": "FARTCOIN lab",
+    "pnl": 33.914,
+    "pct": 3.32,
+    "exb": 8.905,
+    "expo": 89.6,
+    "skill": 10.105,
+    "trades": "26 (25/1)"
+   },
+   "worst": {
+    "name": "h2_ensemble_POPCAT",
+    "group": "POPCAT lab",
+    "pnl": -21.011,
+    "pct": -2.38,
+    "exb": -39.983,
+    "expo": 22.2,
+    "skill": -25.549,
+    "trades": "18 (12/6)"
+   },
+   "exp_day": 14,
+   "ntr": 1134
+  },
+  {
+   "day": "2026-10-14",
+   "n": 148,
+   "pos": 2,
+   "neg": 81,
+   "sum_pnl": -3249.03,
+   "best": {
+    "name": "h2_ensemble_MEW",
+    "group": "MEW lab",
+    "pnl": 1.481,
+    "pct": 0.16,
+    "exb": 65.167,
+    "expo": 0.4,
+    "skill": 1.64,
+    "trades": "2 (2/0)"
+   },
+   "worst": {
+    "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+    "group": "FARTCOIN lab",
+    "pnl": -99.215,
+    "pct": -9.77,
+    "exb": -17.072,
+    "expo": 89.7,
+    "skill": -17.023,
+    "trades": "36 (33/3)"
+   },
+   "exp_day": 15,
+   "ntr": 985
+  },
+  {
+   "day": "2026-10-15",
+   "n": 153,
+   "pos": 71,
+   "neg": 37,
+   "sum_pnl": 1098.15,
+   "best": {
+    "name": "h1_exits_POPCAT_poorjev_relaxed__fork1",
+    "group": "POPCAT lab",
+    "pnl": 63.518,
+    "pct": 7.76,
+    "exb": 1.772,
+    "expo": 94.5,
+    "skill": 8.735,
+    "trades": "38 (37/1)"
+   },
+   "worst": {
+    "name": "h1_exits_GOAT_poorjev_relaxed",
+    "group": "GOAT lab",
+    "pnl": -64.049,
+    "pct": -8.17,
+    "exb": -97.183,
+    "expo": 88.5,
+    "skill": -130.161,
+    "trades": "48 (45/3)"
+   },
+   "exp_day": 16,
+   "ntr": 1312
+  },
+  {
+   "day": "2026-10-16",
+   "n": 169,
+   "pos": 17,
+   "neg": 100,
+   "sum_pnl": -800.85,
+   "best": {
+    "name": "h1_exits_WIF_poorjev_relaxed__fork3",
+    "group": "WIF lab",
+    "pnl": 23.509,
+    "pct": 2.87,
+    "exb": 15.722,
+    "expo": 89.4,
+    "skill": 15.948,
+    "trades": "20 (19/1)"
+   },
+   "worst": {
+    "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+    "group": "FARTCOIN lab",
+    "pnl": -29.788,
+    "pct": -3.66,
+    "exb": -14.389,
+    "expo": 88.3,
+    "skill": -18.352,
+    "trades": "57 (54/3)"
+   },
+   "exp_day": 17,
+   "ntr": 949
+  },
+  {
+   "day": "2026-10-17",
+   "n": 174,
+   "pos": 6,
+   "neg": 112,
+   "sum_pnl": -1913.49,
+   "best": {
+    "name": "h2_ensemble_WIF",
+    "group": "WIF lab",
+    "pnl": 4.299,
+    "pct": 0.49,
+    "exb": 20.563,
+    "expo": 8.4,
+    "skill": 5.781,
+    "trades": "9 (6/3)"
+   },
+   "worst": {
+    "name": "h1_exits_PNUT_poorjev_relaxed__fork2",
+    "group": "PNUT lab",
+    "pnl": -58.159,
+    "pct": -6.87,
+    "exb": -22.399,
+    "expo": 91.6,
+    "skill": -25.432,
+    "trades": "40 (38/2)"
+   },
+   "exp_day": 18,
+   "ntr": 922
+  },
+  {
+   "day": "2026-10-18",
+   "n": 176,
+   "pos": 71,
+   "neg": 48,
+   "sum_pnl": 118.87,
+   "best": {
+    "name": "FARTCOIN_laya_relaxed__fork2",
+    "group": "FARTCOIN lab",
+    "pnl": 24.684,
+    "pct": 2.66,
+    "exb": 38.207,
+    "expo": 9.4,
+    "skill": 25.91,
+    "trades": "5 (4/1)"
+   },
+   "worst": {
+    "name": "h1_exits_POPCAT_poorjev_relaxed",
+    "group": "POPCAT lab",
+    "pnl": -35.936,
+    "pct": -4.03,
+    "exb": -12.222,
+    "expo": 92.1,
+    "skill": -13.773,
+    "trades": "40 (38/2)"
+   },
+   "exp_day": 19,
+   "ntr": 1255
+  },
+  {
+   "day": "2026-10-19",
+   "n": 176,
+   "pos": 39,
+   "neg": 86,
+   "sum_pnl": -318.85,
+   "best": {
+    "name": "GOAT_rule_regime_full",
+    "group": "GOAT rule",
+    "pnl": 7.574,
+    "pct": 1.04,
+    "exb": -0.574,
+    "expo": 100.0,
+    "skill": -0.463,
+    "trades": "0 (0/0)"
+   },
+   "worst": {
+    "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+    "group": "FARTCOIN lab",
+    "pnl": -20.275,
+    "pct": -2.72,
+    "exb": -6.973,
+    "expo": 90.7,
+    "skill": -10.656,
+    "trades": "58 (56/2)"
+   },
+   "exp_day": 20,
+   "ntr": 797
+  },
+  {
+   "day": "2026-10-20",
+   "n": 179,
+   "pos": 101,
+   "neg": 33,
+   "sum_pnl": 2803.45,
+   "best": {
+    "name": "MEW_hybrid_poorjev_regime",
+    "group": "MEW poorjev+rules",
+    "pnl": 208.487,
+    "pct": 25.0,
+    "exb": -3.597,
+    "expo": 99.6,
+    "skill": 12.603,
+    "trades": "0 (0/0)"
+   },
+   "worst": {
+    "name": "PNUT_rule_donch_regime_full",
+    "group": "PNUT rule",
+    "pnl": -44.846,
+    "pct": -4.87,
+    "exb": -65.556,
+    "expo": 62.3,
+    "skill": -60.198,
+    "trades": "3 (2/1)"
+   },
+   "exp_day": 21,
+   "ntr": 1264
+  },
+  {
+   "day": "2026-10-21",
+   "n": 180,
+   "pos": 45,
+   "neg": 87,
+   "sum_pnl": -1057.0,
+   "best": {
+    "name": "BONK_rule_regime_full__fork1",
+    "group": "BONK lab",
+    "pnl": 26.142,
+    "pct": 3.45,
+    "exb": -2.642,
+    "expo": 100.0,
+    "skill": -0.136,
+    "trades": "0 (0/0)"
+   },
+   "worst": {
+    "name": "MEW_hybrid_poorjev_regime",
+    "group": "MEW poorjev+rules",
+    "pnl": -138.055,
+    "pct": -13.24,
+    "exb": 2.382,
+    "expo": 99.7,
+    "skill": 3.954,
+    "trades": "0 (0/0)"
+   },
+   "exp_day": 22,
+   "ntr": 1222
+  },
+  {
+   "day": "2026-10-22",
+   "n": 182,
+   "pos": 21,
+   "neg": 107,
+   "sum_pnl": -901.97,
+   "best": {
+    "name": "MEW_hybrid_poorjev_regime",
+    "group": "MEW poorjev+rules",
+    "pnl": 144.677,
+    "pct": 15.99,
+    "exb": -2.496,
+    "expo": 99.7,
+    "skill": 6.062,
+    "trades": "0 (0/0)"
+   },
+   "worst": {
+    "name": "FARTCOIN_rule_donch_regime_full",
+    "group": "FARTCOIN rule",
+    "pnl": -45.66,
+    "pct": -4.84,
+    "exb": -13.78,
+    "expo": 25.3,
+    "skill": -37.266,
+    "trades": "1 (0/1)"
+   },
+   "exp_day": 23,
+   "ntr": 825
+  },
+  {
+   "day": "2026-10-23",
+   "n": 189,
+   "pos": 3,
+   "neg": 102,
+   "sum_pnl": -2432.71,
+   "best": {
+    "name": "FARTCOIN_laya_relaxed__fork2",
+    "group": "FARTCOIN lab",
+    "pnl": 8.338,
+    "pct": 0.89,
+    "exb": 60.225,
+    "expo": 19.7,
+    "skill": 19.652,
+    "trades": "22 (17/5)"
+   },
+   "worst": {
+    "name": "h1_exits_MEW_poorjev_relaxed",
+    "group": "MEW lab",
+    "pnl": -123.375,
+    "pct": -11.67,
+    "exb": -21.517,
+    "expo": 81.7,
+    "skill": -38.803,
+    "trades": "88 (84/4)"
+   },
+   "exp_day": 24,
+   "ntr": 1617
+  },
+  {
+   "day": "2026-10-24",
+   "n": 189,
+   "pos": 16,
+   "neg": 88,
+   "sum_pnl": -1303.95,
+   "best": {
+    "name": "h1_exits_BONK_poorjev_relaxed__fork1",
+    "group": "BONK lab",
+    "pnl": 15.235,
+    "pct": 1.88,
+    "exb": 5.674,
+    "expo": 80.0,
+    "skill": 6.947,
+    "trades": "31 (29/2)"
+   },
+   "worst": {
+    "name": "FARTCOIN_hybrid_poorjev_regime",
+    "group": "FARTCOIN poorjev+rules",
+    "pnl": -50.059,
+    "pct": -6.49,
+    "exb": 0.775,
+    "expo": 99.6,
+    "skill": -0.437,
+    "trades": "0 (0/0)"
+   },
+   "exp_day": 25,
+   "ntr": 1307
+  },
+  {
+   "day": "2026-10-25",
+   "n": 189,
+   "pos": 2,
+   "neg": 104,
+   "sum_pnl": -2250.52,
+   "best": {
+    "name": "FARTCOIN_laya_relaxed__fork3",
+    "group": "FARTCOIN lab",
+    "pnl": 3.342,
+    "pct": 0.35,
+    "exb": 31.908,
+    "expo": 5.6,
+    "skill": 5.268,
+    "trades": "5 (3/2)"
+   },
+   "worst": {
+    "name": "h1_exits_MEW_poorjev_relaxed__fork1",
+    "group": "MEW lab",
+    "pnl": -61.106,
+    "pct": -7.04,
+    "exb": -6.579,
+    "expo": 84.7,
+    "skill": -18.322,
+    "trades": "39 (38/1)"
+   },
+   "exp_day": 26,
+   "ntr": 920
+  },
+  {
+   "day": "2026-10-26",
+   "n": 189,
+   "pos": 40,
+   "neg": 95,
+   "sum_pnl": -385.83,
+   "best": {
+    "name": "FARTCOIN_hybrid_poorjev_regime",
+    "group": "FARTCOIN poorjev+rules",
+    "pnl": 25.338,
+    "pct": 3.65,
+    "exb": -0.392,
+    "expo": 99.6,
+    "skill": -0.357,
+    "trades": "0 (0/0)"
+   },
+   "worst": {
+    "name": "h1_exits_MEW_poorjev_relaxed__fork1",
+    "group": "MEW lab",
+    "pnl": -45.454,
+    "pct": -5.63,
+    "exb": -25.937,
+    "expo": 79.7,
+    "skill": -32.476,
+    "trades": "40 (38/2)"
+   },
+   "exp_day": 27,
+   "ntr": 1014
+  },
+  {
+   "day": "2026-10-27",
+   "n": 189,
+   "pos": 97,
+   "neg": 39,
+   "sum_pnl": 1022.35,
+   "best": {
+    "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+    "group": "FARTCOIN lab",
+    "pnl": 21.868,
+    "pct": 3.79,
+    "exb": -6.055,
+    "expo": 80.1,
+    "skill": 4.853,
+    "trades": "72 (67/5)"
+   },
+   "worst": {
+    "name": "h2_ensemble_PNUT",
+    "group": "PNUT lab",
+    "pnl": -9.791,
+    "pct": -1.23,
+    "exb": -31.426,
+    "expo": 8.2,
+    "skill": -11.648,
+    "trades": "10 (7/3)"
+   },
+   "exp_day": 28,
+   "ntr": 625
+  },
+  {
+   "day": "2026-10-28",
+   "n": 189,
+   "pos": 13,
+   "neg": 126,
+   "sum_pnl": -1632.02,
+   "best": {
+    "name": "h1_exits_von_relaxed__fork1",
+    "group": "SOL lab",
+    "pnl": 19.632,
+    "pct": 2.14,
+    "exb": 33.409,
+    "expo": 40.4,
+    "skill": 25.507,
+    "trades": "15 (12/3)"
+   },
+   "worst": {
+    "name": "GOAT_rule_donch_regime_full",
+    "group": "GOAT rule",
+    "pnl": -44.441,
+    "pct": -5.35,
+    "exb": -29.232,
+    "expo": 75.1,
+    "skill": -32.223,
+    "trades": "2 (1/1)"
+   },
+   "exp_day": 29,
+   "ntr": 1129
+  },
+  {
+   "day": "2026-10-29",
+   "n": 189,
+   "pos": 8,
+   "neg": 123,
+   "sum_pnl": -4220.17,
+   "best": {
+    "name": "h1_exits_von_relaxed__fork1",
+    "group": "SOL lab",
+    "pnl": 22.801,
+    "pct": 2.43,
+    "exb": 62.114,
+    "expo": 57.4,
+    "skill": 47.873,
+    "trades": "32 (28/4)"
+   },
+   "worst": {
+    "name": "h1_exits_BONK_poorjev_relaxed__fork1",
+    "group": "BONK lab",
+    "pnl": -98.57,
+    "pct": -12.31,
+    "exb": -17.44,
+    "expo": 63.8,
+    "skill": -48.565,
+    "trades": "61 (58/3)"
+   },
+   "exp_day": 30,
+   "ntr": 2660
+  },
+  {
+   "day": "2026-10-30",
+   "n": 189,
+   "pos": 85,
+   "neg": 19,
+   "sum_pnl": 2291.05,
+   "best": {
+    "name": "h1_exits_PNUT_poorjev_relaxed__fork1",
+    "group": "PNUT lab",
+    "pnl": 73.657,
+    "pct": 9.99,
+    "exb": 14.685,
+    "expo": 91.6,
+    "skill": 18.859,
+    "trades": "41 (39/2)"
+   },
+   "worst": {
+    "name": "h2_ensemble_PNUT",
+    "group": "PNUT lab",
+    "pnl": -18.445,
+    "pct": -2.58,
+    "exb": -76.507,
+    "expo": 9.6,
+    "skill": -24.068,
+    "trades": "25 (16/9)"
+   },
+   "exp_day": 31,
+   "ntr": 1683
+  }
+ ],
+ "sol_daily": {
+  "2026-10-01": [
+   118.6,
+   120.165,
+   118.545,
+   120.03
+  ],
+  "2026-10-02": [
+   120.03,
+   123.655,
+   117.21,
+   118.885
+  ],
+  "2026-10-03": [
+   118.885,
+   120.38,
+   118.83,
+   120.38
+  ],
+  "2026-10-04": [
+   120.4,
+   122.235,
+   120.165,
+   121.25
+  ],
+  "2026-10-05": [
+   121.185,
+   122.025,
+   118.905,
+   120.185
+  ],
+  "2026-10-06": [
+   120.185,
+   121.95,
+   117.01,
+   118.28
+  ],
+  "2026-10-07": [
+   118.27,
+   119.04,
+   115.22,
+   116.4
+  ],
+  "2026-10-08": [
+   116.425,
+   116.5,
+   105.62,
+   110.23
+  ],
+  "2026-10-09": [
+   110.22,
+   111.88,
+   108.36,
+   109.825
+  ],
+  "2026-10-10": [
+   109.825,
+   110.655,
+   109.285,
+   109.905
+  ],
+  "2026-10-11": [
+   109.895,
+   111.93,
+   108.88,
+   111.86
+  ],
+  "2026-10-12": [
+   112.815,
+   112.86,
+   101.9,
+   106.65
+  ],
+  "2026-10-13": [
+   106.67,
+   108.85,
+   105.495,
+   107.655
+  ],
+  "2026-10-14": [
+   107.635,
+   108.515,
+   100.98,
+   103.23
+  ],
+  "2026-10-15": [
+   103.165,
+   106.395,
+   100.83,
+   105.215
+  ],
+  "2026-10-16": [
+   105.22,
+   106.48,
+   102.36,
+   104.445
+  ],
+  "2026-10-17": [
+   104.455,
+   105.14,
+   101.27,
+   103.84
+  ],
+  "2026-10-18": [
+   103.845,
+   105.755,
+   100.36,
+   105.345
+  ],
+  "2026-10-19": [
+   105.375,
+   106.06,
+   103.435,
+   105.015
+  ],
+  "2026-10-20": [
+   105.0,
+   107.83,
+   103.66,
+   106.18
+  ],
+  "2026-10-21": [
+   106.18,
+   109.1,
+   105.53,
+   106.06
+  ],
+  "2026-10-22": [
+   103.7,
+   104.66,
+   103.115,
+   104.515
+  ],
+  "2026-10-23": [
+   104.495,
+   105.1,
+   101.73,
+   102.555
+  ],
+  "2026-10-24": [
+   102.555,
+   102.99,
+   98.63,
+   102.32
+  ],
+  "2026-10-25": [
+   102.315,
+   102.625,
+   100.25,
+   100.495
+  ],
+  "2026-10-26": [
+   100.495,
+   102.54,
+   99.78,
+   100.1
+  ],
+  "2026-10-27": [
+   100.155,
+   101.865,
+   99.12,
+   101.545
+  ],
+  "2026-10-28": [
+   101.545,
+   103.715,
+   99.27,
+   99.905
+  ],
+  "2026-10-29": [
+   99.925,
+   103.035,
+   92.47,
+   95.225
+  ],
+  "2026-10-30": [
+   95.205,
+   98.355,
+   93.44,
+   96.66
+  ],
+  "2026-10-31": [
+   96.635,
+   96.725,
+   95.435,
+   95.795
+  ]
+ },
+ "cumulative_generated": "2026-10-31T00:41:10.765244-03:00",
+ "cum_n": 189,
+ "cum_pos": 8,
+ "cum_beat_bh": 105,
+ "cum_sum": -22036.17,
+ "top": [
+  {
+   "name": "rsi_sol_1h__fork1",
+   "group": "SOL lab",
+   "start": "10-15 00:33",
+   "v0": 962.357,
+   "v1": 969.2,
+   "pnl": 6.843,
+   "pct": 0.71,
+   "exb": 30.465,
+   "expo": 32.2,
+   "skill": 22.395,
+   "timing": "+25.141 (0.10)",
+   "trades": "5 (4/1)",
+   "fees": 0.6383,
+   "mdd": -3.9
+  },
+  {
+   "name": "meme_POPCAT_relaxed__fork1",
+   "group": "POPCAT lab",
+   "start": "10-09 00:31",
+   "v0": 963.967,
+   "v1": 970.121,
+   "pnl": 6.154,
+   "pct": 0.64,
+   "exb": 128.219,
+   "expo": 0.2,
+   "skill": 6.327,
+   "timing": "+6.944 (0.04)",
+   "trades": "1 (0/1)",
+   "fees": 0.1244,
+   "mdd": -0.16
+  },
+  {
+   "name": "poorjev_relaxed__fork4",
+   "group": "SOL lab",
+   "start": "10-22 02:59",
+   "v0": 864.602,
+   "v1": 869.538,
+   "pnl": 4.936,
+   "pct": 0.57,
+   "exb": 4.936,
+   "expo": 70.2,
+   "skill": 46.616,
+   "timing": "+63.689 (0.01)",
+   "trades": "197 (181/16)",
+   "fees": 10.5698,
+   "mdd": -4.84
+  },
+  {
+   "name": "meme_GOAT_relaxed__fork1",
+   "group": "GOAT lab",
+   "start": "10-11 00:32",
+   "v0": 979.997,
+   "v1": 985.501,
+   "pnl": 5.504,
+   "pct": 0.56,
+   "exb": 139.195,
+   "expo": 1.3,
+   "skill": 6.415,
+   "timing": "+7.546 (0.24)",
+   "trades": "1 (0/1)",
+   "fees": 0.2849,
+   "mdd": -0.87
+  },
+  {
+   "name": "meme_FARTCOIN_relaxed",
+   "group": "FARTCOIN von",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 1005.464,
+   "pnl": 5.464,
+   "pct": 0.55,
+   "exb": 315.591,
+   "expo": 2.6,
+   "skill": 14.074,
+   "timing": "+69.973 (0.01)",
+   "trades": "139 (89/50)",
+   "fees": 18.9072,
+   "mdd": -3.28
+  },
+  {
+   "name": "h1_exits_von_relaxed__fork3",
+   "group": "SOL lab",
+   "start": "10-15 00:30",
+   "v0": 917.76,
+   "v1": 920.097,
+   "pnl": 2.337,
+   "pct": 0.25,
+   "exb": 15.602,
+   "expo": 0.1,
+   "skill": 2.389,
+   "timing": "+1.521 (0.12)",
+   "trades": "1 (0/1)",
+   "fees": 0.1161,
+   "mdd": -0.2
+  },
+  {
+   "name": "relaxed_expcap50__fork1",
+   "group": "SOL lab",
+   "start": "10-03 01:40",
+   "v0": 998.854,
+   "v1": 1000.694,
+   "pnl": 1.84,
+   "pct": 0.18,
+   "exb": 97.445,
+   "expo": 0.1,
+   "skill": 2.001,
+   "timing": "+2.272 (0.15)",
+   "trades": "1 (0/1)",
+   "fees": 0.2529,
+   "mdd": -0.12
+  },
+  {
+   "name": "relaxed__fork2",
+   "group": "SOL lab",
+   "start": "10-10 00:31",
+   "v0": 970.181,
+   "v1": 970.527,
+   "pnl": 0.346,
+   "pct": 0.04,
+   "exb": 58.871,
+   "expo": 2.4,
+   "skill": 3.063,
+   "timing": "+3.002 (0.40)",
+   "trades": "1 (0/1)",
+   "fees": 0.2439,
+   "mdd": -0.5
+  },
+  {
+   "name": "h1_exits_hybrid_von_cap2__fork1",
+   "group": "SOL lab",
+   "start": "10-09 00:30",
+   "v0": 985.249,
+   "v1": 985.249,
+   "pnl": 0.0,
+   "pct": 0.0,
+   "exb": 0.0,
+   "expo": 0.0,
+   "skill": 0.0,
+   "timing": "+0.000 (–)",
+   "trades": "0 (0/0)",
+   "fees": 0.0,
+   "mdd": 0.0
+  },
+  {
+   "name": "h1_exits_hybrid_von_cap2__fork2",
+   "group": "SOL lab",
+   "start": "10-17 00:31",
+   "v0": 955.108,
+   "v1": 955.108,
+   "pnl": 0.0,
+   "pct": 0.0,
+   "exb": 0.0,
+   "expo": 0.0,
+   "skill": 0.0,
+   "timing": "+0.000 (–)",
+   "trades": "0 (0/0)",
+   "fees": 0.0,
+   "mdd": 0.0
+  },
+  {
+   "name": "h1_exits_von_relaxed__fork4",
+   "group": "SOL lab",
+   "start": "10-22 01:58",
+   "v0": 864.653,
+   "v1": 864.635,
+   "pnl": -0.018,
+   "pct": -0.0,
+   "exb": 14.948,
+   "expo": 0.0,
+   "skill": -0.012,
+   "timing": "-0.309 (0.88)",
+   "trades": "1 (0/1)",
+   "fees": 0.1059,
+   "mdd": -0.0
+  },
+  {
+   "name": "h3_limit_hybrid_von_cap2__fork1",
+   "group": "SOL lab",
+   "start": "10-09 00:31",
+   "v0": 883.186,
+   "v1": 883.186,
+   "pnl": 0.0,
+   "pct": 0.0,
+   "exb": 0.0,
+   "expo": 0.0,
+   "skill": 0.0,
+   "timing": "+0.000 (–)",
+   "trades": "0 (0/0)",
+   "fees": 0.0,
+   "mdd": 0.0
+  }
+ ],
+ "bottom": [
+  {
+   "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+   "group": "FARTCOIN lab",
+   "start": "10-03 00:10",
+   "v0": 1054.869,
+   "v1": 555.64,
+   "pnl": -499.229,
+   "pct": -47.33,
+   "exb": -169.314,
+   "expo": 79.0,
+   "skill": -219.666,
+   "timing": "-22.006 (0.59)",
+   "trades": "2096 (1959/137)",
+   "fees": 101.0354,
+   "mdd": -51.38
+  },
+  {
+   "name": "h1_exits_GOAT_poorjev_relaxed",
+   "group": "GOAT lab",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 604.282,
+   "pnl": -395.718,
+   "pct": -39.57,
+   "exb": -155.631,
+   "expo": 96.1,
+   "skill": -202.63,
+   "timing": "-111.704 (0.97)",
+   "trades": "517 (491/26)",
+   "fees": 20.5542,
+   "mdd": -48.53
+  },
+  {
+   "name": "GOAT_rule_regime_full",
+   "group": "GOAT rule",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 657.41,
+   "pnl": -342.59,
+   "pct": -34.26,
+   "exb": -102.503,
+   "expo": 33.3,
+   "skill": -276.0,
+   "timing": "-250.248 (0.99)",
+   "trades": "26 (13/13)",
+   "fees": 10.4408,
+   "mdd": -36.74
+  },
+  {
+   "name": "h1_exits_WIF_poorjev_relaxed__fork1",
+   "group": "WIF lab",
+   "start": "10-04 01:35",
+   "v0": 1012.272,
+   "v1": 680.697,
+   "pnl": -331.576,
+   "pct": -32.76,
+   "exb": -33.158,
+   "expo": 96.1,
+   "skill": -19.71,
+   "timing": "-15.226 (0.65)",
+   "trades": "476 (452/24)",
+   "fees": 19.603,
+   "mdd": -40.72
+  },
+  {
+   "name": "h1_exits_WIF_poorjev_relaxed",
+   "group": "WIF lab",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 682.855,
+   "pnl": -317.145,
+   "pct": -31.71,
+   "exb": -16.471,
+   "expo": 95.8,
+   "skill": -3.937,
+   "timing": "+1.150 (0.48)",
+   "trades": "581 (553/28)",
+   "fees": 24.2852,
+   "mdd": -40.46
+  },
+  {
+   "name": "h1_exits_MEW_poorjev_relaxed__fork1",
+   "group": "MEW lab",
+   "start": "10-05 01:35",
+   "v0": 1053.311,
+   "v1": 720.087,
+   "pnl": -333.224,
+   "pct": -31.64,
+   "exb": -134.232,
+   "expo": 87.2,
+   "skill": -181.546,
+   "timing": "+20.364 (0.43)",
+   "trades": "610 (578/32)",
+   "fees": 27.7477,
+   "mdd": -36.78
+  },
+  {
+   "name": "FARTCOIN_hybrid_poorjev_regime",
+   "group": "FARTCOIN poorjev+rules",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 684.495,
+   "pnl": -315.505,
+   "pct": -31.55,
+   "exb": -5.378,
+   "expo": 99.5,
+   "skill": 11.949,
+   "timing": "-9.961 (0.89)",
+   "trades": "20 (20/0)",
+   "fees": 0.5104,
+   "mdd": -41.79
+  },
+  {
+   "name": "WIF_rule_regime_full",
+   "group": "WIF rule",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 684.864,
+   "pnl": -315.136,
+   "pct": -31.51,
+   "exb": -13.271,
+   "expo": 33.3,
+   "skill": -205.949,
+   "timing": "-190.056 (0.94)",
+   "trades": "26 (13/13)",
+   "fees": 10.5914,
+   "mdd": -35.39
+  }
+ ],
+ "top_skill": [
+  {
+   "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+   "group": "FARTCOIN lab",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 774.38,
+   "pnl": -225.62,
+   "pct": -22.56,
+   "exb": 83.653,
+   "expo": 94.2,
+   "skill": 83.8,
+   "timing": "+191.692 (0.00)",
+   "trades": "841 (800/41)",
+   "fees": 38.502,
+   "mdd": -37.23
+  },
+  {
+   "name": "h1_exits_WIF_poorjev_relaxed__fork3",
+   "group": "WIF lab",
+   "start": "10-09 01:35",
+   "v0": 871.722,
+   "v1": 818.382,
+   "pnl": -53.34,
+   "pct": -6.12,
+   "exb": 95.84,
+   "expo": 89.7,
+   "skill": 74.965,
+   "timing": "+130.844 (0.02)",
+   "trades": "374 (355/19)",
+   "fees": 15.6568,
+   "mdd": -16.2
+  },
+  {
+   "name": "h1_exits_von_relaxed__fork1",
+   "group": "SOL lab",
+   "start": "10-04 01:35",
+   "v0": 1017.281,
+   "v1": 941.565,
+   "pnl": -75.716,
+   "pct": -7.44,
+   "exb": 129.334,
+   "expo": 63.3,
+   "skill": 61.662,
+   "timing": "+103.839 (0.04)",
+   "trades": "649 (587/62)",
+   "fees": 43.4794,
+   "mdd": -12.49
+  },
+  {
+   "name": "rsi_sol_1h",
+   "group": "SOL rule",
+   "start": "10-01 22:24",
+   "v0": 1000.458,
+   "v1": 984.044,
+   "pnl": -16.413,
+   "pct": -1.64,
+   "exb": -8.958,
+   "expo": 36.9,
+   "skill": 55.936,
+   "timing": "+59.566 (0.02)",
+   "trades": "19 (15/4)",
+   "fees": 2.2768,
+   "mdd": -6.82
+  },
+  {
+   "name": "h1_exits_PNUT_poorjev_relaxed",
+   "group": "PNUT lab",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 808.008,
+   "pnl": -191.992,
+   "pct": -19.2,
+   "exb": 54.495,
+   "expo": 95.3,
+   "skill": 48.388,
+   "timing": "+170.845 (0.00)",
+   "trades": "510 (485/25)",
+   "fees": 21.593,
+   "mdd": -29.6
+  },
+  {
+   "name": "poorjev_relaxed__fork4",
+   "group": "SOL lab",
+   "start": "10-22 02:59",
+   "v0": 864.602,
+   "v1": 869.538,
+   "pnl": 4.936,
+   "pct": 0.57,
+   "exb": 4.936,
+   "expo": 70.2,
+   "skill": 46.616,
+   "timing": "+63.689 (0.01)",
+   "trades": "197 (181/16)",
+   "fees": 10.5698,
+   "mdd": -4.84
+  },
+  {
+   "name": "h1_exits_WIF_poorjev_relaxed__fork2",
+   "group": "WIF lab",
+   "start": "10-06 01:35",
+   "v0": 987.815,
+   "v1": 753.762,
+   "pnl": -234.053,
+   "pct": -23.69,
+   "exb": 50.264,
+   "expo": 90.8,
+   "skill": 46.163,
+   "timing": "+97.155 (0.05)",
+   "trades": "422 (400/22)",
+   "fees": 18.1748,
+   "mdd": -30.32
+  },
+  {
+   "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork3",
+   "group": "FARTCOIN lab",
+   "start": "10-17 00:33",
+   "v0": 929.423,
+   "v1": 780.921,
+   "pnl": -148.503,
+   "pct": -15.98,
+   "exb": 49.285,
+   "expo": 93.7,
+   "skill": 38.567,
+   "timing": "+71.041 (0.04)",
+   "trades": "376 (357/19)",
+   "fees": 15.8086,
+   "mdd": -25.59
+  },
+  {
+   "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork2",
+   "group": "FARTCOIN lab",
+   "start": "10-09 01:34",
+   "v0": 1020.079,
+   "v1": 820.443,
+   "pnl": -199.636,
+   "pct": -19.57,
+   "exb": 58.054,
+   "expo": 88.2,
+   "skill": 35.672,
+   "timing": "+123.492 (0.05)",
+   "trades": "471 (447/24)",
+   "fees": 21.6936,
+   "mdd": -26.46
+  },
+  {
+   "name": "h1_exits_PNUT_poorjev_relaxed__fork1",
+   "group": "PNUT lab",
+   "start": "10-09 00:31",
+   "v0": 921.017,
+   "v1": 805.356,
+   "pnl": -115.662,
+   "pct": -12.56,
+   "exb": 40.032,
+   "expo": 94.4,
+   "skill": 25.683,
+   "timing": "+156.481 (0.00)",
+   "trades": "393 (371/22)",
+   "fees": 17.3306,
+   "mdd": -25.04
+  }
+ ],
+ "refs": {
+  "poorjev_relaxed__fork4": {
+   "name": "poorjev_relaxed__fork4",
+   "group": "SOL lab",
+   "start": "10-22 02:59",
+   "v0": 864.602,
+   "v1": 869.538,
+   "pnl": 4.936,
+   "pct": 0.57,
+   "exb": 4.936,
+   "expo": 70.2,
+   "skill": 46.616,
+   "timing": "+63.689 (0.01)",
+   "trades": "197 (181/16)",
+   "fees": 10.5698,
+   "mdd": -4.84
+  },
+  "meme_FARTCOIN_relaxed": {
+   "name": "meme_FARTCOIN_relaxed",
+   "group": "FARTCOIN von",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 1005.464,
+   "pnl": 5.464,
+   "pct": 0.55,
+   "exb": 315.591,
+   "expo": 2.6,
+   "skill": 14.074,
+   "timing": "+69.973 (0.01)",
+   "trades": "139 (89/50)",
+   "fees": 18.9072,
+   "mdd": -3.28
+  },
+  "baseline": {
+   "name": "baseline",
+   "group": "SOL von",
+   "start": "10-01 22:24",
+   "v0": 1000.443,
+   "v1": 993.0,
+   "pnl": -7.443,
+   "pct": -0.74,
+   "exb": 0.0,
+   "expo": 3.6,
+   "skill": -0.36,
+   "timing": "-0.369 (–)",
+   "trades": "0 (0/0)",
+   "fees": 0.0,
+   "mdd": -1.04
+  },
+  "laya_relaxed": {
+   "name": "laya_relaxed",
+   "group": "SOL laya",
+   "start": "10-01 22:24",
+   "v0": 1000.443,
+   "v1": 993.0,
+   "pnl": -7.443,
+   "pct": -0.74,
+   "exb": 0.0,
+   "expo": 3.6,
+   "skill": -0.363,
+   "timing": "-0.372 (–)",
+   "trades": "0 (0/0)",
+   "fees": 0.0,
+   "mdd": -1.04
+  },
+  "rsi_sol_1h": {
+   "name": "rsi_sol_1h",
+   "group": "SOL rule",
+   "start": "10-01 22:24",
+   "v0": 1000.458,
+   "v1": 984.044,
+   "pnl": -16.413,
+   "pct": -1.64,
+   "exb": -8.958,
+   "expo": 36.9,
+   "skill": 55.936,
+   "timing": "+59.566 (0.02)",
+   "trades": "19 (15/4)",
+   "fees": 2.2768,
+   "mdd": -6.82
+  },
+  "v2": {
+   "name": "v2",
+   "group": "SOL von",
+   "start": "10-01 22:24",
+   "v0": 1000.443,
+   "v1": 980.898,
+   "pnl": -19.544,
+   "pct": -1.95,
+   "exb": -12.101,
+   "expo": 5.2,
+   "skill": -9.402,
+   "timing": "-9.194 (0.84)",
+   "trades": "3 (1/2)",
+   "fees": 0.2617,
+   "mdd": -2.8
+  },
+  "relaxed__fork1": {
+   "name": "relaxed__fork1",
+   "group": "SOL lab",
+   "start": "10-03 00:10",
+   "v0": 994.887,
+   "v1": 910.01,
+   "pnl": -84.877,
+   "pct": -8.53,
+   "exb": 103.541,
+   "expo": 48.8,
+   "skill": 11.366,
+   "timing": "+43.827 (0.03)",
+   "trades": "401 (322/79)",
+   "fees": 38.0281,
+   "mdd": -11.73
+  },
+  "grid_sol_2pct": {
+   "name": "grid_sol_2pct",
+   "group": "SOL rule",
+   "start": "10-01 22:24",
+   "v0": 1000.458,
+   "v1": 898.533,
+   "pnl": -101.924,
+   "pct": -10.19,
+   "exb": -94.469,
+   "expo": 54.4,
+   "skill": 4.861,
+   "timing": "+5.361 (0.37)",
+   "trades": "7 (7/0)",
+   "fees": 0.5406,
+   "mdd": -12.67
+  },
+  "relaxed_expcap50": {
+   "name": "relaxed_expcap50",
+   "group": "SOL lab",
+   "start": "10-01 22:49",
+   "v0": 1000.495,
+   "v1": 885.252,
+   "pnl": -115.242,
+   "pct": -11.52,
+   "exb": -107.751,
+   "expo": 50.3,
+   "skill": -16.076,
+   "timing": "-7.172 (0.94)",
+   "trades": "134 (115/19)",
+   "fees": 9.0391,
+   "mdd": -14.16
+  },
+  "poorjev_relaxed": {
+   "name": "poorjev_relaxed",
+   "group": "SOL poorjev",
+   "start": "10-01 22:24",
+   "v0": 1000.443,
+   "v1": 853.943,
+   "pnl": -146.5,
+   "pct": -14.64,
+   "exb": -139.057,
+   "expo": 79.3,
+   "skill": 8.957,
+   "timing": "+8.385 (0.33)",
+   "trades": "20 (20/0)",
+   "fees": 0.4895,
+   "mdd": -18.33
+  },
+  "relaxed": {
+   "name": "relaxed",
+   "group": "SOL von",
+   "start": "10-01 22:24",
+   "v0": 1000.297,
+   "v1": 796.91,
+   "pnl": -203.387,
+   "pct": -20.33,
+   "exb": -195.944,
+   "expo": 98.5,
+   "skill": -10.429,
+   "timing": "-9.669 (0.81)",
+   "trades": "330 (313/17)",
+   "fees": 14.5919,
+   "mdd": -25.03
+  },
+  "hybrid_von_relaxed_cap2": {
+   "name": "hybrid_von_relaxed_cap2",
+   "group": "SOL von+rules",
+   "start": "10-01 22:24",
+   "v0": 1000.443,
+   "v1": 795.463,
+   "pnl": -204.98,
+   "pct": -20.49,
+   "exb": -197.537,
+   "expo": 59.0,
+   "skill": -89.387,
+   "timing": "-97.464 (0.98)",
+   "trades": "141 (134/7)",
+   "fees": 6.2121,
+   "mdd": -23.16
+  },
+  "h1_exits_FARTCOIN_poorjev_relaxed": {
+   "name": "h1_exits_FARTCOIN_poorjev_relaxed",
+   "group": "FARTCOIN lab",
+   "start": "10-01 22:24",
+   "v0": 1000.0,
+   "v1": 774.38,
+   "pnl": -225.62,
+   "pct": -22.56,
+   "exb": 83.653,
+   "expo": 94.2,
+   "skill": 83.8,
+   "timing": "+191.692 (0.00)",
+   "trades": "841 (800/41)",
+   "fees": 38.502,
+   "mdd": -37.23
+  }
+ },
+ "groups": {
+  "SOL lab": {
+   "n": 43,
+   "avg": -7.98,
+   "pos": 5
+  },
+  "POPCAT lab": {
+   "n": 7,
+   "avg": -14.14,
+   "pos": 1
+  },
+  "GOAT lab": {
+   "n": 8,
+   "avg": -15.55,
+   "pos": 1
+  },
+  "FARTCOIN von": {
+   "n": 2,
+   "avg": 0.28,
+   "pos": 1
+  },
+  "BONK laya": {
+   "n": 2,
+   "avg": 0.0,
+   "pos": 0
+  },
+  "BONK von": {
+   "n": 2,
+   "avg": -2.77,
+   "pos": 0
+  },
+  "BONK lab": {
+   "n": 8,
+   "avg": -15.18,
+   "pos": 0
+  },
+  "FARTCOIN laya": {
+   "n": 2,
+   "avg": 0.0,
+   "pos": 0
+  },
+  "FARTCOIN lab": {
+   "n": 11,
+   "avg": -15.64,
+   "pos": 0
+  },
+  "GOAT laya": {
+   "n": 2,
+   "avg": 0.0,
+   "pos": 0
+  },
+  "GOAT von": {
+   "n": 2,
+   "avg": -4.7,
+   "pos": 0
+  },
+  "MEW laya": {
+   "n": 2,
+   "avg": 0.0,
+   "pos": 0
+  },
+  "MEW von": {
+   "n": 2,
+   "avg": -5.64,
+   "pos": 0
+  },
+  "MEW lab": {
+   "n": 8,
+   "avg": -17.72,
+   "pos": 0
+  },
+  "PNUT laya": {
+   "n": 2,
+   "avg": 0.0,
+   "pos": 0
+  },
+  "PNUT von": {
+   "n": 2,
+   "avg": -3.12,
+   "pos": 0
+  },
+  "PNUT lab": {
+   "n": 7,
+   "avg": -11.26,
+   "pos": 0
+  },
+  "POPCAT laya": {
+   "n": 2,
+   "avg": 0.0,
+   "pos": 0
+  },
+  "POPCAT von": {
+   "n": 2,
+   "avg": -3.48,
+   "pos": 0
+  },
+  "WIF laya": {
+   "n": 2,
+   "avg": 0.0,
+   "pos": 0
+  },
+  "WIF von": {
+   "n": 2,
+   "avg": -4.37,
+   "pos": 0
+  },
+  "WIF lab": {
+   "n": 10,
+   "avg": -15.11,
+   "pos": 0
+  },
+  "SOL von": {
+   "n": 3,
+   "avg": -7.67,
+   "pos": 0
+  },
+  "SOL laya": {
+   "n": 2,
+   "avg": -0.74,
+   "pos": 0
+  },
+  "POPCAT rule": {
+   "n": 4,
+   "avg": -10.94,
+   "pos": 0
+  },
+  "SOL rule": {
+   "n": 2,
+   "avg": -5.92,
+   "pos": 0
+  },
+  "BONK rule": {
+   "n": 4,
+   "avg": -10.66,
+   "pos": 0
+  },
+  "MEW rule": {
+   "n": 4,
+   "avg": -11.2,
+   "pos": 0
+  },
+  "FARTCOIN rule": {
+   "n": 4,
+   "avg": -13.19,
+   "pos": 0
+  },
+  "WIF rule": {
+   "n": 4,
+   "avg": -15.03,
+   "pos": 0
+  },
+  "GOAT rule": {
+   "n": 4,
+   "avg": -17.64,
+   "pos": 0
+  },
+  "PNUT rule": {
+   "n": 4,
+   "avg": -16.16,
+   "pos": 0
+  },
+  "MEW poorjev": {
+   "n": 2,
+   "avg": -13.84,
+   "pos": 0
+  },
+  "MEW poorjev+rules": {
+   "n": 1,
+   "avg": -14.48,
+   "pos": 0
+  },
+  "SOL poorjev": {
+   "n": 2,
+   "avg": -14.57,
+   "pos": 0
+  },
+  "BONK poorjev": {
+   "n": 2,
+   "avg": -20.18,
+   "pos": 0
+  },
+  "SOL von+rules": {
+   "n": 1,
+   "avg": -20.49,
+   "pos": 0
+  },
+  "BONK poorjev+rules": {
+   "n": 1,
+   "avg": -20.76,
+   "pos": 0
+  },
+  "POPCAT poorjev": {
+   "n": 2,
+   "avg": -22.91,
+   "pos": 0
+  },
+  "POPCAT poorjev+rules": {
+   "n": 1,
+   "avg": -23.33,
+   "pos": 0
+  },
+  "GOAT poorjev": {
+   "n": 2,
+   "avg": -24.99,
+   "pos": 0
+  },
+  "PNUT poorjev": {
+   "n": 2,
+   "avg": -25.19,
+   "pos": 0
+  },
+  "GOAT poorjev+rules": {
+   "n": 1,
+   "avg": -25.45,
+   "pos": 0
+  },
+  "PNUT poorjev+rules": {
+   "n": 1,
+   "avg": -25.64,
+   "pos": 0
+  },
+  "WIF poorjev": {
+   "n": 2,
+   "avg": -29.99,
+   "pos": 0
+  },
+  "WIF poorjev+rules": {
+   "n": 1,
+   "avg": -30.47,
+   "pos": 0
+  },
+  "FARTCOIN poorjev": {
+   "n": 2,
+   "avg": -31.07,
+   "pos": 0
+  },
+  "FARTCOIN poorjev+rules": {
+   "n": 1,
+   "avg": -31.55,
+   "pos": 0
+  }
+ },
+ "verdicts": {
+  "ts": "2026-10-31T02:14:40.019864-03:00",
+  "counts": {
+   "inconclusivo": 185,
+   "perdedora": 4
+  },
+  "losers": [
+   "h1_exits_von_relaxed",
+   "h2_ensemble_sol",
+   "poorjev_relaxed__fork1",
+   "laya_relaxed__fork1"
+  ]
+ },
+ "verdict_reasons": {
+  "h1_exits_von_relaxed": "pior que o benchmark com p<0,05",
+  "h2_ensemble_sol": "pior que o benchmark com p<0,05",
+  "poorjev_relaxed__fork1": "pior que o benchmark com p<0,05",
+  "laya_relaxed__fork1": "pior que o benchmark com p<0,05"
+ },
+ "forks_n": 80,
+ "lab_n": 102,
+ "forks_by_who": {
+  "null": 5,
+  "claude-night": 16,
+  "nightly": 59
+ },
+ "forks_by_day": {
+  "2026-10-03": 8,
+  "2026-10-04": 2,
+  "2026-10-05": 2,
+  "2026-10-06": 3,
+  "2026-10-07": 2,
+  "2026-10-08": 2,
+  "2026-10-09": 14,
+  "2026-10-10": 2,
+  "2026-10-11": 2,
+  "2026-10-13": 2,
+  "2026-10-15": 5,
+  "2026-10-16": 16,
+  "2026-10-17": 5,
+  "2026-10-18": 2,
+  "2026-10-20": 3,
+  "2026-10-21": 1,
+  "2026-10-22": 2,
+  "2026-10-23": 7
+ },
+ "forks_sample": [
+  {
+   "name": "relaxed__fork1",
+   "who": null,
+   "created": "2026-10-03T00:10",
+   "diff": {
+    "exits": {
+     "tp": 0.025,
+     "sl": 0.015,
+     "trail": 0.01,
+     "trail_arm": 0.01,
+     "reentry_cooldown_min": 30
+    },
+    "gates": {
+     "max_exposure_frac": 0.5
+    }
+   },
+   "reason": "sessão Claude 2026-10-03 (pedido do utilizador): von SOL relaxado + saídas + exposição ≤50% contra a deriva só-compra (44C/2V, 97% exposto em 24h)"
+  },
+  {
+   "name": "poorjev_relaxed__fork1",
+   "who": null,
+   "created": "2026-10-03T00:10",
+   "diff": {
+    "exits": {
+     "tp": 0.025,
+     "sl": 0.015,
+     "trail": 0.01,
+     "trail_arm": 0.01,
+     "reentry_cooldown_min": 30
+    }
+   },
+   "reason": "sessão Claude 2026-10-03: poorjev SOL + saídas; H1 deu +86 US$ de habilidade em memes, testar em SOL"
+  },
+  {
+   "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork1",
+   "who": null,
+   "created": "2026-10-03T00:10",
+   "diff": {
+    "exits": {
+     "tp": 0.015,
+     "trail": 0.007,
+     "trail_arm": 0.007
+    }
+   },
+   "reason": "sessão Claude 2026-10-03: TP/trailing mais curtos para colher volatilidade mais vezes (timing +58 US$, p<0,01)"
+  },
+  {
+   "name": "h2_ensemble_FARTCOIN__fork1",
+   "who": null,
+   "created": "2026-10-03T00:10",
+   "diff": {
+    "gates": {
+     "cooldown_seconds": 600
+    }
+   },
+   "reason": "sessão Claude 2026-10-03: cooldown 10 min; timing positivo mas custos comem o ganho"
+  },
+  {
+   "name": "h2_ensemble_WIF__fork1",
+   "who": null,
+   "created": "2026-10-03T00:10",
+   "diff": {
+    "gates": {
+     "cooldown_seconds": 600
+    }
+   },
+   "reason": "sessão Claude 2026-10-03: cooldown 10 min; timing +6 US$ mas habilidade −14 US$"
+  },
+  {
+   "name": "relaxed_expcap50__fork1",
+   "who": "claude-night",
+   "created": "2026-10-03T01:40",
+   "diff": {
+    "criteria": {
+     "file": "data/lab/criteria/relaxed_expcap50__fork1.json",
+     "sha256": "695f62ca7dc81a0ffe1ffb440a71a2daa4a8c07185da21717c778471d23e61ef"
+    }
+   },
+   "reason": "[claude-night] Hipótese: os erros confiantes do von em SOL (24 h, 42 episódios) são compras com a fita já green (60% dos erros vs 39% dos acertos) ou pumping (12% vs 6%), enquanto os acertos são mais gray (59% vs 32%): o von persegue o movimento depois de ele acontecer. Critérios que preferem gray lifting e pedem cautela em green ou pumping com spread tight devem reduzir compras tardias. Pai relaxed_expcap50 (teto de exposição 50%) para separar habilidade de beta. Confirma se: em 3-7 dias habilidade fork - pai > 0 US$ com >= 15 trades e hit rate das chamadas confiantes do fork > a do pai. Refuta se: habilidade fork - pai <= 0 com >= 15 trades, ou < 5 trades em 7 dias (texto estrangula a confiança)."
+  },
+  {
+   "name": "laya_relaxed__fork1",
+   "who": "claude-night",
+   "created": "2026-10-03T01:40",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.04,
+     "min_prob_margin": 0.0
+    }
+   },
+   "reason": "[claude-night] Hipótese: a Laya nunca negociou (0 trades em 4 dias) porque o portão relaxed (conf 0.35, margem 0.2) está na escala do von; a confiança da Laya em SOL tem p50 0.028 e P90 0.044. Um portão na escala própria (conf >= 0.04, sem margem; uma ideia: calibrar o portão ao modelo) torna a Laya mensurável. Espero habilidade <= 0 em SOL, porque as chamadas confiantes de 10-02 tiveram hit 31% (250 erros vs 208 acertos). Confirma se: em 3-7 dias o fork tem >= 20 trades e habilidade fork - pai > 0 US$. Refuta se: >= 20 trades e habilidade fork - pai <= 0 (Laya sem habilidade em SOL ao P90), ou 0 trades em 3 dias (portão ainda mal calibrado)."
+  },
+  {
+   "name": "FARTCOIN_laya_relaxed__fork1",
+   "who": "claude-night",
+   "created": "2026-10-03T01:41",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.07,
+     "min_prob_margin": 0.0
+    }
+   },
+   "reason": "[claude-night] Hipótese: a Laya é o único modelo pequeno que vende em memes (553 sells em 1437 chamadas; poorjev 0) e as suas chamadas confiantes em memes foram ligeiramente positivas em 10-02 (65 acertos vs 58 erros, hit 45%), mas nunca negociou porque o portão relaxed está na escala do von (conf da Laya em memes: p50 0.046, P90 0.078). Portão na escala própria (conf >= 0.07, sem margem) deve gerar trades e mostrar se há habilidade com saídas feitas pelo modelo. FARTCOIN por ter a maior faixa e o melhor sinal nas outras famílias. Confirma se: em 3-7 dias >= 20 trades e habilidade fork - pai > 0 US$ com vendas > 0. Refuta se: >= 20 trades e habilidade fork - pai <= 0, ou 0 trades em 3 dias."
+  },
+  {
+   "name": "h1_exits_von_relaxed__fork1",
+   "who": "claude-night",
+   "created": "2026-10-04T01:35",
+   "diff": {
+    "criteria": {
+     "file": "data/lab/criteria/h1_exits_von_relaxed__fork1.json",
+     "sha256": "ca6fdf1353ea7b54b16e4cedf884673f7b82e4ac96d901928f6a8706dd277d00"
+    }
+   },
+   "reason": "[claude-night] Hipótese (método GEPA): relaxed_expcap50__fork1 mudou buy, hold e skip e o von passou a vender em 82% das chamadas com conf p50 0.186 (vs 0.32 no texto base), quase sem trades. Uma só cláusula acrescentada ao buy (não comprar fita já green: lift +0.21 em 10-02, +0.15 no v2 em 10-03), com hold/sell/skip intactos, deve preservar a confiança do von (p50 > 0.30, maioria compras) e cortar compras tardias. Pai h1_exits_von_relaxed: von relaxed com saídas, 99 trades, linhagem livre. Confirma se em 3-7 dias: >= 15 trades, compras > 50% das ordens, conf p50 > 0.30 e habilidade fork - pai > 0 US$. Refuta se: conf p50 < 0.25 ou vendas > 70% (qualquer edição perturba o von) ou habilidade fork - pai <= 0 com >= 15 trades."
+  },
+  {
+   "name": "h1_exits_WIF_poorjev_relaxed__fork1",
+   "who": "claude-night",
+   "created": "2026-10-04T01:35",
+   "diff": {
+    "criteria": {
+     "file": "data/lab/criteria/h1_exits_WIF_poorjev_relaxed__fork1.json",
+     "sha256": "e2715f698b601ee4315d2a3c6bf80e7d1440a59b839c673973bbfbc5252ef683"
+    }
+   },
+   "reason": "[claude-night] Hipótese: em dois dias seguidos (10-02 memes: acertos dumping 63% vs 41%; 10-03 memes: erros jumpy 95% vs 71%, pumping 66% vs 43%; 10-03 SOL: erros green 26% vs 6%) as compras confiantes do poorjev falham quando perseguem a fita (pumping/jumpy/green) e acertam no despejo (red/dumping/flat). O poorjev responde buy a tudo com conf 0.90-0.97, por isso testa-se primeiro se o texto o move: cautelas contra pumping/jumpy, preferência por red/dumping. Pai h1_exits_WIF_poorjev_relaxed (100/4 trades, saídas ligadas, linhagem livre). Confirma se em 3-7 dias: compras do fork < 70% das do pai (o texto tem efeito) e habilidade fork - pai > 0 US$ com >= 20 trades. Refuta se: trades do fork = pai +-10% com as mesmas ações (poorjev ignora o texto) ou habilidade fork - pai <= 0 com >= 20 trades."
+  },
+  {
+   "name": "h1_exits_BONK_poorjev_relaxed__fork1",
+   "who": "claude-night",
+   "created": "2026-10-05T01:35",
+   "diff": {
+    "exits": {
+     "reentry_cooldown_min": 120
+    }
+   },
+   "reason": "[claude-night] Hipotese: em 3 dias (10-02 a 10-04, mercado em baixa, alta e lateral) as compras confiantes do poorjev em memes falham quando a fita esta pumping/jumpy/green/tight e acertam em red/dumping/calm/wide. Toda a habilidade de H1 vem de ~6 saidas por moeda; 30 min depois de cada saida por trailing o poorjev (que compra sempre) recompra com a fita ainda agitada. Esperar 2 h apos a saida e o unico parametro que codifica \"nao perseguir\" sem texto. Confirma se: habilidade fork - pai > 0 US$ com >= 3 vendas no fork em 3-7 dias. Refuta se: habilidade fork - pai <= 0 com >= 3 vendas, ou PnL fork - pai < -1 pp com habilidade ~ 0 (perda de beta sem ganho de selecao)."
+  },
+  {
+   "name": "h1_exits_MEW_poorjev_relaxed__fork1",
+   "who": "claude-night",
+   "created": "2026-10-05T01:35",
+   "diff": {
+    "exits": {
+     "reentry_cooldown_min": 120
+    }
+   },
+   "reason": "[claude-night] Replica em MEW da hipotese testada em h1_exits_BONK_poorjev_relaxed__fork1 (mesma noite), para separar efeito de moeda de efeito de mecanismo. Hipotese: apos uma saida por trailing/TP, recomprar 30 min depois perseguir a fita ainda pumping/jumpy (marcador de erro do poorjev em 3 dias); esperar 2 h evita a recompra no topo e nao custa habilidade porque esta vem das saidas, nao do tempo exposto. Confirma se: habilidade fork - pai > 0 US$ com >= 3 vendas no fork em 3-7 dias, no mesmo sentido que o fork BONK. Refuta se: habilidade fork - pai <= 0 com >= 3 vendas, ou sinais opostos entre BONK e MEW (efeito de moeda, nao de mecanismo)."
+  },
+  {
+   "name": "laya_relaxed__fork2",
+   "who": "claude-night",
+   "created": "2026-10-06T01:35",
+   "diff": {
+    "gates": {
+     "cooldown_seconds": 3600
+    }
+   },
+   "reason": "[claude-night] Hipotese: laya_relaxed__fork1 perde por custo e nao por selecao. Em 3 dias (10-03 a 10-05) o excesso ajustado foi -31 US$ com cerca de 40 US$ de taxas mais custo vs mark (10-05: 101 trades, 9.1 de taxas + 9.0 de custo vs mark, excesso -14.4, bruto de custos aprox. +3.8). Uma pausa de 3600 s entre trades corta a frequencia para no maximo 24 por dia e deixa a selecao, se existir, aparecer liquida. Uma ideia: frequencia; conf 0.04 e margem 0 herdam do fork1. Confirma se: habilidade fork - laya_relaxed > 0 US$ com >= 20 trades em 3-7 dias e acima da margem de laya_relaxed__fork1 no mesmo periodo. Refuta se: habilidade <= 0 com >= 20 trades (a Laya em SOL nao tem selecao positiva mesmo sem churn; a linha Laya SOL fecha)."
+  },
+  {
+   "name": "FARTCOIN_laya_relaxed__fork2",
+   "who": "claude-night",
+   "created": "2026-10-06T01:35",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.07,
+     "min_prob_margin": 0.0,
+     "max_skip_noul": 0.95
+    }
+   },
+   "reason": "[claude-night] Hipotese: FARTCOIN_laya_relaxed__fork1 (conf >= 0.07, margem 0) fez 2 trades em 3 dias porque o veto de skip (skip_noul_high) bloqueia a maioria dos ciclos, incluindo os que passam o portao de confianca (10-05: 10 de 13 ciclos; 10-06 ate 01:30: 8 de 13, 5 deles com conf 0.08-0.10 acima do portao). O skip da Laya esta numa escala propria, como a confianca. Relaxar so o veto (max_skip_noul 0.95), mantendo conf 0.07 e margem 0, isola o efeito do veto (comparar com fork1) e torna a Laya FARTCOIN mensuravel: e o unico modelo pequeno que vende em memes. Confirma se: >= 20 trades com vendas > 0 em 3-7 dias e habilidade fork - pai > 0 US$. Refuta se: >= 20 trades e habilidade <= 0 (Laya sem habilidade em memes), ou < 5 trades em 3 dias (ha outro bloqueio)."
+  },
+  {
+   "name": "h1_exits_WIF_poorjev_relaxed__fork2",
+   "who": "claude-night",
+   "created": "2026-10-06T01:35",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.75
+    }
+   },
+   "reason": "[claude-night] Hipotese: no fork de criterios WIF o texto nao muda a acao (buy em 100% das chamadas) mas desloca a confianca por estado: o decil superior do fork (conf >= 0.81) cai em fita dumping/red/wide, os estados que o texto prefere; no poorjev sem texto cai em pumping/jumpy/green/tight. Nas recompras de hoje apos stop-loss o fork comprou com conf 0.65-0.74 (pai 0.90-0.91), nos mesmos ciclos do pai. Um portao a 0.75 transforma o deslocamento em filtro de estado: fork2 so compra quando o texto concorda com a fita e recompra menos apos saidas. Uma ideia: portao; o resto herda do fork1. Confirma se: habilidade fork2 - fork1 > 0 US$ com >= 3 vendas em 5-7 dias (contar da primeira venda). Refuta se: <= 0 com >= 3 vendas, ou < 5 compras em 3 dias (portao alto demais)."
+  },
+  {
+   "name": "h1_exits_von_relaxed__fork2",
+   "who": "claude-night",
+   "created": "2026-10-07T01:37",
+   "diff": {
+    "gates": {
+     "cooldown_seconds": 3600
+    }
+   },
+   "reason": "[claude-night] Hipotese: h1_exits_von_relaxed perde por custo e nao por selecao. Em 3 dias (10-04 a 10-06) o excesso ajustado foi -7.0 US$ com 14.9 US$ de taxas mais custo vs mark (bruto aprox. +7.9) em 92 trades; a escada de recompra depois de cada saida faz 8-10 compras por hora. As saidas (SL/TP/trailing) nao passam pelo cooldown (check_exits chama market_trade), logo a pausa de 1 h so espaca as compras. Replica entre modelos a hipotese de laya_relaxed__fork2 (dia 1: 16 trades, bruto +6.7, liquido +0.7). Uma ideia: frequencia. Confirma se: habilidade fork - pai > 0 US$ com >= 15 trades em 3-7 dias e custos por dia abaixo de metade dos do pai. Refuta se: <= 0 com >= 15 trades (a selecao do von nao sobrevive a amostragem esparsa) ou < 8 trades em 3 dias."
+  },
+  {
+   "name": "poorjev_relaxed__fork2",
+   "who": "claude-night",
+   "created": "2026-10-07T01:37",
+   "diff": {
+    "gates": {
+     "cooldown_seconds": 3600
+    }
+   },
+   "reason": "[claude-night] Replica em poorjev_relaxed__fork1 (SOL, saidas, margem 0) da hipotese de custo testada em laya_relaxed__fork2 e, esta noite, em h1_exits_von_relaxed, para separar efeito de modelo de efeito de mecanismo. Hipotese: em 4 dias (10-03 a 10-06) o excesso ajustado foi -3.5 US$ com 10.9 US$ de taxas mais custo vs mark (bruto aprox. +7.4; 3 de 4 dias com bruto > 0) em 112 trades. As saidas nao passam pelo cooldown; a pausa de 1 h so espaca a escada de recompra do poorjev, que compra em todos os ciclos. Uma ideia: frequencia. Confirma se: habilidade fork2 - fork1 > 0 US$ com >= 15 trades em 3-7 dias, no mesmo sentido que o fork do von. Refuta se: <= 0 com >= 15 trades, ou sinais opostos entre von e poorjev (efeito de modelo)."
+  },
+  {
+   "name": "FARTCOIN_laya_relaxed__fork3",
+   "who": "claude-night",
+   "created": "2026-10-08T01:38",
+   "diff": {
+    "gates": {
+     "cooldown_seconds": 3600
+    }
+   },
+   "reason": "[claude-night] Hipotese: FARTCOIN_laya_relaxed__fork2 perde por custo de round trips de minutos, nao por selecao. Em 2 dias: 14 trades, 7 round trips de 7 a 71 min (10-07: 15:36-15:43, 22:29-22:36, 22:43-22:50), 0 ganhos, realizado -3.3 US$ com 1.8 de taxas e 3.8 de custo vs mark no dia: cada round trip custa cerca de 0.8% e a chamada a 15 min nao cobre isso. Em SOL, laya_relaxed__fork2 (cooldown 3600 s) ficou positivo liquido 2 dias seguidos (+0.7, +2.7 US$, 36 trades). Replica o mecanismo em FARTCOIN para separar ativo de mecanismo. Uma ideia: pausa de 1 h. Confirma se: habilidade fork3 - fork2 > 0 US$ com >= 10 trades em 3-7 dias. Refuta se: <= 0 com >= 10 trades (fecha a linha Laya memes) ou < 6 trades em 4 dias."
+  },
+  {
+   "name": "laya_relaxed__fork3",
+   "who": "claude-night",
+   "created": "2026-10-08T01:38",
+   "diff": {
+    "criteria": {
+     "file": "data/lab/criteria/laya_relaxed__fork3.json",
+     "sha256": "cbac4690b62ba160258ab6eb413c2f52f3b3619dc2999158c63632ffa5d2398d"
+    }
+   },
+   "reason": "[claude-night] Hipotese: as compras confiantes da Laya em SOL falham quando perseguem uma fita ja lifting com spread tight: lifting nos erros em 5 de 6 dias (hoje lifting 51% vs 26%, tight 48% vs 26%, green 29% vs 10%; erro mais frequente buy lifting calm mid gray tight x35), ao contrario do von, onde green trocava de lado cada dia. O pai (cooldown 3600 s) e o primeiro Laya positivo liquido (+0.7 e +2.7 US$ em 2 dias, 36 trades); como o cooldown limita a cerca de 1 trade/h, o texto so muda qual ciclo da hora passa, nao quantos: controla o confundidor dos textos do von. Uma ideia: nao perseguir (cautela no buy, clausula no hold). Confirma se: habilidade fork3 - fork2 > 0 US$ com >= 20 trades em 3-7 dias e trades >= metade do pai. Refuta se: <= 0 com >= 20 trades, ou trades < metade do pai."
+  },
+  {
+   "name": "h1_exits_hybrid_von_cap2__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:30",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-09: val -0.928 vs -12.680 (train +0.782 vs -28.920), custo 8.2 bps"
+  },
+  {
+   "name": "h2_ensemble_sol__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "ensemble": {
+     "pct_threshold": 0.96
+    }
+   },
+   "reason": "nightly 2026-10-09: val -78.291 vs -92.606 (train -20.521 vs -53.131), custo 8.2 bps"
+  },
+  {
+   "name": "h3_limit_hybrid_von_cap2__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-09: val -3.480 vs -45.205 (train +0.608 vs -35.979), custo 8.2 bps"
+  },
+  {
+   "name": "h4_hours_von_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-09: val -3.480 vs -78.556 (train +0.608 vs -16.023), custo 8.2 bps"
+  },
+  {
+   "name": "hybrid_von_relaxed_cap2__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-09: val -3.480 vs -67.955 (train +0.601 vs -23.888), custo 8.2 bps"
+  },
+  {
+   "name": "h1_exits_GOAT_poorjev_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "exits": {
+     "sl": 0.036000000000000004,
+     "reentry_cooldown_min": 36
+    }
+   },
+   "reason": "nightly 2026-10-09: val -111.898 vs -119.560 (train +22.300 vs +10.228), custo 14.3 bps"
+  },
+  {
+   "name": "h1_exits_PNUT_poorjev_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "exits": {
+     "sl": 0.032
+    },
+    "gates": {
+     "max_trades_per_hour": 6
+    }
+   },
+   "reason": "nightly 2026-10-09: val -80.434 vs -95.302 (train -39.336 vs -49.102), custo 14.3 bps"
+  },
+  {
+   "name": "h1_exits_POPCAT_poorjev_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "exits": {
+     "sl": 0.032
+    }
+   },
+   "reason": "nightly 2026-10-09: val -119.516 vs -127.547 (train -27.577 vs -37.137), custo 14.3 bps"
+  },
+  {
+   "name": "meme_BONK_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-09: val +0.000 vs -6.812 (train +0.000 vs -12.596), custo 14.3 bps"
+  },
+  {
+   "name": "meme_MEW_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-09: val +0.000 vs -5.281 (train +0.000 vs -27.643), custo 14.3 bps"
+  },
+  {
+   "name": "meme_POPCAT_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-09: val +0.000 vs -13.456 (train +0.000 vs -23.270), custo 14.3 bps"
+  },
+  {
+   "name": "meme_WIF_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-09T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-09: val +0.000 vs -4.637 (train +0.000 vs -7.253), custo 14.3 bps"
+  },
+  {
+   "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork2",
+   "who": "claude-night",
+   "created": "2026-10-09T01:34",
+   "diff": {
+    "exits": {
+     "reentry_cooldown_min": 120
+    }
+   },
+   "reason": "[claude-night] Hipotese: replica em FARTCOIN (3.a moeda) da reentrada de 120 min testada em BONK e MEW desde 10-05: apos uma saida do H1, recomprar 30 min depois apanha preco pior do que esperar 2 h. Em 4 dias BONK +60 US$ e MEW +22 US$ de habilidade vs pai; em 10-08 ambos venderam ao mesmo minuto que o pai (12:21 e 12:13) e recompraram 1.3-1.4% mais barato. Mas 10-07 e 10-08 foram dias de queda; FARTCOIN subiu 1.8% em 10-08 e tem o maior numero de saidas (11 RT), logo testa o mecanismo noutro regime. Confirma se: habilidade fork - pai > 0 US$ com >= 3 vendas em 3-7 dias, no mesmo sentido que BONK/MEW. Refuta se: <= 0 com >= 3 vendas (o ganho era regime de queda, nao mecanismo)."
+  },
+  {
+   "name": "h1_exits_WIF_poorjev_relaxed__fork3",
+   "who": "claude-night",
+   "created": "2026-10-09T01:35",
+   "diff": {
+    "exits": {
+     "reentry_cooldown_min": 120
+    }
+   },
+   "reason": "[claude-night] Hipotese: replica em WIF (4.a moeda, a que mais caiu em 10-08: -5.5%) da reentrada de 120 min de BONK/MEW (+60 e +22 US$ de habilidade vs pai em 4 dias; em 10-08 recompraram 1.3-1.4% mais barato que o pai depois de vender ao mesmo minuto). Par com o fork de FARTCOIN desta noite (moeda que subiu): se so WIF ganhar, o efeito e regime de queda; se ambos, e mecanismo. O pai WIF tem 9 RT e os forks fork1/fork2 da linhagem nao mudaram trades (clones do pai), logo o pai original e a base limpa. Confirma se: habilidade fork - pai > 0 US$ com >= 3 vendas em 3-7 dias. Refuta se: <= 0 com >= 3 vendas, ou sinal oposto ao de FARTCOIN sem explicacao de regime."
+  },
+  {
+   "name": "relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-10T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42,
+     "buy_fraction_usdt": 0.3
+    },
+    "exits": {
+     "sl": 0.0135
+    }
+   },
+   "reason": "nightly 2026-10-10: val -15.016 vs -47.695 (train +24.211 vs -4.950), custo 8.9 bps"
+  },
+  {
+   "name": "meme_PNUT_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-10T00:32",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-10: val +0.000 vs -12.224 (train +0.000 vs -7.626), custo 13.4 bps"
+  },
+  {
+   "name": "relaxed_expcap50__fork2",
+   "who": "nightly",
+   "created": "2026-10-11T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-11: val -1.816 vs -26.539 (train -1.291 vs -23.017), custo 9.6 bps"
+  },
+  {
+   "name": "meme_GOAT_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-11T00:32",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-11: val +0.000 vs -11.130 (train +0.000 vs -3.353), custo 13.7 bps"
+  },
+  {
+   "name": "h1_exits_BONK_poorjev_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-13T00:32",
+   "diff": {
+    "exits": {
+     "sl": 0.036000000000000004,
+     "tp": 0.054
+    },
+    "gates": {
+     "buy_fraction_usdt": 0.3
+    }
+   },
+   "reason": "nightly 2026-10-13: val -23.530 vs -30.740 (train -152.559 vs -193.277), custo 14.2 bps"
+  },
+  {
+   "name": "h1_exits_MEW_poorjev_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-13T00:32",
+   "diff": {
+    "exits": {
+     "sl": 0.032
+    }
+   },
+   "reason": "nightly 2026-10-13: val -72.738 vs -84.290 (train -89.421 vs -122.357), custo 14.2 bps"
+  },
+  {
+   "name": "h1_exits_von_relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-15T00:30",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    },
+    "exits": {
+     "trail": 0.008,
+     "trail_arm": 0.008,
+     "sl": 0.012
+    }
+   },
+   "reason": "nightly 2026-10-15: val -0.986 vs -65.119 (train -1.086 vs -57.957), custo 14.5 bps"
+  },
+  {
+   "name": "h3_limit_poorjev_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-15T00:31",
+   "diff": {
+    "gates": {
+     "min_prob_margin": 0.24
+    }
+   },
+   "reason": "nightly 2026-10-15: val -20.636 vs -25.558 (train -27.675 vs -40.850), custo 14.5 bps"
+  },
+  {
+   "name": "poorjev_baseline__fork1",
+   "who": "nightly",
+   "created": "2026-10-15T00:32",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.72
+    }
+   },
+   "reason": "nightly 2026-10-15: val -2.404 vs -22.087 (train -3.052 vs -41.894), custo 14.5 bps"
+  },
+  {
+   "name": "poorjev_relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-15T00:32",
+   "diff": {
+    "exits": {
+     "trail_arm": 0.008
+    }
+   },
+   "reason": "nightly 2026-10-15: val -45.908 vs -62.560 (train -54.604 vs -55.018), custo 14.5 bps"
+  },
+  {
+   "name": "rsi_sol_1h__fork1",
+   "who": "nightly",
+   "created": "2026-10-15T00:33",
+   "diff": {
+    "rule": {
+     "rsi_period": 17
+    }
+   },
+   "reason": "nightly 2026-10-15: replay de regra 1h val +0.000 vs -4.527 (train -2.352 vs -2.352), 119 barras"
+  },
+  {
+   "name": "h2_ensemble_sol__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:31",
+   "diff": {
+    "ensemble": {
+     "pct_threshold": 0.96
+    }
+   },
+   "reason": "nightly 2026-10-16: val -20.548 vs -70.050 (train -105.431 vs -174.259), custo 15.5 bps"
+  },
+  {
+   "name": "h3_limit_hybrid_von_cap2__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-16: val -2.471 vs -45.154 (train -2.725 vs -121.590), custo 15.5 bps"
+  },
+  {
+   "name": "h4_hours_von_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:32",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-16: val -2.471 vs -79.053 (train -2.725 vs -95.764), custo 15.5 bps"
+  },
+  {
+   "name": "hybrid_von_relaxed_cap2__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:32",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-16: val -2.471 vs -58.411 (train -2.725 vs -118.957), custo 15.5 bps"
+  },
+  {
+   "name": "h1_exits_GOAT_poorjev_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "exits": {
+     "sl": 0.036000000000000004,
+     "trail": 0.024,
+     "tp": 0.072,
+     "reentry_cooldown_min": 36
+    }
+   },
+   "reason": "nightly 2026-10-16: val -88.922 vs -110.269 (train -97.962 vs -112.388), custo 14.0 bps"
+  },
+  {
+   "name": "h1_exits_PNUT_poorjev_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "exits": {
+     "sl": 0.0256
+    }
+   },
+   "reason": "nightly 2026-10-16: val -33.933 vs -39.409 (train -27.977 vs -39.514), custo 14.0 bps"
+  },
+  {
+   "name": "h1_exits_POPCAT_poorjev_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "exits": {
+     "reentry_cooldown_min": 36
+    }
+   },
+   "reason": "nightly 2026-10-16: val -17.623 vs -47.017 (train -123.125 vs -141.079), custo 14.0 bps"
+  },
+  {
+   "name": "meme_BONK_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-16: val +0.000 vs -6.624 (train +0.000 vs -38.226), custo 14.0 bps"
+  },
+  {
+   "name": "meme_MEW_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-16: val +0.000 vs -7.717 (train +0.000 vs -55.211), custo 14.0 bps"
+  },
+  {
+   "name": "meme_POPCAT_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-16: val +0.000 vs -5.040 (train +0.000 vs -34.790), custo 14.0 bps"
+  },
+  {
+   "name": "meme_WIF_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-16: val +0.000 vs -17.087 (train +0.000 vs -20.554), custo 14.0 bps"
+  },
+  {
+   "name": "BONK_rule_regime_full__fork1",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "rule": {
+     "ema_slow": 31
+    }
+   },
+   "reason": "nightly 2026-10-16: replay de regra 1h val -14.482 vs -19.555 (train -39.100 vs -39.100), 119 barras"
+  },
+  {
+   "name": "FARTCOIN_rule_regime_full__fork1",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "rule": {
+     "ema_fast": 10
+    }
+   },
+   "reason": "nightly 2026-10-16: replay de regra 1h val -11.097 vs -17.624 (train -5.082 vs -24.659), 119 barras"
+  },
+  {
+   "name": "GOAT_rule_regime_full__fork1",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "rule": {
+     "ema_fast": 10
+    }
+   },
+   "reason": "nightly 2026-10-16: replay de regra 1h val -19.806 vs -26.666 (train -14.223 vs -32.898), 119 barras"
+  },
+  {
+   "name": "POPCAT_rule_regime_full__fork1",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "rule": {
+     "ema_fast": 10
+    }
+   },
+   "reason": "nightly 2026-10-16: replay de regra 1h val +11.205 vs +1.556 (train -24.486 vs -41.348), 119 barras"
+  },
+  {
+   "name": "WIF_rule_regime_full__fork1",
+   "who": "nightly",
+   "created": "2026-10-16T00:33",
+   "diff": {
+    "rule": {
+     "ema_fast": 10
+    }
+   },
+   "reason": "nightly 2026-10-16: replay de regra 1h val -8.163 vs -12.587 (train -28.500 vs -37.975), 119 barras"
+  },
+  {
+   "name": "h1_exits_hybrid_von_cap2__fork2",
+   "who": "nightly",
+   "created": "2026-10-17T00:31",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-17: val -0.821 vs -33.627 (train +0.730 vs -53.470), custo 16.0 bps"
+  },
+  {
+   "name": "relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-17T00:32",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42,
+     "buy_fraction_usdt": 0.3
+    }
+   },
+   "reason": "nightly 2026-10-17: val -15.680 vs -51.840 (train +23.023 vs -66.568), custo 16.0 bps"
+  },
+  {
+   "name": "h1_exits_FARTCOIN_poorjev_relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-17T00:33",
+   "diff": {
+    "gates": {
+     "max_trades_per_hour": 6
+    }
+   },
+   "reason": "nightly 2026-10-17: val -87.831 vs -121.753 (train -89.930 vs -90.254), custo 15.2 bps"
+  },
+  {
+   "name": "h1_exits_WIF_poorjev_relaxed__fork4",
+   "who": "nightly",
+   "created": "2026-10-17T00:33",
+   "diff": {
+    "exits": {
+     "tp": 0.054,
+     "sl": 0.036000000000000004
+    },
+    "gates": {
+     "buy_fraction_usdt": 0.3
+    }
+   },
+   "reason": "nightly 2026-10-17: val -31.186 vs -56.070 (train -165.549 vs -182.509), custo 15.2 bps"
+  },
+  {
+   "name": "meme_PNUT_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-17T00:33",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-17: val +0.000 vs -8.167 (train +0.000 vs -18.138), custo 15.2 bps"
+  },
+  {
+   "name": "relaxed_expcap50__fork3",
+   "who": "nightly",
+   "created": "2026-10-18T00:34",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-18: val -0.972 vs -26.420 (train -4.538 vs -72.154), custo 16.5 bps"
+  },
+  {
+   "name": "meme_GOAT_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-18T00:35",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-18: val +0.000 vs -6.156 (train +0.000 vs -36.964), custo 15.6 bps"
+  },
+  {
+   "name": "h1_exits_BONK_poorjev_relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-20T00:33",
+   "diff": {
+    "exits": {
+     "sl": 0.036000000000000004
+    },
+    "gates": {
+     "buy_fraction_usdt": 0.3
+    }
+   },
+   "reason": "nightly 2026-10-20: val -44.313 vs -57.359 (train -160.808 vs -179.363), custo 17.5 bps"
+  },
+  {
+   "name": "h1_exits_MEW_poorjev_relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-20T00:33",
+   "diff": {
+    "exits": {
+     "sl": 0.036000000000000004
+    },
+    "gates": {
+     "buy_fraction_usdt": 0.3
+    }
+   },
+   "reason": "nightly 2026-10-20: val -45.939 vs -53.267 (train -193.482 vs -206.667), custo 17.5 bps"
+  },
+  {
+   "name": "meme_FARTCOIN_relaxed__fork1",
+   "who": "nightly",
+   "created": "2026-10-20T00:33",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.385
+    }
+   },
+   "reason": "nightly 2026-10-20: val +0.000 vs -7.823 (train +0.000 vs -8.610), custo 17.5 bps"
+  },
+  {
+   "name": "MEW_rule_donch_regime_full__fork1",
+   "who": "nightly",
+   "created": "2026-10-21T00:34",
+   "diff": {
+    "rule": {
+     "ema_fast": 13
+    }
+   },
+   "reason": "nightly 2026-10-21: replay de regra 1h val +191.916 vs +186.698 (train -8.775 vs -8.775), 119 barras"
+  },
+  {
+   "name": "h1_exits_von_relaxed__fork4",
+   "who": "nightly",
+   "created": "2026-10-22T01:58",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42,
+     "buy_fraction_usdt": 0.2
+    },
+    "exits": {
+     "trail": 0.008,
+     "tp": 0.027500000000000004,
+     "trail_arm": 0.012,
+     "sl": 0.0135
+    }
+   },
+   "reason": "nightly 2026-10-22: val +4.936 vs -35.106 (train -14.953 vs -168.447), custo 16.6 bps"
+  },
+  {
+   "name": "poorjev_relaxed__fork4",
+   "who": "nightly",
+   "created": "2026-10-22T02:59",
+   "diff": {
+    "gates": {
+     "cooldown_seconds": 3240,
+     "buy_fraction_usdt": 0.2
+    },
+    "exits": {
+     "sl": 0.018,
+     "trail": 0.008,
+     "tp": 0.03
+    }
+   },
+   "reason": "nightly 2026-10-22: val -22.416 vs -34.720 (train -114.056 vs -159.857), custo 16.6 bps"
+  },
+  {
+   "name": "h3_limit_hybrid_von_cap2__fork3",
+   "who": "nightly",
+   "created": "2026-10-23T00:32",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-23: val +0.204 vs -15.951 (train -2.199 vs -63.692), custo 16.6 bps"
+  },
+  {
+   "name": "h3_limit_poorjev_relaxed__fork2",
+   "who": "nightly",
+   "created": "2026-10-23T00:32",
+   "diff": {
+    "gates": {
+     "min_prob_margin": 0.22000000000000003
+    }
+   },
+   "reason": "nightly 2026-10-23: val +0.699 vs -9.577 (train -12.008 vs -16.565), custo 16.6 bps"
+  },
+  {
+   "name": "h4_hours_von_relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-23T00:32",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-23: val +0.204 vs -20.374 (train -2.199 vs -88.536), custo 16.6 bps"
+  },
+  {
+   "name": "hybrid_von_relaxed_cap2__fork3",
+   "who": "nightly",
+   "created": "2026-10-23T00:33",
+   "diff": {
+    "gates": {
+     "min_confidence": 0.42
+    }
+   },
+   "reason": "nightly 2026-10-23: val +0.204 vs -19.743 (train -2.199 vs -70.244), custo 16.6 bps"
+  },
+  {
+   "name": "laya_relaxed__fork4",
+   "who": "nightly",
+   "created": "2026-10-23T00:33",
+   "diff": {
+    "gates": {
+     "buy_fraction_usdt": 0.2
+    }
+   },
+   "reason": "nightly 2026-10-23: val -38.139 vs -41.133 (train -62.835 vs -68.922), custo 16.6 bps"
+  },
+  {
+   "name": "h1_exits_GOAT_poorjev_relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-23T00:34",
+   "diff": {
+    "gates": {
+     "max_trades_per_hour": 6
+    }
+   },
+   "reason": "nightly 2026-10-23: val +30.787 vs +25.841 (train -199.620 vs -200.722), custo 20.2 bps"
+  },
+  {
+   "name": "h1_exits_PNUT_poorjev_relaxed__fork3",
+   "who": "nightly",
+   "created": "2026-10-23T00:34",
+   "diff": {
+    "gates": {
+     "buy_fraction_usdt": 0.3
+    }
+   },
+   "reason": "nightly 2026-10-23: val +52.781 vs +40.705 (train -150.821 vs -167.926), custo 20.2 bps"
+  }
+ ],
+ "book_A": [
+  [
+   "2026-10-01",
+   52.109,
+   0.333
+  ],
+  [
+   "2026-10-02",
+   51.268,
+   1.0
+  ],
+  [
+   "2026-10-03",
+   51.913,
+   1.0
+  ],
+  [
+   "2026-10-04",
+   52.288,
+   1.0
+  ],
+  [
+   "2026-10-05",
+   51.829,
+   1.0
+  ],
+  [
+   "2026-10-06",
+   50.991,
+   1.0
+  ],
+  [
+   "2026-10-07",
+   50.18,
+   1.0
+  ],
+  [
+   "2026-10-08",
+   47.521,
+   1.0
+  ],
+  [
+   "2026-10-09",
+   47.347,
+   1.0
+  ],
+  [
+   "2026-10-10",
+   47.381,
+   1.0
+  ],
+  [
+   "2026-10-11",
+   48.224,
+   1.0
+  ],
+  [
+   "2026-10-12",
+   45.973,
+   1.0
+  ],
+  [
+   "2026-10-13",
+   46.406,
+   1.0
+  ],
+  [
+   "2026-10-14",
+   44.486,
+   1.0
+  ],
+  [
+   "2026-10-15",
+   45.342,
+   1.0
+  ],
+  [
+   "2026-10-16",
+   45.01,
+   1.0
+  ],
+  [
+   "2026-10-17",
+   44.742,
+   1.0
+  ],
+  [
+   "2026-10-18",
+   45.391,
+   1.0
+  ],
+  [
+   "2026-10-19",
+   45.248,
+   1.0
+  ],
+  [
+   "2026-10-20",
+   45.746,
+   1.0
+  ],
+  [
+   "2026-10-21",
+   45.695,
+   1.0
+  ],
+  [
+   "2026-10-22",
+   45.029,
+   1.0
+  ],
+  [
+   "2026-10-23",
+   44.185,
+   1.0
+  ],
+  [
+   "2026-10-24",
+   44.083,
+   1.0
+  ],
+  [
+   "2026-10-25",
+   43.297,
+   1.0
+  ],
+  [
+   "2026-10-26",
+   43.127,
+   1.0
+  ],
+  [
+   "2026-10-27",
+   43.749,
+   1.0
+  ],
+  [
+   "2026-10-28",
+   43.043,
+   1.0
+  ],
+  [
+   "2026-10-29",
+   40.933,
+   1.0
+  ],
+  [
+   "2026-10-30",
+   41.55,
+   1.0
+  ]
+ ],
+ "book_B": [
+  [
+   "2026-10-01",
+   52.097,
+   0.04
+  ],
+  [
+   "2026-10-02",
+   52.077,
+   0.04
+  ],
+  [
+   "2026-10-03",
+   52.209,
+   0.501
+  ],
+  [
+   "2026-10-04",
+   52.253,
+   0.5
+  ],
+  [
+   "2026-10-05",
+   51.966,
+   0.0
+  ],
+  [
+   "2026-10-06",
+   51.597,
+   0.18
+  ],
+  [
+   "2026-10-07",
+   51.197,
+   0.502
+  ],
+  [
+   "2026-10-08",
+   49.886,
+   0.503
+  ],
+  [
+   "2026-10-09",
+   49.722,
+   0.503
+  ],
+  [
+   "2026-10-10",
+   49.74,
+   0.503
+  ],
+  [
+   "2026-10-11",
+   50.163,
+   0.506
+  ],
+  [
+   "2026-10-12",
+   49.104,
+   0.351
+  ],
+  [
+   "2026-10-13",
+   49.363,
+   0.502
+  ],
+  [
+   "2026-10-14",
+   48.339,
+   0.085
+  ],
+  [
+   "2026-10-15",
+   48.894,
+   0.5
+  ],
+  [
+   "2026-10-16",
+   48.7,
+   0.504
+  ],
+  [
+   "2026-10-17",
+   48.364,
+   0.502
+  ],
+  [
+   "2026-10-18",
+   48.335,
+   0.503
+  ],
+  [
+   "2026-10-19",
+   48.309,
+   0.503
+  ],
+  [
+   "2026-10-20",
+   48.768,
+   0.0
+  ],
+  [
+   "2026-10-21",
+   48.625,
+   0.0
+  ],
+  [
+   "2026-10-22",
+   48.763,
+   0.503
+  ],
+  [
+   "2026-10-23",
+   48.22,
+   0.501
+  ],
+  [
+   "2026-10-24",
+   48.161,
+   0.503
+  ],
+  [
+   "2026-10-25",
+   47.686,
+   0.5
+  ],
+  [
+   "2026-10-26",
+   47.1,
+   0.499
+  ],
+  [
+   "2026-10-27",
+   47.194,
+   0.504
+  ],
+  [
+   "2026-10-28",
+   46.796,
+   0.151
+  ],
+  [
+   "2026-10-29",
+   46.363,
+   0.5
+  ],
+  [
+   "2026-10-30",
+   46.79,
+   0.507
+  ]
+ ]
+}
